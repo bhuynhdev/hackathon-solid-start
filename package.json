@@ -20,5 +20,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "daisyui": "^4.12.22"
   }
 }
