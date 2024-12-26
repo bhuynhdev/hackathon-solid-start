@@ -1,11 +1,39 @@
+import { createAsync, query, useSearchParams } from '@solidjs/router'
+import { like } from 'drizzle-orm'
 import { TbSearch } from 'solid-icons/tb'
-import { For } from 'solid-js'
+import { createSignal, For } from 'solid-js'
+import { db } from '~/db'
+import { participant } from '~/db/schema'
+
+const getParticipants = query(async () => {
+  'use server'
+  const [searchParams, _] = useSearchParams()
+  const query = searchParams.q
+  const participants = await db
+    .select()
+    .from(participant)
+    .where(query ? like(participant.nameEmail, `%${query}%`) : undefined)
+    .orderBy(participant.id)
+  return participants
+}, 'participants')
+
+export const route = {
+  preload: () => getParticipants()
+}
 
 export default function ParticipantPage() {
-  const data: any = { participants: [] }
+  const participants = createAsync(() => getParticipants())
+  const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
+
   return (
     <div class="drawer drawer-end m-auto flex w-4/5 flex-col items-center justify-center gap-6">
-      <input id="participant-info-drawer" type="checkbox" class="drawer-toggle" />
+      <input
+        id="participant-info-drawer"
+        type="checkbox"
+        class="drawer-toggle"
+        checked={selectedParticipantId() !== null}
+        onChange={(e) => !e.currentTarget.checked && setSelectedParticipantId(null)}
+      />
       <div class="drawer-content w-full">
         <form method="get" class="w-full">
           <label class="input input-bordered flex w-full items-center gap-2">
@@ -25,7 +53,7 @@ export default function ParticipantPage() {
             </tr>
           </thead>
           <tbody>
-            <For each={data.participants}>
+            <For each={participants()}>
               {(p) => (
                 <tr>
                   <td>{p.id}</td>
@@ -34,7 +62,11 @@ export default function ParticipantPage() {
                   <td>{p.email}</td>
                   <td>{p.checkedIn ? '✅' : '❌'}</td>
                   <td>
-                    <button class="btn btn-primary h-8 min-h-8 text-white">Edit</button>
+                    <button
+                      class="btn btn-primary h-8 min-h-8 text-white"
+                      onClick={() => setSelectedParticipantId(p.id)}>
+                      Edit
+                    </button>
                   </td>
                 </tr>
               )}
