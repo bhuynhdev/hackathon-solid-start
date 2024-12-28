@@ -13,7 +13,7 @@
   background-size: 40px 40px;
 }
 
-html:has(.drawer-toggle:checked)) {
+html:has(.drawer-toggle:checked) {
   /* Disable scrollbar gutter due to Chrome bug: https://stackoverflow.com/questions/77787580/width-of-screen-is-not-calculating-correctly-when-using-scrollbar-gutter-stable */
   scrollbar-gutter: auto !important;
 }
