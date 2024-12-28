@@ -1,9 +1,9 @@
-import { action, createAsync, query, useSearchParams } from '@solidjs/router'
+import { action, createAsync, query, useSearchParams, useSubmission } from '@solidjs/router'
 import { eq, like } from 'drizzle-orm'
 import { TbSearch, TbX } from 'solid-icons/tb'
-import { createSignal, For, Show } from 'solid-js'
+import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { db } from '~/db'
-import { participant } from '~/db/schema'
+import { Participant, participant } from '~/db/schema'
 
 const getParticipants = query(async () => {
   'use server'
@@ -39,8 +39,66 @@ export const route = {
 export default function ParticipantPage() {
   const participants = createAsync(() => getParticipants())
   const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
-  const closeDrawer = () => setSelectedParticipantId(null)
   const participant = () => participants()?.find((p) => p.id == selectedParticipantId())
+  const updateParticipantSubmission = useSubmission(updateParticipant)
+  const closeDrawer = () => setSelectedParticipantId(null)
+
+  function ParticipantInfoForm(props: { participant: Participant }) {
+    const p = props.participant
+    return (
+      <form method="post" action={updateParticipant} class="flex w-full flex-col gap-2">
+        <header class="flex w-full justify-between">
+          <h2 class="font-bold">Participant #{p.id}</h2>
+          <button type="button" onclick={closeDrawer}>
+            <TbX size="32" />
+          </button>
+        </header>
+        <div class="flex gap-4">
+          <label class="flex-1">
+            <div class="label">
+              <span class="label-text">First name</span>
+            </div>
+            <input type="text" name="firstName" value={p.firstName} class="input input-bordered w-full" disabled />
+          </label>
+          <label class="flex-1">
+            <div class="label">
+              <span class="label-text">Last name</span>
+            </div>
+            <input type="text" name="lastName" value={p.lastName} class="input input-bordered w-full" />
+          </label>
+        </div>
+        <label class="grow">
+          <div class="label">
+            <span class="label-text">Email</span>
+          </div>
+          <input type="text" name="email" value={p.email} class="input input-bordered w-full" />
+        </label>
+        <div class="form-control">
+          <label class="label cursor-pointer justify-start gap-4">
+            <input type="checkbox" name="checkedIn" class="checkbox-primary checkbox" checked={p.checkedIn} />
+            <span class="label-text">Checked in?</span>
+          </label>
+        </div>
+        <input type="hidden" name="participantId" value={p.id} />
+        <div class="mt-6 flex w-full gap-8">
+          <button type="button" class="btn btn-outline btn-error grow" onclick={closeDrawer}>
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary grow">
+            Save
+          </button>
+        </div>
+        <Switch>
+          <Match when={updateParticipantSubmission.pending}>
+            <p>Saving...</p>
+          </Match>
+          <Match when={updateParticipantSubmission.result && updateParticipantSubmission.result.id === p.id}>
+            <pre>{JSON.stringify(updateParticipantSubmission.result, null, 1)}</pre>
+          </Match>
+        </Switch>
+      </form>
+    )
+  }
 
   return (
     <div class="drawer drawer-end m-auto flex w-4/5 flex-col items-center justify-center gap-6">
@@ -79,9 +137,7 @@ export default function ParticipantPage() {
                   <td>{p.email}</td>
                   <td>{p.checkedIn ? '✅' : '❌'}</td>
                   <td>
-                    <button
-                      class="btn btn-primary h-8 min-h-8 text-white"
-                      onClick={() => setSelectedParticipantId(p.id)}>
+                    <button class="btn btn-primary h-8 min-h-8 text-white" onClick={() => setSelectedParticipantId(p.id)}>
                       Edit
                     </button>
                   </td>
@@ -96,57 +152,7 @@ export default function ParticipantPage() {
         <div class="min-h-full w-4/5 bg-base-100 p-6 lg:w-2/5 xl:w-1/5">
           <Show when={participant()} fallback={<p>No participant selected</p>} keyed>
             {/* Participant Info Form */}
-            {(p) => (
-              <form method="post" action={updateParticipant} class="flex w-full flex-col gap-2">
-                <header class="flex w-full justify-between">
-                  <h2 class="font-bold">Participant #{p.id}</h2>
-                  <button type="button" onclick={closeDrawer}>
-                    <TbX size="32" />
-                  </button>
-                </header>
-                <div class="flex gap-4">
-                  <label class="flex-1">
-                    <div class="label">
-                      <span class="label-text">First name</span>
-                    </div>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={p.firstName}
-                      class="input input-bordered w-full"
-                      disabled
-                    />
-                  </label>
-                  <label class="flex-1">
-                    <div class="label">
-                      <span class="label-text">Last name</span>
-                    </div>
-                    <input type="text" name="lastName" value={p.lastName} class="input input-bordered w-full" />
-                  </label>
-                </div>
-                <label class="grow">
-                  <div class="label">
-                    <span class="label-text">Email</span>
-                  </div>
-                  <input type="text" name="email" value={p.email} class="input input-bordered w-full" />
-                </label>
-                <div class="form-control">
-                  <label class="label cursor-pointer justify-start gap-4">
-                    <input type="checkbox" name="checkedIn" class="checkbox-primary checkbox" checked={p.checkedIn} />
-                    <span class="label-text">Checked in?</span>
-                  </label>
-                </div>
-                <input type="hidden" name="participantId" value={p.id} />
-                <div class="mt-6 flex w-full gap-8">
-                  <button type="button" class="btn btn-outline btn-error grow" onclick={closeDrawer}>
-                    Cancel
-                  </button>
-                  <button type="submit" class="btn btn-primary grow">
-                    Save
-                  </button>
-                </div>
-              </form>
-            )}
+            {(p) => <ParticipantInfoForm participant={p} />}
           </Show>
         </div>
       </div>
