@@ -1,7 +1,7 @@
-import { createAsync, query, useSearchParams } from '@solidjs/router'
-import { like } from 'drizzle-orm'
-import { TbSearch } from 'solid-icons/tb'
-import { createSignal, For } from 'solid-js'
+import { action, createAsync, query, useSearchParams } from '@solidjs/router'
+import { eq, like } from 'drizzle-orm'
+import { TbSearch, TbX } from 'solid-icons/tb'
+import { createSignal, For, Show } from 'solid-js'
 import { db } from '~/db'
 import { participant } from '~/db/schema'
 
@@ -17,6 +17,21 @@ const getParticipants = query(async () => {
   return participants
 }, 'participants')
 
+const updateParticipant = action(async (formData: FormData) => {
+  'use server'
+  const data = Object.fromEntries(formData)
+  const { participantId, ...toUpdate } = data
+  // HTML checkbox input either returns 'on' or undefined
+  const isCheckedIn = toUpdate.checkedIn === 'on'
+
+  const [updated] = await db
+    .update(participant)
+    .set({ ...toUpdate, checkedIn: isCheckedIn })
+    .where(eq(participant.id, parseInt(participantId.toString())))
+    .returning()
+  return updated
+})
+
 export const route = {
   preload: () => getParticipants()
 }
@@ -24,6 +39,8 @@ export const route = {
 export default function ParticipantPage() {
   const participants = createAsync(() => getParticipants())
   const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
+  const closeDrawer = () => setSelectedParticipantId(null)
+  const participant = () => participants()?.find((p) => p.id == selectedParticipantId())
 
   return (
     <div class="drawer drawer-end m-auto flex w-4/5 flex-col items-center justify-center gap-6">
@@ -77,7 +94,60 @@ export default function ParticipantPage() {
       <div class="drawer-side">
         <label for="participant-info-drawer" class="drawer-overlay"></label>
         <div class="min-h-full w-4/5 bg-base-100 p-6 lg:w-2/5 xl:w-1/5">
-          <p>Loading state</p>
+          <Show when={participant()} fallback={<p>No participant selected</p>}>
+            {/* Participant Info Form */}
+            {(p) => (
+              <form method="post" action={updateParticipant} class="flex w-full flex-col gap-2">
+                <header class="flex w-full justify-between">
+                  <h2 class="font-bold">Participant #{p().id}</h2>
+                  <button type="button" onclick={closeDrawer}>
+                    <TbX size="32" />
+                  </button>
+                </header>
+                <div class="flex gap-4">
+                  <label class="flex-1">
+                    <div class="label">
+                      <span class="label-text">First name</span>
+                    </div>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={p().firstName}
+                      class="input input-bordered w-full"
+                      disabled
+                    />
+                  </label>
+                  <label class="flex-1">
+                    <div class="label">
+                      <span class="label-text">Last name</span>
+                    </div>
+                    <input type="text" name="lastName" value={p().lastName} class="input input-bordered w-full" />
+                  </label>
+                </div>
+                <label class="grow">
+                  <div class="label">
+                    <span class="label-text">Email</span>
+                  </div>
+                  <input type="text" name="email" value={p().email} class="input input-bordered w-full" />
+                </label>
+                <div class="form-control">
+                  <label class="label cursor-pointer justify-start gap-4">
+                    <input type="checkbox" name="checkedIn" class="toggle toggle-primary" checked={p().checkedIn} />
+                    <span class="label-text">Checked in?</span>
+                  </label>
+                </div>
+                <input type="hidden" name="participantId" value={p().id} />
+                <div class="mt-6 flex w-full gap-8">
+                  <button type="button" class="btn btn-outline btn-error grow" onclick={closeDrawer}>
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary grow">
+                    Save
+                  </button>
+                </div>
+              </form>
+            )}
+          </Show>
         </div>
       </div>
     </div>
