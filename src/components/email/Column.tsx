@@ -15,7 +15,8 @@ export function Column(props: ColumnProps) {
       background={local.bgImage}
       bgcolor={local.bgColor}
       {...rest}
-      style={local.style}>
+      style={local.style}
+    >
       {local.children}
     </td>
   )

@@ -1,4 +1,4 @@
-import { JSX, mergeProps, splitProps } from 'solid-js'
+import { JSX, Match, mergeProps, splitProps, Switch } from 'solid-js'
 import { BaseProps } from './types'
 
 export interface ButtonProps extends BaseProps<'a'> {
@@ -25,7 +25,7 @@ export function Button(props: ButtonProps) {
     withBackground: false
   } satisfies Partial<ButtonProps>
 
-  const [local, rest] = splitProps(mergeProps(props, defaultValues), [
+  const [local, rest] = splitProps(mergeProps(defaultValues, props), [
     'href',
     'children',
     'width',
@@ -90,12 +90,14 @@ export function Button(props: ButtonProps) {
 
   return (
     <table width="100%" border={0} cellPadding={0} cellSpacing={0} style={{ 'border-collapse': 'collapse' }} role="presentation">
-      <tr>
-        <td align={local.align}>
-          {/* VML Fallback for mso clients */}
-          {!local.withBackground && (
-            <span
-              innerHTML={`<!--[if mso]>
+      <tbody>
+        <tr>
+          <td align={local.align}>
+            {/* VML Fallback for mso clients */}
+            <Switch>
+              <Match when={!local.withBackground}>
+                <span
+                  innerHTML={`<!--[if mso]>
                 <v:roundrect
                   xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
                   style="height:${local.height}px;v-text-anchor:middle;width:${local.width}px;"
@@ -109,33 +111,36 @@ export function Button(props: ButtonProps) {
                 ${local.children}
                 </center></v:roundrect>
                 <![endif]-->`}
-            />
-          )}
-          {local.withBackground ? (
-            <table align={local.align} width={local.width} border={0} cellPadding={0} cellSpacing={0} role="presentation">
-              <tr>
-                <td
-                  // @ts-ignore: `bgcolor` not documented
-                  bgcolor={local.backgroundColor}
-                  width={local.width}
-                  height={local.height}
-                  style={{
-                    'border-radius': `${local.borderRadius}px`,
-                    height: `${local.height}px`,
-                    width: `${local.width}px`,
-                    'max-width': `${local.width}px`,
-                    'text-align': 'center'
-                  }}
-                >
-                  {baseButton}
-                </td>
-              </tr>
-            </table>
-          ) : (
-            baseButton
-          )}
-        </td>
-      </tr>
+                />
+                {baseButton}
+              </Match>
+              <Match when={local.withBackground}>
+                <table align={local.align} width={local.width} border={0} cellPadding={0} cellSpacing={0} role="presentation">
+                  <tbody>
+                    <tr>
+                      <td
+                        // @ts-ignore: `bgcolor` not documented
+                        bgcolor={local.backgroundColor}
+                        width={local.width}
+                        height={local.height}
+                        style={{
+                          'border-radius': `${local.borderRadius}px`,
+                          height: `${local.height}px`,
+                          width: `${local.width}px`,
+                          'max-width': `${local.width}px`,
+                          'text-align': 'center'
+                        }}
+                      >
+                        {baseButton}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </Match>
+            </Switch>
+          </td>
+        </tr>
+      </tbody>
     </table>
   )
 }
