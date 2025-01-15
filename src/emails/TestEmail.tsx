@@ -1,12 +1,5 @@
-import Body from '~/components/email/Body'
-import Html from '~/components/email/Html'
-import { Section } from '~/components/email/Section'
-import Row from '~/components/email/Row'
-import { Column } from '~/components/email/Column'
-import { Text } from '~/components/email/Text'
 import { JSX } from 'solid-js'
-import { Container } from '~/components/email/Container'
-import { Button } from '~/components/email/Button'
+import { Body, Button, Column, Container, Html, Row, Section, Text } from 'solid-jsx-email'
 
 const mainStyle = {
 	'font-family': '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif'
@@ -47,7 +40,8 @@ export function TestEmail() {
 							align="center"
 							backgroundColor={'#777'}
 							borderRadius={5}
-							fontSize={16}>
+							fontSize={16}
+						>
 							Click me
 						</Button>
 					</Container>

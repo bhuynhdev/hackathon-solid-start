@@ -1,10 +1,10 @@
 import { createAsync, query } from '@solidjs/router'
-import { renderEmail } from '~/components/email/render'
+import { renderToString } from 'solid-js/web'
 import { TestEmail } from '~/emails/TestEmail'
 
 const getEmailHtml = query(async () => {
 	'use server'
-	return renderEmail(<TestEmail />)
+	return renderToString(() => <TestEmail />)
 }, 'test-email')
 
 export default function EmailsPage() {
