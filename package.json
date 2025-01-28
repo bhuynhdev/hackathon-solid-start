@@ -35,6 +35,7 @@
 		"@fsouza/prettierd": "^0.25.4",
 		"daisyui": "^4.12.22",
 		"drizzle-kit": "^0.30.1",
+		"drizzle-seed": "^0.3.0",
 		"prettier-plugin-tailwindcss": "^0.6.9",
 		"tsx": "^4.19.2"
 	}

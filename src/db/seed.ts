@@ -1,7 +1,8 @@
-import { drizzle } from 'drizzle-orm/libsql'
 import { createClient } from '@libsql/client'
-import { event, participant } from './schema'
 import 'dotenv/config'
+import { drizzle } from 'drizzle-orm/libsql'
+import { seed } from 'drizzle-seed'
+import { participant } from './schema'
 
 async function main() {
 	const dbUrl = process.env.DB_URL
@@ -11,49 +12,37 @@ async function main() {
 	const queryClient = createClient({ url: dbUrl })
 	const db = drizzle(queryClient)
 
-	/**
-	 * SEED REGISTRY
-	 **/
+	const SEED = 1234
 
-	type NewParticipant = typeof participant.$inferInsert
-	const participantSeeds: Array<NewParticipant> = [
-		{
-			firstName: 'Steve',
-			lastName: 'Job',
-			email: 'steve.job@email.com',
-			checkedIn: true
-		},
-		{ firstName: 'Andrej', lastName: 'Karpathy', email: 'ak@email.com' },
-		{
-			firstName: 'Sundar',
-			lastName: 'Pichai',
-			email: 'pichai123@email.com'
-		},
-		{
-			firstName: 'Hans',
-			lastName: 'Zimmer',
-			email: 'zimmerhans@email.com'
-		},
-		{ firstName: 'Dan', lastName: 'Abramov', email: 'dan-react@email.com' }
-	]
-
-	console.log('Registry Seed start')
-	for (const participantSeed of participantSeeds) {
-		await db.transaction(async (tx) => {
-			const [newParticipant] = await tx.insert(participant).values(participantSeed).returning()
-			if (!newParticipant) throw Error('Cannot create registry record')
-			// Insert corresponding event
-			await tx.insert(event).values([
-				{
-					targetParticipantId: newParticipant.id,
-					timestamp: new Date().toISOString(),
-					description: 'Seed register participant'
+	await seed(db, { participant }, { seed: SEED }).refine((f) => {
+		return {
+			participant: {
+				count: 20,
+				columns: {
+					firstName: f.firstName(),
+					lastName: f.lastName(),
+					email: f.email(),
+					checkedIn: f.boolean(),
+					createdAt: f.default({ defaultValue: new Date().toISOString() }),
+					phone: f.phoneNumber({ template: '###-###-####' }),
+					age: f.int({ minValue: 16, maxValue: 25 }),
+					graduationYear: f.int({ minValue: 2015, maxValue: 2025 }),
+					levelOfStudy: f.valuesFromArray({ values: ['undergraduate', 'graduate', 'phd', 'highschool'] }),
+					gender: f.valuesFromArray({ values: ['male', 'female', 'nonbinary', 'other', 'noanswer'] }),
+					school: f.valuesFromArray({ values: ['University of Cincinnati', 'Hardvard University', 'Dartmouth College'] }),
+					country: f.country(),
+					major: f.default({ defaultValue: 'Computer Science' }),
+					dietRestrictions: f.valuesFromArray({ values: ['none', '', 'vegan'] }),
+					resumeUrl: f.default({ defaultValue: null }),
+					notes: f.default({ defaultValue: null }),
+					updatedAt: f.default({ defaultValue: null }),
+					deletedAt: f.default({ defaultValue: null })
 				}
-			])
-		})
-	}
+			}
+		}
+	})
 
-	console.log('Registry Seed done')
+	console.log('Seed done')
 	queryClient.close()
 }
 
