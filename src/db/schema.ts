@@ -28,21 +28,22 @@ export const participant = sqliteTable('participant', {
 	lastName: text('last_name').notNull(),
 	checkedIn: integer('checked_in', { mode: 'boolean' }).default(false).notNull(),
 	email: text('email').notNull(),
-	phone: text('phone'),
-	age: integer('age'),
+	phone: text('phone').notNull(),
+	age: integer('age').notNull(),
 	gender: text('gender', {
 		enum: ['male', 'female', 'nonbinary', 'other', 'noanswer']
-	}),
-	school: text('school'),
-	graduationYear: integer('graduation_year'),
-	levelOfStudy: text('level_of_study'),
-	country: text('country'),
-	major: text('major'),
-	dietRestrictions: text('diet_restrictions'),
+	}).notNull(),
+	school: text('school').notNull(),
+	graduationYear: integer('graduation_year').notNull(),
+	levelOfStudy: text('level_of_study').notNull(),
+	country: text('country').notNull(),
+	major: text('major').notNull(),
+	dietRestrictions: text('diet_restrictions').default('').notNull(),
 	resumeUrl: text('resume_url'),
 	notes: text('notes'),
-	createdAt: text('created_at'),
+	createdAt: text('created_at').notNull(),
 	updatedAt: text('updated_at'),
+	deletedAt: text('deleted_at'),
 	nameEmail: text('name_email')
 		.notNull()
 		.generatedAlwaysAs((): SQL => sql`lower(${participant.firstName} || ' ' || ${participant.lastName} || ' ' || ${participant.email})`)
@@ -53,6 +54,7 @@ export const user = sqliteTable('user', {
 	email: text('email').notNull(),
 	password: text('password'),
 	name: text('name').notNull(),
+	isDiabled: integer('is_disabled', { mode: 'boolean' }).default(false).notNull(),
 	isAdmin: integer('is_admin', { mode: 'boolean' }).default(false).notNull(),
 	isJudge: integer('is_judge', { mode: 'boolean' }).default(false).notNull()
 })

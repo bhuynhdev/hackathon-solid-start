@@ -19,19 +19,20 @@ CREATE TABLE `participant` (
 	`last_name` text NOT NULL,
 	`checked_in` integer DEFAULT false NOT NULL,
 	`email` text NOT NULL,
-	`phone` text,
-	`age` integer,
-	`gender` text,
-	`school` text,
-	`graduation_year` integer,
-	`level_of_study` text,
-	`country` text,
-	`major` text,
-	`diet_restrictions` text,
+	`phone` text NOT NULL,
+	`age` integer NOT NULL,
+	`gender` text NOT NULL,
+	`school` text NOT NULL,
+	`graduation_year` integer NOT NULL,
+	`level_of_study` text NOT NULL,
+	`country` text NOT NULL,
+	`major` text NOT NULL,
+	`diet_restrictions` text DEFAULT '' NOT NULL,
 	`resume_url` text,
 	`notes` text,
-	`created_at` text,
+	`created_at` text NOT NULL,
 	`updated_at` text,
+	`deleted_at` text,
 	`name_email` text GENERATED ALWAYS AS (lower("first_name" || ' ' || "last_name" || ' ' || "email")) VIRTUAL NOT NULL
 );
 --> statement-breakpoint
@@ -47,6 +48,7 @@ CREATE TABLE `user` (
 	`email` text NOT NULL,
 	`password` text,
 	`name` text NOT NULL,
+	`is_disabled` integer DEFAULT false NOT NULL,
 	`is_admin` integer DEFAULT false NOT NULL,
 	`is_judge` integer DEFAULT false NOT NULL
 );
