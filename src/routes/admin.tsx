@@ -10,7 +10,7 @@ export default function AdminLayout(props: RouteSectionProps) {
 	const location = useLocation()
 	return (
 		<div class="grid min-h-screen grid-rows-[auto_1fr_auto]">
-			<header class="diagonal-pattern-bg border-b p-4">
+			<header class="bg-diagonal-pattern border-b p-4">
 				RevolutionUC Dashboard <TbChalkboard class="inline" />
 			</header>
 			<div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
