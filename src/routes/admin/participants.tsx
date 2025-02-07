@@ -5,9 +5,9 @@ import { createSignal, For, Show } from 'solid-js'
 import { db } from '~/db'
 import { Participant, participant } from '~/db/schema'
 
-const getParticipants = query((query: string = '') => {
+const getParticipants = query(async (query: string = '') => {
 	'use server'
-	return db
+	return await db
 		.select()
 		.from(participant)
 		.where(query ? like(participant.nameEmail, `%${query}%`) : undefined)
@@ -18,7 +18,7 @@ const updateParticipant = action(async (formData: FormData) => {
 	'use server'
 	const data = Object.fromEntries(formData)
 	const { participantId, ...updateContent } = data
-	const isCheckedIn = updateContent.checkedIn === 'on' // HTML checkbox input only returns either 'on' or undefined
+	const isCheckedIn = updateContent.checkedIn === 'yes'
 
 	const [updated] = await db
 		.update(participant)
@@ -47,7 +47,7 @@ export default function ParticipantPage() {
 				id="participant-info-drawer"
 				type="checkbox"
 				class="drawer-toggle"
-				hidden
+				aria-hidden
 				checked={selectedParticipantId() !== null}
 				onChange={(e) => !e.currentTarget.checked && setSelectedParticipantId(null)} /** Set participant to null if drawer is checked off **/
 			/>
@@ -149,7 +149,7 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 			</label>
 			<div>
 				<label class="flex cursor-pointer justify-start gap-2">
-					<input type="checkbox" name="checkedIn" class="checkbox-primary checkbox" checked={props.participant.checkedIn} />
+					<input type="checkbox" name="checkedIn" value="yes" class="checkbox-primary checkbox" checked={props.participant.checkedIn} />
 					<span>Checked in?</span>
 				</label>
 			</div>
