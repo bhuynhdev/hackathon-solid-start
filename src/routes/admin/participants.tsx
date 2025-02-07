@@ -18,8 +18,7 @@ const updateParticipant = action(async (formData: FormData) => {
 	'use server'
 	const data = Object.fromEntries(formData)
 	const { participantId, ...updateContent } = data
-	// HTML checkbox input either returns 'on' or undefined
-	const isCheckedIn = updateContent.checkedIn === 'on'
+	const isCheckedIn = updateContent.checkedIn === 'on' // HTML checkbox input only returns either 'on' or undefined
 
 	const [updated] = await db
 		.update(participant)
@@ -35,7 +34,7 @@ export const route = {
 
 export default function ParticipantPage() {
 	const [searchParams, _] = useSearchParams()
-	const query = searchParams.q?.toString()
+	const query = String(searchParams.q ?? '')
 
 	const participants = createAsync(() => getParticipants(query))
 
@@ -48,50 +47,60 @@ export default function ParticipantPage() {
 				id="participant-info-drawer"
 				type="checkbox"
 				class="drawer-toggle"
+				hidden
 				checked={selectedParticipantId() !== null}
 				onChange={(e) => !e.currentTarget.checked && setSelectedParticipantId(null)} /** Set participant to null if drawer is checked off **/
 			/>
 			<div class="drawer-content w-full">
-				<form method="get" class="w-full">
+				<form method="get" class="w-full" role="search">
 					<label class="input input-bordered flex w-full items-center gap-2">
 						<TbSearch size="18" />
-						<input id="query" type="text" name="q" placeholder="Search" class="grow" value={query} />
+						<input aria-label="Search participant" id="query" type="text" name="q" placeholder="Search" class="grow" value={query} />
 					</label>
 				</form>
-				<table class="table table-auto">
-					<thead>
-						<tr class="font-bold">
-							<th>Id</th>
-							<th>First name</th>
-							<th>Last name</th>
-							<th>Email</th>
-							<th>Checked In?</th>
-							<th class="sr-only">Edit</th>
-						</tr>
-					</thead>
-					<tbody>
-						<For each={participants()}>
-							{(p) => (
-								<tr>
-									<td>{p.id}</td>
-									<td>{p.firstName}</td>
-									<td>{p.lastName}</td>
-									<td>{p.email}</td>
-									<td>{p.checkedIn ? '✅' : '❌'}</td>
-									<td>
-										<button class="btn btn-primary h-8 min-h-8 text-white" onClick={() => setSelectedParticipantId(p.id)}>
-											Edit
-										</button>
-									</td>
-								</tr>
-							)}
-						</For>
-					</tbody>
-				</table>
+				<section aria-labelleby="participant-list-heading">
+					<h2 id="participant-list-heading" class="mt-5 mb-3 font-bold">
+						Participant list
+					</h2>
+					<table aria-labelledby="participant-list-heading" class="table table-auto">
+						<thead>
+							<tr class="font-bold">
+								<th>Id</th>
+								<th>First name</th>
+								<th>Last name</th>
+								<th>Email</th>
+								<th>Checked In?</th>
+								<th class="sr-only">Edit</th>
+							</tr>
+						</thead>
+						<tbody>
+							<For each={participants()}>
+								{(p) => (
+									<tr>
+										<td>{p.id}</td>
+										<td>{p.firstName}</td>
+										<td>{p.lastName}</td>
+										<td>{p.email}</td>
+										<td>{p.checkedIn ? <span aria-label="Yes">✅</span> : <span aria-label="No">❌</span>}</td>
+										<td>
+											<button
+												aria-label="Open Participant edit modal"
+												class="btn btn-primary h-8 min-h-8 text-white"
+												onClick={() => setSelectedParticipantId(p.id)}
+											>
+												Edit
+											</button>
+										</td>
+									</tr>
+								)}
+							</For>
+						</tbody>
+					</table>
+				</section>
 			</div>
-			<div class="drawer-side">
+			<div role="dialog" class="drawer-side">
 				<label for="participant-info-drawer" class="drawer-overlay"></label>
-				<div class="min-h-full w-4/5 bg-base-100 p-6 lg:w-2/5 xl:w-1/5">
+				<div class="bg-base-100 min-h-full w-4/5 p-6 lg:w-2/5 xl:w-1/5">
 					<Show when={participant()} fallback={<p>No participant selected</p>} keyed>
 						{(p) => <ParticipantInfoForm participant={p} onClose={() => setSelectedParticipantId(null)} />}
 					</Show>
@@ -120,34 +129,28 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 		<form method="post" action={updateParticipant} class="flex w-full flex-col gap-2">
 			<header class="flex w-full justify-between">
 				<h2 class="font-bold">Participant #{props.participant.id}</h2>
-				<button type="button" onclick={props.onClose}>
+				<button aria-label="Close" type="button" onclick={props.onClose} class="cursor-pointer">
 					<TbX size="32" />
 				</button>
 			</header>
 			<div class="flex gap-4">
-				<label class="flex-1">
-					<div class="label">
-						<span class="label-text">First name</span>
-					</div>
+				<label class="fieldset flex-1">
+					<span class="fieldset-legend text-sm">First name</span>
 					<input type="text" name="firstName" value={props.participant.firstName} class="input input-bordered w-full" />
 				</label>
-				<label class="flex-1">
-					<div class="label">
-						<span class="label-text">Last name</span>
-					</div>
+				<label class="fieldset flex-1">
+					<span class="fieldset-legend text-sm">Last name</span>
 					<input type="text" name="lastName" value={props.participant.lastName} class="input input-bordered w-full" />
 				</label>
 			</div>
-			<label class="grow">
-				<div class="label">
-					<span class="label-text">Email</span>
-				</div>
+			<label class="fieldset grow">
+				<span class="fieldset-legend text-sm">Email</span>
 				<input type="text" name="email" value={props.participant.email} class="input input-bordered w-full" />
 			</label>
-			<div class="form-control">
-				<label class="label cursor-pointer justify-start gap-4">
+			<div>
+				<label class="flex cursor-pointer justify-start gap-2">
 					<input type="checkbox" name="checkedIn" class="checkbox-primary checkbox" checked={props.participant.checkedIn} />
-					<span class="label-text">Checked in?</span>
+					<span>Checked in?</span>
 				</label>
 			</div>
 			<input type="hidden" name="participantId" value={props.participant.id} />
@@ -160,11 +163,11 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 				</button>
 			</div>
 			<div class="mt-4">
-				<p class="text-sm italic text-gray-600">Created at: {datetimeFormatter.format(new Date(props.participant.createdAt))}</p>
-				<p class="text-sm italic text-gray-600">
+				<p class="text-sm text-gray-600 italic">Created at: {datetimeFormatter.format(new Date(props.participant.createdAt))}</p>
+				<p class="text-sm text-gray-600 italic">
 					{props.participant.updatedAt ? `Updated at: ${datetimeFormatter.format(new Date(props.participant.updatedAt))}` : 'No updates yet'}
 				</p>
-				<h3 class="text-md mb-2 mt-4 font-bold">Additional Information</h3>
+				<h3 class="text-md mt-4 mb-2 font-bold">Additional Information</h3>
 				<ul class="mb-4 flex list-inside list-disc flex-col gap-0.5">
 					<For each={extraInfoFields}>
 						{(field) => (
