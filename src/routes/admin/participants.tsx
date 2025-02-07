@@ -5,14 +5,13 @@ import { createSignal, For, Show } from 'solid-js'
 import { db } from '~/db'
 import { Participant, participant } from '~/db/schema'
 
-const getParticipants = query(async (query: string = '') => {
+const getParticipants = query((query: string = '') => {
 	'use server'
-	const participants = await db
+	return db
 		.select()
 		.from(participant)
 		.where(query ? like(participant.nameEmail, `%${query}%`) : undefined)
 		.orderBy(participant.id)
-	return participants
 }, 'participants')
 
 const updateParticipant = action(async (formData: FormData) => {
@@ -37,11 +36,11 @@ export const route = {
 export default function ParticipantPage() {
 	const [searchParams, _] = useSearchParams()
 	const query = searchParams.q?.toString()
+
 	const participants = createAsync(() => getParticipants(query))
+
 	const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
 	const participant = () => participants()?.find((p) => p.id == selectedParticipantId())
-
-	const closeDrawer = () => setSelectedParticipantId(null)
 
 	return (
 		<div class="drawer drawer-end m-auto flex w-4/5 flex-col items-center justify-center gap-6">
@@ -50,7 +49,7 @@ export default function ParticipantPage() {
 				type="checkbox"
 				class="drawer-toggle"
 				checked={selectedParticipantId() !== null}
-				onChange={(e) => !e.currentTarget.checked && setSelectedParticipantId(null)}
+				onChange={(e) => !e.currentTarget.checked && setSelectedParticipantId(null)} /** Set participant to null if drawer is checked off **/
 			/>
 			<div class="drawer-content w-full">
 				<form method="get" class="w-full">
@@ -94,7 +93,7 @@ export default function ParticipantPage() {
 				<label for="participant-info-drawer" class="drawer-overlay"></label>
 				<div class="min-h-full w-4/5 bg-base-100 p-6 lg:w-2/5 xl:w-1/5">
 					<Show when={participant()} fallback={<p>No participant selected</p>} keyed>
-						{(p) => <ParticipantInfoForm participant={p} onClose={closeDrawer} />}
+						{(p) => <ParticipantInfoForm participant={p} onClose={() => setSelectedParticipantId(null)} />}
 					</Show>
 				</div>
 			</div>

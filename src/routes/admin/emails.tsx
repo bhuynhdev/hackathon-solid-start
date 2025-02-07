@@ -12,7 +12,22 @@ export default function EmailsPage() {
 	return (
 		<div class="flex h-full gap-4">
 			<p>Homie</p>
-			<iframe srcdoc={emailHtml()} class="h-full w-full" />
+			<div role="tablist" class="tabs tabs-lifted">
+				<input type="radio" name="my_tabs_2" role="tab" class="tab" aria-label="Tab 1" checked />
+				<div role="tabpanel" class="tab-content rounded-box border-base-300 bg-base-100 p-6">
+					Tab content 1
+				</div>
+
+				<input type="radio" name="my_tabs_2" role="tab" class="tab" aria-label="Tab 2" />
+				<div role="tabpanel" class="tab-content rounded-box border-base-300 bg-base-100 p-6">
+					Tab content 2
+				</div>
+
+				<input type="radio" name="my_tabs_2" role="tab" class="tab" aria-label="Tab 3" />
+				<div role="tabpanel" class="tab-content rounded-box border-base-300 bg-base-100 p-6">
+					Tab content 3
+				</div>
+			</div>
 		</div>
 	)
 }
