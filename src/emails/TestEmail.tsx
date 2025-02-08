@@ -2,7 +2,9 @@ import { JSX } from 'solid-js'
 import { Body, Button, Column, Container, Html, Row, Section, Text } from 'solid-jsx-email'
 
 const mainStyle = {
-	'font-family': '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif'
+	'font-family': '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+	'background-color': '#ffffff',
+	margin: '0 auto'
 } satisfies JSX.CSSProperties
 
 const textStyle = {
