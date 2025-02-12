@@ -14,30 +14,27 @@
 	"dependencies": {
 		"@libsql/client": "^0.14.0",
 		"@solidjs/router": "^0.15.3",
-		"@solidjs/start": "^1.0.11",
+		"@solidjs/start": "^1.1.0",
+		"@tailwindcss/vite": "^4.0.6",
 		"autoprefixer": "^10.4.20",
 		"daisyui": "5.0.0-beta.7",
 		"dotenv": "^16.4.7",
-		"drizzle-orm": "^0.38.3",
-		"postcss": "^8.4.49",
+		"drizzle-orm": "^0.38.4",
+		"postcss": "^8.5.2",
 		"solid-icons": "^1.1.0",
-		"solid-js": "^1.9.3",
+		"solid-js": "^1.9.4",
 		"solid-jsx-email": "^0.0.5",
-		"tailwindcss": "^4.0.4",
-		"vinxi": "^0.4.3"
-	},
-	"overrides": {
-		"vite": "5.4.10"
+		"tailwindcss": "^4.0.6",
+		"vinxi": "^0.5.3"
 	},
 	"engines": {
 		"node": ">=18"
 	},
 	"devDependencies": {
 		"@fsouza/prettierd": "^0.25.4",
-		"@tailwindcss/vite": "^4.0.4",
-		"drizzle-kit": "^0.30.1",
-		"drizzle-seed": "^0.3.0",
-		"prettier-plugin-tailwindcss": "^0.6.9",
+		"drizzle-kit": "^0.30.4",
+		"drizzle-seed": "^0.3.1",
+		"prettier-plugin-tailwindcss": "^0.6.11",
 		"tsx": "^4.19.2"
 	}
 }
