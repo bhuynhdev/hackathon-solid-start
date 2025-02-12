@@ -14,7 +14,7 @@ const textStyle = {
 	'text-align': 'left'
 } satisfies JSX.CSSProperties
 
-export function TestEmail() {
+export default function TestEmail2() {
 	return (
 		<Html lang="en">
 			<Body style={mainStyle}>
@@ -22,10 +22,10 @@ export function TestEmail() {
 					<Container>
 						<Row>
 							<Column>
-								<Text style={textStyle}>Hello</Text>
+								<Text style={textStyle}>Hello 2</Text>
 							</Column>
 							<Column>
-								<Text style={textStyle}>This is me</Text>
+								<Text style={textStyle}>This is me 2</Text>
 							</Column>
 						</Row>
 					</Container>
@@ -50,7 +50,7 @@ export function TestEmail() {
 				</Section>
 				<Section>
 					<Container>
-						<Text style={{ 'text-align': 'center' }}>This is paragraph</Text>
+						<Text style={{ 'text-align': 'center' }}>This is paragraph 2</Text>
 					</Container>
 				</Section>
 			</Body>
