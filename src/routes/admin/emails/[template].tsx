@@ -15,18 +15,20 @@ export default function EmailsPage() {
 	return (
 		<>
 			<h2>Email {params.template}</h2>
-			<div class="tabs tabs-border h-full" role="tablist">
-				<input type="radio" name="view" class="tab" aria-label="Desktop" role="tab" checked />
+			<div class="tabs tabs-lift h-full" role="tablist">
+				<input type="radio" name="view" class="tab [--tab-bg:var(--color-base-200)]" aria-label="Desktop" role="tab" checked />
 				<div class="tab-content bg-base-200 border-base-300 h-full p-6" role="tabpanel">
 					<Show when={emailData()} fallback={<p>Loading...</p>}>
-						{(info) => <iframe srcdoc={info().html} class="h-full w-full" />}
+						{(info) => <iframe srcdoc={info().html} class="h-full w-full rounded-md shadow-sm" />}
 					</Show>
 				</div>
 
-				<input type="radio" name="view" class="tab" aria-label="Mobile" role="tab" />
+				<input type="radio" name="view" class="tab [--tab-bg:var(--color-base-200)]" aria-label="Mobile" role="tab" />
 				<div class="tab-content border-base-300 bg-base-200 p-6" role="tabpanel">
 					<Show when={emailData()} fallback={<p>Loading...</p>}>
-						{(data) => <iframe srcdoc={data().html} class="mx-auto mt-2 h-full w-full shadow-lg" style={{ height: '932px', width: '430px' }} />}
+						{(data) => (
+							<iframe srcdoc={data().html} class="mx-auto mt-2 h-full w-full rounded-md shadow-sm" style={{ height: '932px', width: '430px' }} />
+						)}
 					</Show>
 				</div>
 
