@@ -34,9 +34,9 @@ export default function AdminLayout(props: RouteSectionProps) {
 						{links()?.map((link) => (
 							<li>
 								{link.href ? (
-									<a href={link.href} class="px-4 py-2">
+									<A href={link.href} class="px-4 py-2" activeClass="menu-active">
 										<span>{link.title}</span>
-									</a>
+									</A>
 								) : (
 									<p class="px-4 py-2">{link.title}</p>
 								)}
@@ -44,9 +44,9 @@ export default function AdminLayout(props: RouteSectionProps) {
 									<ul>
 										{link.sublinks.map((l) => (
 											<li>
-												<a href={l.href} class="px-4 py-2">
+												<A href={l.href} class="px-4 py-2" activeClass="menu-active">
 													<span>{l.title}</span>
-												</a>
+												</A>
 											</li>
 										))}
 									</ul>
