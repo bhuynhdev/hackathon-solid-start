@@ -29,3 +29,6 @@ Thumbs.db
 
 # SQlite
 local.db
+
+# Emails
+src/email_templates/_build

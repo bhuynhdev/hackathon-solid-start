@@ -1,10 +1,75 @@
 import { defineConfig } from '@solidjs/start/config'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
+import fs from 'fs'
+import { type Plugin } from 'vinxi'
+import { build } from 'esbuild'
+import { solidPlugin as esbuildSolidPlugin } from 'esbuild-plugin-solid'
+import { renderToString } from 'solid-js/web'
+import assert from 'assert'
+import '@total-typescript/ts-reset/filter-boolean'
+
+/**
+ * Extract the module name from a path
+ * i.e. './email_templates/TextEmail.tsx' -> 'TestEmail'
+ **/
+export function convertPathToModuleName(filePath: string) {
+	return path.basename(filePath, path.extname(filePath))
+}
+
+/**
+ * Compile the email_templates using esbuild, then use SolidJS to render the compiled components to HTML strings
+ * And write the result to json
+ */
+async function buildEmailTemplates() {
+	assert(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'production')
+	const buildResult = await build({
+		entryPoints: ['./src/email_templates/*.tsx'],
+		bundle: true,
+		target: 'ESNext',
+		platform: 'node',
+		format: 'esm',
+		metafile: true,
+		entryNames: '[dir]/[name]',
+		outdir: './src/email_templates/_build/',
+		plugins: [esbuildSolidPlugin({ solid: { hydratable: false, generate: 'ssr' } })],
+		// Required configuration for proper development/production handling
+		define: {
+			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+		},
+		conditions: ['solid', process.env.NODE_ENV]
+	}).catch((err) => {
+		console.log(err)
+		process.exit(1)
+	})
+
+	const renderResult = await Promise.all(
+		Object.entries(buildResult.metafile.outputs).map(async ([compiledPath, { entryPoint }]) => {
+			if (!entryPoint) return
+			const rawSource = fs.readFileSync(path.resolve('./', entryPoint), 'utf-8')
+			const component = (await import(path.resolve('./', compiledPath))).default
+			const html = renderToString(() => component())
+			return [convertPathToModuleName(compiledPath), { html, jsx: rawSource }] as const
+		})
+	)
+
+	// Convert to lookup map where `moduleName` is key
+	const renderMap = Object.fromEntries(renderResult.filter(Boolean))
+	fs.writeFileSync(path.resolve('./src/email_templates/emails.json'), JSON.stringify(renderMap, null, 2), 'utf-8')
+}
+
+function emailTemplatesPlugin(): Plugin {
+	return {
+		name: 'email-templates-plugin',
+		async buildStart() {
+			await buildEmailTemplates()
+		}
+	}
+}
 
 export default defineConfig({
 	vite: {
-		plugins: [tailwindcss()],
+		plugins: [tailwindcss(), emailTemplatesPlugin()],
 		resolve: {
 			alias: {
 				'@emailtemplates': path.resolve('./src/email_templates/')
