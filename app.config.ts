@@ -23,6 +23,9 @@ export function convertPathToModuleName(filePath: string) {
  */
 async function buildEmailTemplates() {
 	assert(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'production')
+
+	fs.rmSync('./src/email_templates/_build', { recursive: true, force: true })
+
 	const buildResult = await build({
 		entryPoints: ['./src/email_templates/*.tsx'],
 		bundle: true,
@@ -30,7 +33,7 @@ async function buildEmailTemplates() {
 		platform: 'node',
 		format: 'esm',
 		metafile: true,
-		entryNames: '[dir]/[name]',
+		entryNames: '[dir]/[name]-[hash]', // Hash helps bust the dynamic import cache
 		outdir: './src/email_templates/_build/',
 		plugins: [esbuildSolidPlugin({ solid: { hydratable: false, generate: 'ssr' } })],
 		// Required configuration for proper development/production handling
@@ -46,10 +49,11 @@ async function buildEmailTemplates() {
 	const renderResult = await Promise.all(
 		Object.entries(buildResult.metafile.outputs).map(async ([compiledPath, { entryPoint }]) => {
 			if (!entryPoint) return
-			const rawSource = fs.readFileSync(path.resolve('./', entryPoint), 'utf-8')
 			const component = (await import(path.resolve('./', compiledPath))).default
+			if (typeof component !== 'function') return
 			const html = renderToString(() => component())
-			return [convertPathToModuleName(compiledPath), { html, jsx: rawSource }] as const
+			const rawSource = fs.readFileSync(path.resolve('./', entryPoint), 'utf-8')
+			return [convertPathToModuleName(entryPoint), { html, jsx: rawSource }] as const
 		})
 	)
 
