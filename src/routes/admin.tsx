@@ -1,27 +1,18 @@
 import { A, createAsync, query, RouteSectionProps } from '@solidjs/router'
 import { TbChalkboard } from 'solid-icons/tb'
-import { convertPathToModuleName } from '~/utils'
+import emails from '@emailtemplates/emails.json'
 
-const getLinks = query(async () => {
-	'use server'
-	return [
-		{ title: 'Participants', href: '/admin/participants' },
-		{
-			title: 'Emails',
-			sublinks: Object.keys(import.meta.glob('../email_templates/*.tsx')).map((path) => {
-				const moduleName = convertPathToModuleName(path)
-				return { title: moduleName, href: `/admin/emails/${moduleName}` }
-			})
-		}
-	]
-}, 'nav-links')
-
-export const route = {
-	preload: () => getLinks()
-}
+const links = [
+	{ title: 'Participants', href: '/admin/participants' },
+	{
+		title: 'Emails',
+		sublinks: Object.keys(emails).map((emailName) => {
+			return { title: emailName, href: `/admin/emails/${emailName}` }
+		})
+	}
+]
 
 export default function AdminLayout(props: RouteSectionProps) {
-	const links = createAsync(() => getLinks())
 	return (
 		<div class="grid min-h-screen grid-rows-[auto_1fr_auto]">
 			<header class="bg-diagonal-pattern border-b p-4">
@@ -31,7 +22,7 @@ export default function AdminLayout(props: RouteSectionProps) {
 				{/* Left sidebar */}
 				<nav class="w-64 py-4" aria-label="Main navigation">
 					<ul class="menu w-full space-y-1">
-						{links()?.map((link) => (
+						{links.map((link) => (
 							<li>
 								{link.href ? (
 									<A href={link.href} class="px-4 py-2" activeClass="menu-active">
