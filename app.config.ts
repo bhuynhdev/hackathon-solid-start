@@ -63,6 +63,20 @@ function emailTemplatesPlugin(): Plugin {
 		name: 'email-templates-plugin',
 		async buildStart() {
 			await buildEmailTemplates()
+		},
+		configureServer(server) {
+			server.watcher.on('change', (filePath) => {
+				// Regex to match direct TSX children files of /src/email_templates folder
+				if (filePath.match(/^.*\/src\/email_templates\/[^/]+\.tsx$/)) {
+					buildEmailTemplates()
+				}
+			})
+			server.watcher.on('unlink', (filePath) => {
+				// Regex to match direct TSX children files of /src/email_templates folder
+				if (filePath.match(/^.*\/src\/email_templates\/[^/]+\.tsx$/)) {
+					buildEmailTemplates()
+				}
+			})
 		}
 	}
 }
