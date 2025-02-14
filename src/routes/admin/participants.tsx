@@ -2,9 +2,11 @@ import { action, createAsync, query, RouteDefinition, useSearchParams } from '@s
 import { eq, like } from 'drizzle-orm'
 import { createSignal, For, Show } from 'solid-js'
 import { db } from '~/db'
-import { Participant, participant } from '~/db/schema'
+import { Participant, participant, ParticipantUpdate } from '~/db/schema'
 import IconTablerSearch from '~icons/tabler/search'
 import IconTablerX from '~icons/tabler/x'
+
+type AttendanceStatus = Participant['attendanceStatus']
 
 const getParticipants = query(async (query: string = '') => {
 	'use server'
@@ -17,13 +19,33 @@ const getParticipants = query(async (query: string = '') => {
 
 const updateParticipant = action(async (formData: FormData) => {
 	'use server'
-	const data = Object.fromEntries(formData)
-	const { participantId, ...updateContent } = data
-	const isCheckedIn = updateContent.checkedIn === 'yes'
+	const now = new Date().toISOString()
+	const { participantId, ...data } = Object.fromEntries(formData)
+	const pId = parseInt(participantId.toString())
+	const shouldAdvanceAttendance = data.advanceAttendance === 'yes'
+	let newAttendanceStatus: AttendanceStatus | null = null
+
+	if (shouldAdvanceAttendance) {
+		const [participantInfo] = await db.select().from(participant).where(eq(participant.id, pId))
+		const currentAttendanceStatus = participantInfo.attendanceStatus
+		if (currentAttendanceStatus === 'registered') {
+			newAttendanceStatus = 'confirmed'
+		} else if (currentAttendanceStatus === 'confirmed') {
+			// TODO: check waitlist
+			newAttendanceStatus = 'attended'
+		}
+	}
+
+	const updateContent: ParticipantUpdate = {
+		...data,
+		...(newAttendanceStatus && { attendanceStatus: newAttendanceStatus }),
+		updatedAt: now,
+		checkedInAt: now
+	}
 
 	const [updated] = await db
 		.update(participant)
-		.set({ ...updateContent, checkedIn: isCheckedIn, updatedAt: new Date().toISOString() })
+		.set(updateContent)
 		.where(eq(participant.id, parseInt(participantId.toString())))
 		.returning()
 	return updated
@@ -70,7 +92,7 @@ export default function ParticipantPage() {
 								<th>First name</th>
 								<th>Last name</th>
 								<th>Email</th>
-								<th>Checked In?</th>
+								<th>Attendance Status</th>
 								<th class="sr-only">Edit</th>
 							</tr>
 						</thead>
@@ -82,7 +104,7 @@ export default function ParticipantPage() {
 										<td>{p.firstName}</td>
 										<td>{p.lastName}</td>
 										<td>{p.email}</td>
-										<td>{p.checkedIn ? <span aria-label="Yes">✅</span> : <span aria-label="No">❌</span>}</td>
+										<td>{p.attendanceStatus === 'confirmed' ? <span aria-label="Yes">✅</span> : <span aria-label="No">❌</span>}</td>
 										<td>
 											<button
 												aria-label="Open Participant edit modal"
@@ -148,10 +170,13 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 				<span class="fieldset-legend text-sm">Email</span>
 				<input type="text" name="email" value={props.participant.email} class="input input-bordered w-full" />
 			</label>
+			<p>
+				Attendance Status: <span class="font-bold">{props.participant.attendanceStatus}</span>
+			</p>
 			<div>
 				<label class="flex cursor-pointer justify-start gap-2">
-					<input type="checkbox" name="checkedIn" value="yes" class="checkbox-primary checkbox" checked={props.participant.checkedIn} />
-					<span>Checked in?</span>
+					<input type="checkbox" name="advanceAttendance" value="yes" class="checkbox-primary checkbox" />
+					<span>{props.participant.attendanceStatus === 'registered' ? 'Confirm attendance' : 'Check in'}</span>
 				</label>
 			</div>
 			<input type="hidden" name="participantId" value={props.participant.id} />
