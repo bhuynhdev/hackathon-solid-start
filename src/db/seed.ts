@@ -1,7 +1,7 @@
 import { createClient } from '@libsql/client'
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/libsql'
-import { seed } from 'drizzle-seed'
+import { reset, seed } from 'drizzle-seed'
 import { participant } from './schema'
 
 async function main() {
@@ -22,7 +22,7 @@ async function main() {
 					firstName: f.firstName(),
 					lastName: f.lastName(),
 					email: f.email(),
-					checkedIn: f.boolean(),
+					attendanceStatus: f.valuesFromArray({ values: ['registered', 'confirmed', 'attended', 'waitlist', 'waitlist-attended'] }),
 					createdAt: f.default({ defaultValue: new Date().toISOString() }),
 					phone: f.phoneNumber({ template: '###-###-####' }),
 					age: f.int({ minValue: 16, maxValue: 25 }),
@@ -36,7 +36,8 @@ async function main() {
 					resumeUrl: f.default({ defaultValue: null }),
 					notes: f.default({ defaultValue: null }),
 					updatedAt: f.default({ defaultValue: null }),
-					deletedAt: f.default({ defaultValue: null })
+					deletedAt: f.default({ defaultValue: null }),
+					checkedInAt: f.default({ defaultValue: null })
 				}
 			}
 		}

@@ -26,13 +26,13 @@ export const participant = sqliteTable('participant', {
 	id: integer('id').primaryKey(),
 	firstName: text('first_name').notNull(),
 	lastName: text('last_name').notNull(),
-	checkedIn: integer('checked_in', { mode: 'boolean' }).default(false).notNull(),
+	attendanceStatus: text('attendance_status', { enum: ['registered', 'confirmed', 'attended', 'waitlist', 'waitlist-attended'] })
+		.default('registered')
+		.notNull(),
 	email: text('email').notNull(),
 	phone: text('phone').notNull(),
 	age: integer('age').notNull(),
-	gender: text('gender', {
-		enum: ['male', 'female', 'nonbinary', 'other', 'noanswer']
-	}).notNull(),
+	gender: text('gender', { enum: ['male', 'female', 'nonbinary', 'other', 'noanswer'] }).notNull(),
 	school: text('school').notNull(),
 	graduationYear: integer('graduation_year').notNull(),
 	levelOfStudy: text('level_of_study').notNull(),
@@ -44,6 +44,7 @@ export const participant = sqliteTable('participant', {
 	createdAt: text('created_at').notNull(),
 	updatedAt: text('updated_at'),
 	deletedAt: text('deleted_at'),
+	checkedInAt: text('checkedin_at'),
 	nameEmail: text('name_email')
 		.notNull()
 		.generatedAlwaysAs((): SQL => sql`lower(${participant.firstName} || ' ' || ${participant.lastName} || ' ' || ${participant.email})`)
@@ -68,5 +69,9 @@ export const session = sqliteTable('session', {
 })
 
 export type Session = typeof session.$inferSelect
+
 export type Participant = typeof participant.$inferSelect
+export type ParticipantInsert = typeof participant.$inferSelect
+export type ParticipantUpdate = Partial<ParticipantInsert>
+
 export type User = typeof user.$inferSelect
