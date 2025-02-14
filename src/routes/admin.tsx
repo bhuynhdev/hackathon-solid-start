@@ -1,6 +1,13 @@
-import { A, createAsync, query, RouteSectionProps } from '@solidjs/router'
-import { TbChalkboard } from 'solid-icons/tb'
 import emails from '@emailtemplates/emails.json'
+import { A, RouteSectionProps } from '@solidjs/router'
+import { TbChalkboard } from 'solid-icons/tb'
+import { For, Show } from 'solid-js'
+
+type NavLinkData = {
+	title: string
+	href?: string
+	sublinks?: Array<{ title: string; href?: string }>
+}
 
 const links = [
 	{ title: 'Participants', href: '/admin/participants' },
@@ -10,7 +17,7 @@ const links = [
 			return { title: emailName, href: `/admin/emails/${emailName}` }
 		})
 	}
-]
+] satisfies Array<NavLinkData>
 
 export default function AdminLayout(props: RouteSectionProps) {
 	return (
@@ -19,31 +26,16 @@ export default function AdminLayout(props: RouteSectionProps) {
 				RevolutionUC Dashboard <TbChalkboard class="inline" />
 			</header>
 			<div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
-				{/* Left sidebar */}
+				{/* Left-side navbar */}
 				<nav class="w-64 py-4" aria-label="Main navigation">
 					<ul class="menu w-full space-y-1">
-						{links.map((link) => (
-							<li>
-								{link.href ? (
-									<A href={link.href} class="px-4 py-2" activeClass="menu-active">
-										<span>{link.title}</span>
-									</A>
-								) : (
-									<p class="px-4 py-2">{link.title}</p>
-								)}
-								{link.sublinks && (
-									<ul>
-										{link.sublinks.map((l) => (
-											<li>
-												<A href={l.href} class="px-4 py-2" activeClass="menu-active">
-													<span>{l.title}</span>
-												</A>
-											</li>
-										))}
-									</ul>
-								)}
-							</li>
-						))}
+						<For each={links}>
+							{(link) => (
+								<li>
+									<NavLink {...link} />
+								</li>
+							)}
+						</For>
 					</ul>
 				</nav>
 				{/* Main Content */}
@@ -52,5 +44,48 @@ export default function AdminLayout(props: RouteSectionProps) {
 			{/* Footer */}
 			<footer class="p-4">(footer)</footer>
 		</div>
+	)
+}
+
+type NavLinkProps = NavLinkData & { class?: string }
+
+/**
+ * Render a full navlinks with possible sublinks
+ */
+function NavLink(props: NavLinkProps) {
+	return (
+		<>
+			<Show when={props.sublinks} fallback={<IndividualNavLink {...props} class="px-4 py-2" />}>
+				<details open>
+					<summary class="px-4 py-2">
+						<IndividualNavLink {...props} />
+					</summary>
+					<ul>
+						<For each={props.sublinks}>
+							{(subLink) => (
+								<li>
+									<NavLink {...subLink} />
+								</li>
+							)}
+						</For>
+					</ul>
+				</details>
+			</Show>
+		</>
+	)
+}
+
+/**
+ * Render an individual nav link without sublinks
+ */
+function IndividualNavLink(props: Omit<NavLinkProps, 'sublinks'>) {
+	return (
+		<Show when={props.href} fallback={<span class={props.class}>{props.title}</span>} keyed>
+			{(href) => (
+				<A href={href} class={props.class} activeClass="menu-active">
+					{props.title}
+				</A>
+			)}
+		</Show>
 	)
 }

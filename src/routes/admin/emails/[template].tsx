@@ -8,9 +8,9 @@ export default function EmailsPage() {
 	return (
 		<>
 			<h2 class="mb-2 text-lg font-bold">{params.template}</h2>
-			<div class="tabs tabs-lift h-full" role="tablist">
+			<div class="tabs tabs-lift h-[calc(100%-60px)]" role="tablist">
 				<input type="radio" name="view" class="tab [--tab-bg:var(--color-base-200)]" aria-label="Desktop" role="tab" checked />
-				<div class="tab-content bg-base-200 border-base-300 h-full p-6" role="tabpanel">
+				<div class="tab-content bg-base-200 border-base-300 p-6" role="tabpanel">
 					<Show when={emailData()} fallback={<p>Loading...</p>}>
 						{(data) => <iframe srcdoc={data().html} class="h-full w-full rounded-md shadow-sm" />}
 					</Show>
