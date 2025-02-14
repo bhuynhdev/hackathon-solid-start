@@ -1,9 +1,10 @@
 import { action, createAsync, query, RouteDefinition, useSearchParams } from '@solidjs/router'
 import { eq, like } from 'drizzle-orm'
-import { TbSearch, TbX } from 'solid-icons/tb'
 import { createSignal, For, Show } from 'solid-js'
 import { db } from '~/db'
 import { Participant, participant } from '~/db/schema'
+import IconTablerSearch from '~icons/tabler/search'
+import IconTablerX from '~icons/tabler/x'
 
 const getParticipants = query(async (query: string = '') => {
 	'use server'
@@ -54,7 +55,7 @@ export default function ParticipantPage() {
 			<div class="drawer-content w-full">
 				<form method="get" class="w-full" role="search">
 					<label class="input input-bordered flex w-full items-center gap-2">
-						<TbSearch size="18" />
+						<IconTablerSearch width="18" height="18" />
 						<input aria-label="Search participant" id="query" type="text" name="q" placeholder="Search" class="grow" value={query} />
 					</label>
 				</form>
@@ -130,7 +131,7 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 			<header class="flex w-full justify-between">
 				<h2 class="font-bold">Participant #{props.participant.id}</h2>
 				<button aria-label="Close" type="button" onclick={props.onClose} class="cursor-pointer">
-					<TbX size="32" />
+					<IconTablerX width="32" height="32" />
 				</button>
 			</header>
 			<div class="flex gap-4">

@@ -1,14 +1,14 @@
 import { defineConfig } from '@solidjs/start/config'
 import tailwindcss from '@tailwindcss/vite'
-import path from 'path'
-import fs from 'fs'
-import { type Plugin } from 'vinxi'
+import '@total-typescript/ts-reset/filter-boolean'
+import assert from 'assert'
 import { build } from 'esbuild'
 import { solidPlugin as esbuildSolidPlugin } from 'esbuild-plugin-solid'
+import fs from 'fs'
+import path from 'path'
 import { renderToString } from 'solid-js/web'
-import assert from 'assert'
-import '@total-typescript/ts-reset/filter-boolean'
-
+import Icons from 'unplugin-icons/vite'
+import { type Plugin } from 'vinxi'
 /**
  * Extract the module name from a path
  * i.e. './email_templates/TextEmail.tsx' -> 'TestEmail'
@@ -87,7 +87,7 @@ function emailTemplatesPlugin(): Plugin {
 
 export default defineConfig({
 	vite: {
-		plugins: [tailwindcss(), emailTemplatesPlugin()],
+		plugins: [tailwindcss(), emailTemplatesPlugin(), Icons({ compiler: 'solid' })],
 		resolve: {
 			alias: {
 				'@emailtemplates': path.resolve('./src/email_templates/')

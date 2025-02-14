@@ -1,6 +1,6 @@
 import emails from '@emailtemplates/emails.json'
 import { A, RouteSectionProps } from '@solidjs/router'
-import { TbChalkboard } from 'solid-icons/tb'
+import IconTablerChalkboard from '~icons/tabler/chalkboard'
 import { For, Show } from 'solid-js'
 
 type NavLinkData = {
@@ -23,7 +23,7 @@ export default function AdminLayout(props: RouteSectionProps) {
 	return (
 		<div class="grid min-h-screen grid-rows-[auto_1fr_auto]">
 			<header class="bg-diagonal-pattern border-b p-4">
-				RevolutionUC Dashboard <TbChalkboard class="inline" />
+				RevolutionUC Dashboard <IconTablerChalkboard class="inline" aria-hidden="true" />
 			</header>
 			<div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
 				{/* Left-side navbar */}
