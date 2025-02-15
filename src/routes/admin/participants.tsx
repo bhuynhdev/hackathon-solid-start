@@ -17,41 +17,49 @@ const getParticipants = query(async (query: string = '') => {
 		.orderBy(participant.id)
 }, 'participants')
 
-const updateParticipant = action(async (formData: FormData) => {
+const updateParticipantInfo = action(async (formData: FormData) => {
 	'use server'
 	const now = new Date().toISOString()
 	const { participantId, ...data } = Object.fromEntries(formData)
 	const pId = parseInt(participantId.toString())
-	const shouldAdvanceAttendance = data.advanceAttendance === 'yes'
-	let newAttendanceStatus: AttendanceStatus | null = null
-
-	if (shouldAdvanceAttendance) {
-		const [participantInfo] = await db.select().from(participant).where(eq(participant.id, pId))
-		const currentAttendanceStatus = participantInfo.attendanceStatus
-		if (currentAttendanceStatus === 'registered') {
-			newAttendanceStatus = 'confirmed'
-		} else if (currentAttendanceStatus === 'confirmed') {
-			// TODO: check waitlist
-			newAttendanceStatus = 'attended'
-		} else if (currentAttendanceStatus === 'waitlist') {
-			newAttendanceStatus = 'waitlist-attended'
-		}
-	}
-
-	const updateContent: ParticipantUpdate = {
-		...data,
-		...(newAttendanceStatus && { attendanceStatus: newAttendanceStatus }),
-		updatedAt: now,
-		checkedInAt: now
-	}
 
 	const [updated] = await db
 		.update(participant)
-		.set(updateContent)
-		.where(eq(participant.id, parseInt(participantId.toString())))
+		.set({ ...data, updatedAt: now })
+		.where(eq(participant.id, pId))
 		.returning()
 	return updated
 })
+
+const advanceAttendanceStaus = action(async (formData: FormData) => {
+	'use server'
+	const now = new Date().toISOString()
+	const { participantId } = Object.fromEntries(formData)
+	const pId = parseInt(participantId.toString())
+	let newAttendanceStatus: AttendanceStatus | null = null
+
+	const [participantInfo] = await db.select().from(participant).where(eq(participant.id, pId))
+	const currentAttendanceStatus = participantInfo.attendanceStatus
+
+	if (currentAttendanceStatus === 'registered') {
+		newAttendanceStatus = 'confirmed'
+	} else if (currentAttendanceStatus === 'confirmed') {
+		// TODO: check waitlist
+		newAttendanceStatus = 'attended'
+	} else if (currentAttendanceStatus === 'waitlist') {
+		newAttendanceStatus = 'waitlist-attended'
+	}
+
+	const updateContent: ParticipantUpdate = {
+		updatedAt: now,
+		...(newAttendanceStatus && { attendanceStatus: newAttendanceStatus }),
+		...(newAttendanceStatus === 'attended' && { checkedInAt: now })
+	}
+
+	if (newAttendanceStatus) {
+		await db.update(participant).set(updateContent).where(eq(participant.id, pId))
+	}
+}, 'advance-attendance-status')
 
 export const route = {
 	preload: () => getParticipants()
@@ -201,7 +209,7 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 					{props.participant.checkedInAt ? `${datetimeFormatter.format(new Date(props.participant.checkedInAt))}` : 'Not yet'}
 				</p>
 			</div>
-			<form id="participant-profile" method="post" action={updateParticipant} class="border-base-300 mt-4 rounded-md border-1">
+			<form id="participant-profile" method="post" action={updateParticipantInfo} class="border-base-300 mt-4 rounded-md border-1">
 				<header class="bg-gray-200 px-4 py-3">
 					<h3 class="font-semibold">Profile</h3>
 				</header>
@@ -242,6 +250,11 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 						</button>
 					</div>
 				</div>
+			</form>
+			<hr class="divider mx-auto w-4/5 border-none" />
+			<form method="post" action={advanceAttendanceStaus}>
+				<input type="hidden" name="participantId" value={props.participant.id} />
+				<button class="btn">Check in</button>
 			</form>
 		</div>
 	)
