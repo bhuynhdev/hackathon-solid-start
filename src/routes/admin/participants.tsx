@@ -152,7 +152,7 @@ export default function ParticipantPage() {
 			</div>
 			<div role="dialog" class="drawer-side">
 				<label for="participant-info-drawer" class="drawer-overlay"></label>
-				<div class="bg-base-100 min-h-full w-4/5 p-6 lg:w-2/5 xl:w-1/5">
+				<div class="bg-base-100 min-h-full w-4/5 max-w-[500px] p-6">
 					<Show when={participant()} fallback={<p>No participant selected</p>} keyed>
 						{(p) => <ParticipantInfoForm participant={p} onClose={() => setSelectedParticipantId(null)} />}
 					</Show>
@@ -163,7 +163,7 @@ export default function ParticipantPage() {
 }
 
 function ParticipantInfoForm(props: { participant: Participant; onClose: () => void }) {
-	const datetimeFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', dateStyle: 'short', timeStyle: 'long' })
+	const datetimeFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', dateStyle: 'short', timeStyle: 'medium' })
 	const extraInfoFields = [
 		'phone',
 		'gender',
@@ -178,62 +178,72 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 	] satisfies Array<keyof Participant>
 
 	return (
-		<form method="post" action={updateParticipant} class="flex w-full flex-col gap-2">
-			<header class="flex w-full justify-between">
-				<h2 class="font-bold">Participant #{props.participant.id}</h2>
+		<div class="flex w-full flex-col gap-2">
+			<div class="flex w-full justify-between">
+				<div class="flex gap-2">
+					<h2 class="font-bold">Participant #{props.participant.id}</h2>
+					<AttendanceStatusBadge attendanceStatus={props.participant.attendanceStatus} />
+				</div>
 				<button aria-label="Close" type="button" onclick={props.onClose} class="cursor-pointer">
 					<IconTablerX width="32" height="32" />
 				</button>
-			</header>
-			<div class="flex gap-4">
-				<label class="fieldset flex-1">
-					<span class="fieldset-legend text-sm">First name</span>
-					<input type="text" name="firstName" value={props.participant.firstName} class="input input-bordered w-full" />
-				</label>
-				<label class="fieldset flex-1">
-					<span class="fieldset-legend text-sm">Last name</span>
-					<input type="text" name="lastName" value={props.participant.lastName} class="input input-bordered w-full" />
-				</label>
 			</div>
-			<label class="fieldset grow">
-				<span class="fieldset-legend text-sm">Email</span>
-				<input type="text" name="email" value={props.participant.email} class="input input-bordered w-full" />
-			</label>
-			<p>
-				Attendance Status: <span class="font-bold">{props.participant.attendanceStatus}</span>
-			</p>
-			<div>
-				<label class="flex cursor-pointer justify-start gap-2">
-					<input type="checkbox" name="advanceAttendance" value="yes" class="checkbox-primary checkbox" />
-					<span>{props.participant.attendanceStatus === 'registered' ? 'Confirm attendance' : 'Check in'}</span>
-				</label>
-			</div>
-			<input type="hidden" name="participantId" value={props.participant.id} />
-			<div class="mt-6 flex w-full gap-8">
-				<button type="button" class="btn btn-outline btn-error grow" onclick={props.onClose}>
-					Cancel
-				</button>
-				<button type="submit" class="btn btn-primary grow">
-					Save
-				</button>
-			</div>
-			<div class="mt-4">
-				<p class="text-sm text-gray-600 italic">Created at: {datetimeFormatter.format(new Date(props.participant.createdAt))}</p>
+			<div class="flex gap-8">
 				<p class="text-sm text-gray-600 italic">
-					{props.participant.updatedAt ? `Updated at: ${datetimeFormatter.format(new Date(props.participant.updatedAt))}` : 'No updates yet'}
+					Created: <br /> {datetimeFormatter.format(new Date(props.participant.createdAt))}
 				</p>
-				<h3 class="text-md mt-4 mb-2 font-bold">Additional Information</h3>
-				<ul class="mb-4 flex list-inside list-disc flex-col gap-0.5">
-					<For each={extraInfoFields}>
-						{(field) => (
-							<li>
-								<span>{camelCaseToTitleCase(field)}</span>: <span>{props.participant[field]}</span>
-							</li>
-						)}
-					</For>
-				</ul>
+				<p class="text-sm text-gray-600 italic">
+					Updated: <br />
+					{props.participant.updatedAt ? `${datetimeFormatter.format(new Date(props.participant.updatedAt))}` : 'No updates yet'}
+				</p>
+				<p class="text-sm text-gray-600 italic">
+					Checked in: <br />
+					{props.participant.checkedInAt ? `${datetimeFormatter.format(new Date(props.participant.checkedInAt))}` : 'Not yet'}
+				</p>
 			</div>
-		</form>
+			<form id="participant-profile" method="post" action={updateParticipant} class="border-base-300 mt-4 rounded-md border-1">
+				<header class="bg-gray-200 px-4 py-3">
+					<h3 class="font-semibold">Profile</h3>
+				</header>
+				<div class="p-4">
+					<div class="flex gap-4">
+						<label class="fieldset flex-1">
+							<span class="fieldset-legend text-sm">First name</span>
+							<input type="text" name="firstName" value={props.participant.firstName} class="input input-bordered w-full" />
+						</label>
+						<label class="fieldset flex-1">
+							<span class="fieldset-legend text-sm">Last name</span>
+							<input type="text" name="lastName" value={props.participant.lastName} class="input input-bordered w-full" />
+						</label>
+					</div>
+					<label class="fieldset grow">
+						<span class="fieldset-legend text-sm">Email</span>
+						<input type="text" name="email" value={props.participant.email} class="input input-bordered w-full" />
+					</label>
+					<div tabindex="0" class="collapse-arrow collapse">
+						<input type="checkbox" />
+						<div class="collapse-title px-0 text-sm font-semibold">Additional Information</div>
+						<div class="collapse-content pl-1 text-sm">
+							<ul class="-mt-4 flex list-inside list-disc flex-col gap-0.5">
+								<For each={extraInfoFields}>
+									{(field) => (
+										<li>
+											<span>{camelCaseToTitleCase(field)}</span>: <span>{props.participant[field]}</span>
+										</li>
+									)}
+								</For>
+							</ul>
+						</div>
+					</div>
+					<input type="hidden" name="participantId" value={props.participant.id} />
+					<div class="text-right">
+						<button type="submit" class="btn btn-primary text-base-100 mx-auto mt-4 w-32">
+							Save changes
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
 	)
 }
 
