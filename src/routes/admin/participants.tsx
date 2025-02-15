@@ -1,6 +1,6 @@
 import { action, createAsync, query, RouteDefinition, useSearchParams } from '@solidjs/router'
 import { eq, like } from 'drizzle-orm'
-import { createSignal, For, Show } from 'solid-js'
+import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { db } from '~/db'
 import { Participant, participant, ParticipantUpdate } from '~/db/schema'
 import IconTablerSearch from '~icons/tabler/search'
@@ -33,6 +33,8 @@ const updateParticipant = action(async (formData: FormData) => {
 		} else if (currentAttendanceStatus === 'confirmed') {
 			// TODO: check waitlist
 			newAttendanceStatus = 'attended'
+		} else if (currentAttendanceStatus === 'waitlist') {
+			newAttendanceStatus = 'waitlist-attended'
 		}
 	}
 
@@ -54,6 +56,31 @@ const updateParticipant = action(async (formData: FormData) => {
 export const route = {
 	preload: () => getParticipants()
 } satisfies RouteDefinition
+
+function AttendanceStatusBadge(props: { attendanceStatus: AttendanceStatus }) {
+	return (
+		<Switch fallback={<span>{props.attendanceStatus}</span>}>
+			<Match when={props.attendanceStatus === 'registered'}>
+				<span class="badge badge-neutral badge-soft">Registered</span>
+			</Match>
+			<Match when={props.attendanceStatus === 'confirmed'}>
+				<span class="badge badge-primary">Confirmed</span>
+			</Match>
+			<Match when={props.attendanceStatus === 'attended'}>
+				<span class="badge bg-emerald-400">Attended</span>
+			</Match>
+			<Match when={props.attendanceStatus === 'waitlist'}>
+				<span class="badge bg-amber-400">Waitlist</span>
+			</Match>
+			<Match when={props.attendanceStatus === 'waitlist-attended'}>
+				<div class="flex gap-1">
+					<span class="badge bg-emerald-400">Attended</span>
+					<span class="badge bg-amber-400">Waitlist</span>
+				</div>
+			</Match>
+		</Switch>
+	)
+}
 
 export default function ParticipantPage() {
 	const [searchParams, _] = useSearchParams()
@@ -104,7 +131,9 @@ export default function ParticipantPage() {
 										<td>{p.firstName}</td>
 										<td>{p.lastName}</td>
 										<td>{p.email}</td>
-										<td>{p.attendanceStatus === 'confirmed' ? <span aria-label="Yes">✅</span> : <span aria-label="No">❌</span>}</td>
+										<td>
+											<AttendanceStatusBadge attendanceStatus={p.attendanceStatus} />
+										</td>
 										<td>
 											<button
 												aria-label="Open Participant edit modal"
