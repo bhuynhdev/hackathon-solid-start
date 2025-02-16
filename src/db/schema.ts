@@ -22,13 +22,13 @@ export const event = sqliteTable(
 	]
 )
 
+const attendanceStatuses = ['registered', 'confirmed', 'confirmed-delayedcheckin', 'attended', 'waitlist', 'waitlist-attended'] as const
+
 export const participant = sqliteTable('participant', {
 	id: integer('id').primaryKey(),
 	firstName: text('first_name').notNull(),
 	lastName: text('last_name').notNull(),
-	attendanceStatus: text('attendance_status', { enum: ['registered', 'confirmed', 'attended', 'waitlist', 'waitlist-attended'] })
-		.default('registered')
-		.notNull(),
+	attendanceStatus: text('attendance_status', { enum: attendanceStatuses }).default('registered').notNull(),
 	email: text('email').notNull(),
 	phone: text('phone').notNull(),
 	age: integer('age').notNull(),
@@ -73,5 +73,7 @@ export type Session = typeof session.$inferSelect
 export type Participant = typeof participant.$inferSelect
 export type ParticipantInsert = typeof participant.$inferSelect
 export type ParticipantUpdate = Partial<ParticipantInsert>
+
+export type AttendanceStatus = (typeof attendanceStatuses)[number]
 
 export type User = typeof user.$inferSelect

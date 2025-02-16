@@ -22,7 +22,7 @@ async function main() {
 					firstName: f.firstName(),
 					lastName: f.lastName(),
 					email: f.email(),
-					attendanceStatus: f.valuesFromArray({ values: ['registered', 'confirmed', 'attended', 'waitlist', 'waitlist-attended'] }),
+					attendanceStatus: f.valuesFromArray({ values: ['registered', 'confirmed', 'waitlist'] }),
 					createdAt: f.default({ defaultValue: new Date().toISOString() }),
 					phone: f.phoneNumber({ template: '###-###-####' }),
 					age: f.int({ minValue: 16, maxValue: 25 }),
