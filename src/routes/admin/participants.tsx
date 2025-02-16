@@ -252,9 +252,28 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 				</div>
 			</form>
 			<hr class="divider mx-auto w-4/5 border-none" />
-			<form method="post" action={advanceAttendanceStaus}>
+			<form method="post" action={advanceAttendanceStaus} class="border-base-300 rounded-md border-1">
+				<header class="bg-gray-200 px-4 py-3">
+					<h3 class="font-semibold">Attendance Status</h3>
+				</header>
 				<input type="hidden" name="participantId" value={props.participant.id} />
-				<button class="btn">Check in</button>
+				<div class="p-4">
+					<p class="mb-4">
+						Attendance Status: <span class="font-bold">{props.participant.attendanceStatus}</span>
+					</p>
+					<Switch fallback={<p>No action needed</p>}>
+						<Match when={props.participant.attendanceStatus === 'registered'}>
+							<button type="submit" class="btn btn-primary">
+								Confirm Attendance
+							</button>
+						</Match>
+						<Match when={props.participant.attendanceStatus === 'confirmed'}>
+							<button type="submit" class="btn btn-primary">
+								Check in
+							</button>
+						</Match>
+					</Switch>
+				</div>
 			</form>
 		</div>
 	)
