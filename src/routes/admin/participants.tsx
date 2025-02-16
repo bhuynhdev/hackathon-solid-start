@@ -4,7 +4,6 @@ import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { db } from '~/db'
 import { AttendanceStatus, Participant, participant, ParticipantUpdate } from '~/db/schema'
 import { determineNextAttendanceStatus, getNextAttendanceAction } from '~/utils'
-import IconTablerInfoCircle from '~icons/tabler/info-circle'
 import IconTablerSearch from '~icons/tabler/search'
 import IconTablerX from '~icons/tabler/x'
 
@@ -34,16 +33,15 @@ const updateParticipantInfo = action(async (formData: FormData) => {
 const advanceAttendanceStaus = action(async (formData: FormData) => {
 	'use server'
 	const now = new Date().toISOString()
-	const { participantId, delayCheckin } = Object.fromEntries(formData)
+	const { participantId, toggleLateCheckIn } = Object.fromEntries(formData)
 	const pId = parseInt(participantId.toString())
-	const shouldDelayCheckin = delayCheckin === 'yes'
 
 	const [participantInfo] = await db.select().from(participant).where(eq(participant.id, pId))
 	const currentAttendanceStatus = participantInfo.attendanceStatus
 
 	const { status: newAttendanceStatus, actionPerformed } = determineNextAttendanceStatus({
 		currentStatus: currentAttendanceStatus,
-		delayCheckIn: shouldDelayCheckin
+		toggleLateCheckIn: toggleLateCheckIn === 'yes'
 	})
 
 	const updateContent: ParticipantUpdate = { updatedAt: now }
@@ -264,42 +262,31 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 					<p>
 						Attendance Status: <span class="font-bold">{props.participant.attendanceStatus}</span>
 					</p>
-					<Switch>
-						<Match when={nextAttendanceAction() === 'ConfirmAttendance'}>
+					<div class="flex items-center gap-2">
+						<Show when={nextAttendanceAction() === null}>
+							<div>
+								<p>No action needed</p>
+								{props.participant.attendanceStatus.includes('waitlist') && (
+									<p>Remind participant to keep an eye on their emails for waitlist status updates</p>
+								)}
+							</div>
+						</Show>
+						<Show when={nextAttendanceAction()?.includes('ConfirmAttendance')}>
 							<button type="submit" class="btn btn-primary text-base-100">
 								Confirm Attendance
 							</button>
-						</Match>
-						<Match when={nextAttendanceAction() === 'CheckIn'}>
-							{!props.participant.attendanceStatus.includes('waitlist') && (
-								// If already on waitlist, then delaying checkin or not doesn't matter
-								<div class="flex items-center gap-2">
-									<label class="flex cursor-pointer justify-start gap-2">
-										<input
-											type="checkbox"
-											name="delayCheckin"
-											value="yes"
-											class="checkbox-primary checkbox"
-											checked={props.participant.attendanceStatus === 'confirmed-delayedcheckin'}
-										/>
-										<span>Delay check-in</span>
-									</label>
-									<span class="tooltip" data-tip="Allow participant to check-in late">
-										<IconTablerInfoCircle />
-									</span>
-								</div>
-							)}
+						</Show>
+						<Show when={nextAttendanceAction()?.includes('CheckIn')}>
 							<button type="submit" class="btn btn-primary text-base-100">
 								Check in
 							</button>
-						</Match>
-						<Match when={nextAttendanceAction() === null}>
-							<p>No action needed</p>
-							{props.participant.attendanceStatus.includes('waitlist') && (
-								<p>Remind participant to keep an eye on their emails for waitlist status updates</p>
-							)}
-						</Match>
-					</Switch>
+						</Show>
+						<Show when={nextAttendanceAction()?.includes('ToggleLateCheckIn')}>
+							<button type="submit" name="toggleLateCheckIn" value="yes" class="btn btn-outline">
+								{props.participant.attendanceStatus === 'confirmed' ? 'Mark as' : 'Unmark'} Late Check-in
+							</button>
+						</Show>
+					</div>
 				</div>
 			</form>
 		</div>
