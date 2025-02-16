@@ -84,6 +84,12 @@ function AttendanceStatusBadge(props: { attendanceStatus: AttendanceStatus }) {
 					<span class="badge bg-amber-400">Waitlist</span>
 				</div>
 			</Match>
+			<Match when={props.attendanceStatus === 'confirmed-delayedcheckin'}>
+				<div class="flex gap-1">
+					<span class="badge badge-primary">Confirmed</span>
+					<span class="badge badge-error">Late</span>
+				</div>
+			</Match>
 		</Switch>
 	)
 }
