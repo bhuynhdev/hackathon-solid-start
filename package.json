@@ -15,7 +15,7 @@
 		"@iconify-json/tabler": "^1.2.16",
 		"@libsql/client": "^0.14.0",
 		"@solidjs/router": "^0.15.3",
-		"@solidjs/start": "^1.1.0",
+		"@solidjs/start": "^1.1.1",
 		"@tailwindcss/vite": "^4.0.6",
 		"autoprefixer": "^10.4.20",
 		"daisyui": "5.0.0-beta.7",
@@ -32,6 +32,7 @@
 		"node": ">=18"
 	},
 	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250214.0",
 		"@fsouza/prettierd": "^0.25.4",
 		"@total-typescript/ts-reset": "^0.6.1",
 		"drizzle-kit": "^0.30.4",
@@ -39,6 +40,7 @@
 		"esbuild": "^0.25.0",
 		"esbuild-plugin-solid": "^0.6.0",
 		"prettier-plugin-tailwindcss": "^0.6.11",
-		"tsx": "^4.19.2"
+		"tsx": "^4.19.2",
+		"wrangler": "^3.109.1"
 	}
 }

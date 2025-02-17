@@ -87,6 +87,7 @@ function emailTemplatesPlugin(): Plugin {
 
 export default defineConfig({
 	vite: {
+		ssr: { external: ['drizzle-orm'] },
 		plugins: [tailwindcss(), emailTemplatesPlugin(), Icons({ compiler: 'solid' })],
 		resolve: {
 			alias: {
@@ -95,7 +96,10 @@ export default defineConfig({
 		}
 	},
 	server: {
-		esbuild: { options: { target: 'esnext' } },
+		preset: 'cloudflare-pages',
+		rollupConfig: {
+			external: ['node:async_hooks']
+		},
 		prerender: {
 			routes: ['/admin/emails/TestEmail', '/admin/emails/TestEmail2', '/admin/emails/TestEmail3', '/admin/emails/TestEmail4']
 		}

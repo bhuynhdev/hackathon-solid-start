@@ -10,7 +10,7 @@
 		"allowJs": true,
 		"noEmit": true,
 		"strict": true,
-		"types": ["vinxi/types/client", "unplugin-icons/types/solid"],
+		"types": ["vinxi/types/client", "unplugin-icons/types/solid", "@cloudflare/workers-types/2023-07-01"],
 		"isolatedModules": true,
 		"paths": {
 			"~/*": ["./src/*"],
