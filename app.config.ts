@@ -86,6 +86,7 @@ function emailTemplatesPlugin(): Plugin {
 }
 
 export default defineConfig({
+	middleware: './src/middleware.ts',
 	vite: {
 		ssr: { external: ['drizzle-orm'] },
 		plugins: [tailwindcss(), emailTemplatesPlugin(), Icons({ compiler: 'solid' })],

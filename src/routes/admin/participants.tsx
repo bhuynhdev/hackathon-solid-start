@@ -1,14 +1,14 @@
 import { action, createAsync, query, RouteDefinition, useSearchParams } from '@solidjs/router'
 import { eq, like } from 'drizzle-orm'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
-import { db } from '~/db'
 import { AttendanceStatus, Participant, participant, ParticipantUpdate } from '~/db/schema'
-import { determineNextAttendanceStatus, getNextAttendanceAction } from '~/utils'
+import { determineNextAttendanceStatus, getDb, getNextAttendanceAction } from '~/utils'
 import IconTablerSearch from '~icons/tabler/search'
 import IconTablerX from '~icons/tabler/x'
 
 const getParticipants = query(async (query: string = '') => {
 	'use server'
+	const db = getDb()
 	return await db
 		.select()
 		.from(participant)
@@ -18,6 +18,7 @@ const getParticipants = query(async (query: string = '') => {
 
 const updateParticipantInfo = action(async (formData: FormData) => {
 	'use server'
+	const db = getDb()
 	const now = new Date().toISOString()
 	const { participantId, ...data } = Object.fromEntries(formData)
 	const pId = parseInt(participantId.toString())
@@ -32,6 +33,7 @@ const updateParticipantInfo = action(async (formData: FormData) => {
 
 const advanceAttendanceStaus = action(async (formData: FormData) => {
 	'use server'
+	const db = getDb()
 	const now = new Date().toISOString()
 	const { participantId, toggleLateCheckIn } = Object.fromEntries(formData)
 	const pId = parseInt(participantId.toString())

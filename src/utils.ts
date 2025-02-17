@@ -1,4 +1,6 @@
+import { getRequestEvent } from 'solid-js/web'
 import { AttendanceStatus } from './db/schema'
+import { Database } from './db'
 
 type AttendanceAction = 'CheckIn' | 'ConfirmAttendance' | 'Waitlist' | 'ToggleLateCheckIn'
 
@@ -47,4 +49,9 @@ export function getNextAttendanceAction({ currentStatus }: { currentStatus: Atte
 		return ['CheckIn']
 	}
 	return null
+}
+
+export const getDb = () => {
+	const event = getRequestEvent()
+	return event?.locals.db as Database
 }

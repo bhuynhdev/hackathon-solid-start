@@ -32,3 +32,8 @@ local.db
 
 # Emails
 src/email_templates/_build
+
+# Cloudflare wrangler
+.wrangler
+.dev.vars
+
