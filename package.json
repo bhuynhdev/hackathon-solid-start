@@ -5,9 +5,12 @@
 		"dev": "vinxi dev",
 		"build": "vinxi build",
 		"start": "vinxi start",
+		"preview": "pnpm run build && wrangler pages dev",
+		"deploy": "pnpm run build && wrangler pages deploy",
 		"db:gen": "drizzle-kit generate",
 		"db:push": "drizzle-kit push",
 		"db:migrate": "drizzle-kit migrate",
+		"db:migrate:local": "wrangler d1 migrations apply test-db --local",
 		"db:seed": "tsx ./src/db/seed.ts",
 		"db:studio": "drizzle-kit studio"
 	},
@@ -33,6 +36,7 @@
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250214.0",
+		"@dotenvx/dotenvx": "^1.36.0",
 		"@fsouza/prettierd": "^0.25.4",
 		"@total-typescript/ts-reset": "^0.6.1",
 		"drizzle-kit": "^0.30.4",
