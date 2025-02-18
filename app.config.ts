@@ -100,9 +100,6 @@ export default defineConfig({
 		preset: 'cloudflare-pages',
 		rollupConfig: {
 			external: ['node:async_hooks']
-		},
-		prerender: {
-			routes: ['/admin/emails/TestEmail', '/admin/emails/TestEmail2', '/admin/emails/TestEmail3', '/admin/emails/TestEmail4']
 		}
 	}
 })
