@@ -29,9 +29,6 @@ importers:
       daisyui:
         specifier: 5.0.0-beta.7
         version: 5.0.0-beta.7
-      dotenv:
-        specifier: ^16.4.7
-        version: 16.4.7
       drizzle-orm:
         specifier: ^0.38.4
         version: 0.38.4(@cloudflare/workers-types@4.20250214.0)(@libsql/client@0.14.0)
