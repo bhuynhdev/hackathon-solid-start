@@ -1,23 +1,21 @@
-import { createClient } from '@libsql/client'
-import 'dotenv/config'
+import assert from 'assert'
 import { drizzle } from 'drizzle-orm/libsql'
 import { reset, seed } from 'drizzle-seed'
+import { getLocalD1Path } from '../../drizzle.config'
 import { participant } from './schema'
 
 async function main() {
-	const dbUrl = process.env.DB_URL
-	if (!dbUrl) {
-		throw new Error('Missing environment variable: DB_URL')
-	}
-	const queryClient = createClient({ url: dbUrl })
-	const db = drizzle(queryClient)
+	assert(process.env.NODE_ENV == 'development', 'Can only seed in development mode')
+	const localD1DbUrl = getLocalD1Path('DB')
+	const db = drizzle(`file:${localD1DbUrl}`)
 
 	const SEED = 1234
 
+	await reset(db, { participant })
 	await seed(db, { participant }, { seed: SEED }).refine((f) => {
 		return {
 			participant: {
-				count: 20,
+				count: 50,
 				columns: {
 					firstName: f.firstName(),
 					lastName: f.lastName(),
@@ -44,7 +42,7 @@ async function main() {
 	})
 
 	console.log('Seed done')
-	queryClient.close()
+	process.exit(0)
 }
 
 main()
