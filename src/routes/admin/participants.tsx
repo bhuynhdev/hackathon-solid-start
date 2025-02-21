@@ -107,7 +107,7 @@ export default function ParticipantPage() {
 	const participant = () => participants()?.participants.find((p) => p.id == selectedParticipantId())
 
 	return (
-		<div class="drawer drawer-end m-auto flex w-4/5 flex-col items-center justify-center gap-6">
+		<div class="drawer drawer-end m-auto flex flex-col items-center justify-center gap-6 lg:w-4/5">
 			<input
 				id="participant-info-drawer"
 				type="checkbox"
@@ -118,7 +118,7 @@ export default function ParticipantPage() {
 			/>
 			<div class="drawer-content w-full">
 				<form method="get" class="w-full" role="search">
-					<label class="input input-bordered flex w-full items-center gap-2">
+					<label class="input input-bordered flex w-full items-center gap-2 text-base">
 						<IconTablerSearch width="18" height="18" />
 						<input aria-label="Search participant" id="query" type="text" name="q" placeholder="Search" class="grow" value={query()} />
 					</label>
@@ -129,41 +129,37 @@ export default function ParticipantPage() {
 							Participant list
 						</h2>
 						<div class="flex items-center gap-2">
-							<button class="btn btn-sm btn-soft btn-primary" aria-label="Previous page" title="Previous page">
+							<button class="btn btn-sm btn-soft btn-primary" disabled aria-label="Previous page" title="Previous page">
 								<IconTablerChevronLeft />
 							</button>
 							<button class="btn btn-sm btn-soft btn-primary" aria-label="Next page" title="Next page">
 								<IconTablerChevronRight />
 							</button>
-							<p class="ml-2 text-sm text-gray-600 italic">
-								1 - {participants()?.participants.length} of {participants()?.totalCount}
-							</p>
 						</div>
 					</div>
 
 					<table aria-labelledby="participant-list-heading" class="table table-auto">
 						<thead>
 							<tr class="font-bold">
-								<th>Id</th>
-								<th>First name</th>
-								<th>Last name</th>
-								<th>Email</th>
-								<th>Attendance Status</th>
-								<th class="sr-only">Edit</th>
+								<th>Name &amp; Email</th>
+								<th>Status</th>
+								<th class="sr-only hidden md:table-cell">Edit</th>
 							</tr>
 						</thead>
 						<tbody>
 							<For each={participants()?.participants}>
 								{(p) => (
-									<tr>
-										<td>{p.id}</td>
-										<td>{p.firstName}</td>
-										<td>{p.lastName}</td>
-										<td>{p.email}</td>
+									<tr onpointerup={(e) => e.pointerType === 'touch' && setSelectedParticipantId(p.id)}>
+										<td>
+											<p>
+												{p.firstName} {p.lastName}
+											</p>
+											<p class="text-gray-500 italic">{p.email}</p>
+										</td>
 										<td>
 											<AttendanceStatusBadge attendanceStatus={p.attendanceStatus} />
 										</td>
-										<td>
+										<td class="hidden md:table-cell">
 											<button
 												aria-label="Open Participant edit modal"
 												class="btn btn-primary h-8 min-h-8 text-white"
@@ -181,7 +177,7 @@ export default function ParticipantPage() {
 			</div>
 			<div role="dialog" class="drawer-side">
 				<label for="participant-info-drawer" class="drawer-overlay"></label>
-				<div class="bg-base-100 min-h-full w-4/5 max-w-[500px] p-6">
+				<div class="bg-base-100 min-h-full w-full max-w-[500px] p-6">
 					<Show when={participant()} fallback={<p>No participant selected</p>} keyed>
 						{(p) => <ParticipantInfoForm participant={p} onClose={() => setSelectedParticipantId(null)} />}
 					</Show>

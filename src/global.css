@@ -22,3 +22,13 @@
 	);
 	background-size: 40px 40px;
 }
+
+@media screen and (max-width: 640px) {
+	/* Decrease table padding on mobile so it fits */
+	.table tr :where(th, td):first-child {
+		padding-inline-start: 0;
+	}
+	.table tr :where(th, td):last-child {
+		padding-inline-end: 0;
+	}
+}
