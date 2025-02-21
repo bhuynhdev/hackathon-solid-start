@@ -27,7 +27,7 @@ export default function AdminLayout(props: RouteSectionProps) {
 			</header>
 			<div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
 				{/* Left-side navbar */}
-				<nav class="w-64 py-4" aria-label="Main navigation">
+				<nav class="hidden w-64 py-4 md:block" aria-label="Main navigation">
 					<ul class="menu w-full space-y-1">
 						<For each={links}>
 							{(link) => (
