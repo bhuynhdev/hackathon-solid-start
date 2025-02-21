@@ -99,9 +99,9 @@ function AttendanceStatusBadge(props: { attendanceStatus: AttendanceStatus }) {
 
 export default function ParticipantPage() {
 	const [searchParams, _] = useSearchParams()
-	const query = String(searchParams.q ?? '')
+	const query = () => String(searchParams.q ?? '')
 
-	const participants = createAsync(() => getParticipants(query))
+	const participants = createAsync(() => getParticipants(query()))
 
 	const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
 	const participant = () => participants()?.participants.find((p) => p.id == selectedParticipantId())
@@ -120,7 +120,7 @@ export default function ParticipantPage() {
 				<form method="get" class="w-full" role="search">
 					<label class="input input-bordered flex w-full items-center gap-2">
 						<IconTablerSearch width="18" height="18" />
-						<input aria-label="Search participant" id="query" type="text" name="q" placeholder="Search" class="grow" value={query} />
+						<input aria-label="Search participant" id="query" type="text" name="q" placeholder="Search" class="grow" value={query()} />
 					</label>
 				</form>
 				<section aria-labelleby="participant-list-heading">
