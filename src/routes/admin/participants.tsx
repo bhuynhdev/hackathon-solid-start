@@ -3,17 +3,20 @@ import { eq, like } from 'drizzle-orm'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { AttendanceStatus, Participant, participant, ParticipantUpdate } from '~/db/schema'
 import { determineNextAttendanceStatus, getDb, getNextAttendanceAction } from '~/utils'
+import IconTablerChevronLeft from '~icons/tabler/chevron-left'
+import IconTablerChevronRight from '~icons/tabler/chevron-right'
 import IconTablerSearch from '~icons/tabler/search'
 import IconTablerX from '~icons/tabler/x'
+
+const ITEMS_PER_PAGE = 20
 
 const getParticipants = query(async (query: string = '') => {
 	'use server'
 	const db = getDb()
-	return await db
-		.select()
-		.from(participant)
-		.where(query ? like(participant.nameEmail, `%${query}%`) : undefined)
-		.orderBy(participant.id)
+	const criteria = query ? like(participant.nameEmail, `%${query}%`) : undefined
+	const totalCount = await db.$count(participant, criteria)
+	const participants = await db.select().from(participant).where(criteria).orderBy(participant.id).limit(ITEMS_PER_PAGE)
+	return { totalCount, participants }
 }, 'participants')
 
 const updateParticipantInfo = action(async (formData: FormData) => {
@@ -101,7 +104,7 @@ export default function ParticipantPage() {
 	const participants = createAsync(() => getParticipants(query))
 
 	const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
-	const participant = () => participants()?.find((p) => p.id == selectedParticipantId())
+	const participant = () => participants()?.participants.find((p) => p.id == selectedParticipantId())
 
 	return (
 		<div class="drawer drawer-end m-auto flex w-4/5 flex-col items-center justify-center gap-6">
@@ -121,9 +124,23 @@ export default function ParticipantPage() {
 					</label>
 				</form>
 				<section aria-labelleby="participant-list-heading">
-					<h2 id="participant-list-heading" class="mt-5 mb-3 font-bold">
-						Participant list
-					</h2>
+					<div class="my-5 flex items-center gap-16">
+						<h2 id="participant-list-heading" class="text-lg font-bold">
+							Participant list
+						</h2>
+						<div class="flex items-center gap-2">
+							<button class="btn btn-sm btn-soft btn-primary" aria-label="Previous page" title="Previous page">
+								<IconTablerChevronLeft />
+							</button>
+							<button class="btn btn-sm btn-soft btn-primary" aria-label="Next page" title="Next page">
+								<IconTablerChevronRight />
+							</button>
+							<p class="ml-2 text-sm text-gray-600 italic">
+								1 - {participants()?.participants.length} of {participants()?.totalCount}
+							</p>
+						</div>
+					</div>
+
 					<table aria-labelledby="participant-list-heading" class="table table-auto">
 						<thead>
 							<tr class="font-bold">
@@ -136,7 +153,7 @@ export default function ParticipantPage() {
 							</tr>
 						</thead>
 						<tbody>
-							<For each={participants()}>
+							<For each={participants()?.participants}>
 								{(p) => (
 									<tr>
 										<td>{p.id}</td>
