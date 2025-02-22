@@ -98,13 +98,26 @@ function AttendanceStatusBadge(props: { attendanceStatus: AttendanceStatus }) {
 }
 
 export default function ParticipantPage() {
-	const [searchParams, _] = useSearchParams()
+	const [searchParams, setSearchParams] = useSearchParams()
 	const query = () => String(searchParams.q ?? '')
+	const page = () => Number(searchParams.page ?? 1)
 
 	const participants = createAsync(() => getParticipants(query()))
 
+	const totalCount = () => participants()?.totalCount ?? 0
+	const recordCount = () => participants()?.participants.length ?? 0
+	const recordRangeStart = () => (page() - 1) * ITEMS_PER_PAGE + 1
+	const recordRangeEnd = () => recordRangeStart() + recordCount() - 1
+
 	const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
 	const participant = () => participants()?.participants.find((p) => p.id == selectedParticipantId())
+
+	function nextPage() {
+		setSearchParams({ page: page() + 1 })
+	}
+	function previousPage() {
+		setSearchParams({ page: Math.max(1, page() - 1) })
+	}
 
 	return (
 		<div class="drawer drawer-end m-auto flex flex-col items-center justify-center gap-6 lg:w-4/5">
@@ -129,12 +142,27 @@ export default function ParticipantPage() {
 							Participant list
 						</h2>
 						<div class="flex items-center gap-2">
-							<button class="btn btn-sm btn-soft btn-primary" disabled aria-label="Previous page" title="Previous page">
+							<button
+								class="btn btn-sm btn-soft btn-primary"
+								aria-label="Previous page"
+								title="Previous page"
+								onclick={previousPage}
+								disabled={page() === 1}
+							>
 								<IconTablerChevronLeft />
 							</button>
-							<button class="btn btn-sm btn-soft btn-primary" aria-label="Next page" title="Next page">
+							<button
+								class="btn btn-sm btn-soft btn-primary"
+								aria-label="Next page"
+								title="Next page"
+								onclick={nextPage}
+								disabled={recordRangeEnd() >= totalCount()}
+							>
 								<IconTablerChevronRight />
 							</button>
+							<p class="ml-2 text-sm text-gray-600 italic">
+								{recordRangeStart()} - {recordRangeEnd()} of {participants()?.totalCount}
+							</p>
 						</div>
 					</div>
 
