@@ -2,53 +2,53 @@ import { getRequestEvent } from 'solid-js/web'
 import { AttendanceStatus } from './db/schema'
 import { Database } from './db'
 
-type AttendanceAction = 'CheckIn' | 'ConfirmAttendance' | 'Waitlist' | 'ToggleLateCheckIn'
+export type AttendanceAction = 'CheckIn' | 'ConfirmAttendance' | 'Unconfirm' | 'Waitlist' | 'ToggleLateCheckIn'
 
-type DetermineNextAttendanceStatusReturn = { status: AttendanceStatus; actionPerformed: AttendanceAction } | { status: null; actionPerformed: null }
+const ATTENDANCE_STATUS_STATE_MACHINE: Record<AttendanceStatus, Partial<Record<AttendanceAction, AttendanceStatus>>> = {
+	registered: {
+		get ConfirmAttendance() {
+			// TODO: Check waitlist
+			const isWaitlisted = true
+			return isWaitlisted ? 'waitlist' : 'confirmed'
+		}
+	},
+	confirmed: {
+		CheckIn: 'attended',
+		ToggleLateCheckIn: 'confirmed-delayedcheckin',
+		Unconfirm: 'registered'
+	},
+	'confirmed-delayedcheckin': {
+		CheckIn: 'attended',
+		ToggleLateCheckIn: 'confirmed'
+	},
+	waitlist: {
+		CheckIn: 'waitlist-attended'
+	},
+	attended: {},
+	'waitlist-attended': {}
+} as const
 
 /**
- * Given the current attendance status, determine the next attendance status
- * Return the new status, and the action performed ("CheckIn" | "ConfirmAttendance" | "Waitlist" | null)
+ * Given the current attendance status and action, determine the next attendance status
  */
-export function determineNextAttendanceStatus(args: {
-	currentStatus: AttendanceStatus
-	toggleLateCheckIn?: boolean
-}): DetermineNextAttendanceStatusReturn {
-	const { currentStatus, toggleLateCheckIn } = args
-	if (currentStatus === 'registered') {
-		// TODO: Check waitlist
-		const isWaitlisted = false
-		return isWaitlisted ? { status: 'waitlist', actionPerformed: 'Waitlist' } : { status: 'confirmed', actionPerformed: 'ConfirmAttendance' }
+export function determineNextAttendanceStatus(args: { currentStatus: AttendanceStatus; action: AttendanceAction }): AttendanceStatus | null {
+	const currentState = ATTENDANCE_STATUS_STATE_MACHINE[args.currentStatus]
+	const potentialTransitions = Object.keys(currentState)
+	if (potentialTransitions.length == 0) {
+		return null // No more transition available at this state
 	}
-	if (currentStatus === 'confirmed') {
-		return toggleLateCheckIn
-			? { status: 'confirmed-delayedcheckin', actionPerformed: 'ToggleLateCheckIn' }
-			: { status: 'attended', actionPerformed: 'CheckIn' }
+	if (args.action in currentState) {
+		return currentState[args.action as keyof typeof currentState] ?? null
 	}
-	if (currentStatus === 'confirmed-delayedcheckin') {
-		return toggleLateCheckIn ? { status: 'confirmed', actionPerformed: 'ToggleLateCheckIn' } : { status: 'attended', actionPerformed: 'CheckIn' }
-	}
-	if (currentStatus === 'waitlist') {
-		return { status: 'waitlist-attended', actionPerformed: 'CheckIn' }
-	}
-	return { status: null, actionPerformed: null }
+	throw Error(`AttendanceAtion ${args.action} is not possible given state ${args.currentStatus}`)
 }
 
 /**
  * Determine the next attendance action to display on the UI
  * given the current attendance status
  */
-export function getNextAttendanceAction({ currentStatus }: { currentStatus: AttendanceStatus }): Array<AttendanceAction> | null {
-	if (currentStatus === 'registered') {
-		return ['ConfirmAttendance']
-	}
-	if (currentStatus === 'confirmed' || currentStatus === 'confirmed-delayedcheckin') {
-		return ['CheckIn', 'ToggleLateCheckIn']
-	}
-	if (currentStatus === 'waitlist') {
-		return ['CheckIn']
-	}
-	return null
+export function getNextAttendanceActions(currentStatus: AttendanceStatus): Array<AttendanceAction> {
+	return Object.keys(ATTENDANCE_STATUS_STATE_MACHINE[currentStatus]) as Array<keyof (typeof ATTENDANCE_STATUS_STATE_MACHINE)[AttendanceStatus]>
 }
 
 export const getDb = () => {

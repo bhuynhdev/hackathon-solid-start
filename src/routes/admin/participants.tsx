@@ -1,8 +1,8 @@
 import { action, createAsync, query, RouteDefinition, useSearchParams } from '@solidjs/router'
-import { and, eq, gt, gte, like } from 'drizzle-orm'
+import { eq, like } from 'drizzle-orm'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { AttendanceStatus, Participant, participant, ParticipantUpdate } from '~/db/schema'
-import { determineNextAttendanceStatus, getDb, getNextAttendanceAction } from '~/utils'
+import { AttendanceAction, determineNextAttendanceStatus, getDb, getNextAttendanceActions } from '~/utils'
 import IconTablerChevronLeft from '~icons/tabler/chevron-left'
 import IconTablerChevronRight from '~icons/tabler/chevron-right'
 import IconTablerSearch from '~icons/tabler/search'
@@ -15,7 +15,14 @@ type GetParticipantsArg = {
 	page?: number
 }
 
-const getParticipants = query(async ({ query = '', page = 1 }: GetParticipantsArg) => {
+type ParticipantDto = Participant & { availableAttendanceActions: ReturnType<typeof getNextAttendanceActions> }
+
+type GetParticipantsReturn = {
+	totalCount: number
+	participants: Array<ParticipantDto>
+}
+
+const getParticipants = query(async ({ query = '', page = 1 }: GetParticipantsArg): Promise<GetParticipantsReturn> => {
 	'use server'
 	const db = getDb()
 	const searchCriteria = query ? like(participant.nameEmail, `%${query}%`) : undefined
@@ -35,7 +42,13 @@ const getParticipants = query(async ({ query = '', page = 1 }: GetParticipantsAr
 
 	const participants = await db.select().from(participant).innerJoin(sq, eq(participant.id, sq.id)).orderBy(participant.createdAt, participant.id)
 
-	return { totalCount, participants: participants.map((record) => record.participant) }
+	return {
+		totalCount,
+		participants: participants.map(({ participant }) => ({
+			...participant,
+			availableAttendanceActions: getNextAttendanceActions(participant.attendanceStatus)
+		}))
+	}
 }, 'participants')
 
 const updateParticipantInfo = action(async (formData: FormData) => {
@@ -57,21 +70,18 @@ const advanceAttendanceStaus = action(async (formData: FormData) => {
 	'use server'
 	const db = getDb()
 	const now = new Date().toISOString()
-	const { participantId, toggleLateCheckIn } = Object.fromEntries(formData)
+	const { participantId, attendanceAction } = Object.fromEntries(formData)
 	const pId = parseInt(participantId.toString())
 
 	const [participantInfo] = await db.select().from(participant).where(eq(participant.id, pId))
 	const currentAttendanceStatus = participantInfo.attendanceStatus
 
-	const { status: newAttendanceStatus, actionPerformed } = determineNextAttendanceStatus({
-		currentStatus: currentAttendanceStatus,
-		toggleLateCheckIn: toggleLateCheckIn === 'yes'
-	})
+	const newAttendanceStatus = determineNextAttendanceStatus({ currentStatus: currentAttendanceStatus, action: attendanceAction as AttendanceAction })
 
 	const updateContent: ParticipantUpdate = { updatedAt: now }
 	if (newAttendanceStatus) {
 		updateContent.attendanceStatus = newAttendanceStatus
-		if (actionPerformed === 'CheckIn') {
+		if (attendanceAction === 'CheckIn') {
 			updateContent.checkedInAt = now
 		}
 	}
@@ -233,7 +243,7 @@ export default function ParticipantPage() {
 	)
 }
 
-function ParticipantInfoForm(props: { participant: Participant; onClose: () => void }) {
+function ParticipantInfoForm(props: { participant: ParticipantDto; onClose: () => void }) {
 	const datetimeFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', dateStyle: 'short', timeStyle: 'medium' })
 	const extraInfoFields = [
 		'phone',
@@ -247,7 +257,6 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 		'resumeUrl',
 		'notes'
 	] satisfies Array<keyof Participant>
-	const nextAttendanceAction = () => getNextAttendanceAction({ currentStatus: props.participant.attendanceStatus })
 
 	return (
 		<div class="flex w-full flex-col gap-2">
@@ -324,7 +333,7 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 						Attendance Status: <span class="font-bold">{props.participant.attendanceStatus}</span>
 					</p>
 					<div class="flex items-center gap-2">
-						<Show when={nextAttendanceAction() === null}>
+						<Show when={props.participant.availableAttendanceActions.length === 0}>
 							<div>
 								<p>No action needed</p>
 								{props.participant.attendanceStatus.includes('waitlist') && (
@@ -332,19 +341,24 @@ function ParticipantInfoForm(props: { participant: Participant; onClose: () => v
 								)}
 							</div>
 						</Show>
-						<Show when={nextAttendanceAction()?.includes('ConfirmAttendance')}>
-							<button type="submit" class="btn btn-primary text-base-100">
+						<Show when={props.participant.availableAttendanceActions.includes('ConfirmAttendance')}>
+							<button type="submit" name="attendanceAction" value="ConfirmAttendance" class="btn btn-primary text-base-100">
 								Confirm Attendance
 							</button>
 						</Show>
-						<Show when={nextAttendanceAction()?.includes('CheckIn')}>
-							<button type="submit" class="btn btn-primary text-base-100">
+						<Show when={props.participant.availableAttendanceActions.includes('CheckIn')}>
+							<button type="submit" name="attendanceAction" value="CheckIn" class="btn btn-primary text-base-100">
 								Check in
 							</button>
 						</Show>
-						<Show when={nextAttendanceAction()?.includes('ToggleLateCheckIn')}>
-							<button type="submit" name="toggleLateCheckIn" value="yes" class="btn btn-outline">
-								{props.participant.attendanceStatus === 'confirmed' ? 'Mark as' : 'Unmark'} Late Check-in
+						<Show when={props.participant.availableAttendanceActions.includes('Unconfirm')}>
+							<button type="submit" name="attendanceAction" value="Unconfirm" class="btn btn-outline">
+								Unconfirm
+							</button>
+						</Show>
+						<Show when={props.participant.availableAttendanceActions.includes('ToggleLateCheckIn')}>
+							<button type="submit" name="attendanceAction" value="ToggleLateCheckIn" class="btn btn-outline">
+								{props.participant.attendanceStatus === 'confirmed' ? 'Mark Late Check-in' : 'Unmark Late Check-in'}
 							</button>
 						</Show>
 					</div>
