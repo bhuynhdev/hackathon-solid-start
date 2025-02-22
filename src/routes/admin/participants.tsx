@@ -1,5 +1,5 @@
 import { action, createAsync, query, RouteDefinition, useSearchParams } from '@solidjs/router'
-import { eq, like } from 'drizzle-orm'
+import { and, eq, gt, gte, like } from 'drizzle-orm'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { AttendanceStatus, Participant, participant, ParticipantUpdate } from '~/db/schema'
 import { determineNextAttendanceStatus, getDb, getNextAttendanceAction } from '~/utils'
@@ -10,13 +10,32 @@ import IconTablerX from '~icons/tabler/x'
 
 const ITEMS_PER_PAGE = 20
 
-const getParticipants = query(async (query: string = '') => {
+type GetParticipantsArg = {
+	query?: string
+	page?: number
+}
+
+const getParticipants = query(async ({ query = '', page = 1 }: GetParticipantsArg) => {
 	'use server'
 	const db = getDb()
-	const criteria = query ? like(participant.nameEmail, `%${query}%`) : undefined
-	const totalCount = await db.$count(participant, criteria)
-	const participants = await db.select().from(participant).where(criteria).orderBy(participant.id).limit(ITEMS_PER_PAGE)
-	return { totalCount, participants }
+	const searchCriteria = query ? like(participant.nameEmail, `%${query}%`) : undefined
+	const totalCount = await db.$count(participant, searchCriteria)
+
+	/* Deferred Join technique to optimize offset-based pagination
+	 * https://orm.drizzle.team/docs/guides/limit-offset-pagination
+	 */
+	const sq = db
+		.select({ id: participant.id })
+		.from(participant)
+		.where(searchCriteria)
+		.orderBy(participant.createdAt, participant.id)
+		.limit(ITEMS_PER_PAGE)
+		.offset((page - 1) * ITEMS_PER_PAGE)
+		.as('subquery')
+
+	const participants = await db.select().from(participant).innerJoin(sq, eq(participant.id, sq.id)).orderBy(participant.createdAt, participant.id)
+
+	return { totalCount, participants: participants.map((record) => record.participant) }
 }, 'participants')
 
 const updateParticipantInfo = action(async (formData: FormData) => {
@@ -63,7 +82,7 @@ const advanceAttendanceStaus = action(async (formData: FormData) => {
 }, 'advance-attendance-status')
 
 export const route = {
-	preload: () => getParticipants()
+	preload: () => getParticipants({})
 } satisfies RouteDefinition
 
 function AttendanceStatusBadge(props: { attendanceStatus: AttendanceStatus }) {
@@ -102,12 +121,10 @@ export default function ParticipantPage() {
 	const query = () => String(searchParams.q ?? '')
 	const page = () => Number(searchParams.page ?? 1)
 
-	const participants = createAsync(() => getParticipants(query()))
+	const participants = createAsync(() => getParticipants({ query: query(), page: page() }))
 
-	const totalCount = () => participants()?.totalCount ?? 0
-	const recordCount = () => participants()?.participants.length ?? 0
-	const recordRangeStart = () => (page() - 1) * ITEMS_PER_PAGE + 1
-	const recordRangeEnd = () => recordRangeStart() + recordCount() - 1
+	const totalCount = () => participants()?.totalCount ?? 999
+	const recordRange = () => ({ start: Math.max((page() - 1) * ITEMS_PER_PAGE + 1, 1), end: Math.min(page() * ITEMS_PER_PAGE, totalCount()) })
 
 	const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
 	const participant = () => participants()?.participants.find((p) => p.id == selectedParticipantId())
@@ -115,6 +132,7 @@ export default function ParticipantPage() {
 	function nextPage() {
 		setSearchParams({ page: page() + 1 })
 	}
+
 	function previousPage() {
 		setSearchParams({ page: Math.max(1, page() - 1) })
 	}
@@ -156,12 +174,12 @@ export default function ParticipantPage() {
 								aria-label="Next page"
 								title="Next page"
 								onclick={nextPage}
-								disabled={recordRangeEnd() >= totalCount()}
+								disabled={recordRange().end >= totalCount()}
 							>
 								<IconTablerChevronRight />
 							</button>
 							<p class="ml-2 text-sm text-gray-600 italic">
-								{recordRangeStart()} - {recordRangeEnd()} of {participants()?.totalCount}
+								{recordRange().start} - {recordRange().end} of {participants()?.totalCount}
 							</p>
 						</div>
 					</div>
