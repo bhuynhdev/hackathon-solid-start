@@ -1,0 +1,1 @@
+ALTER TABLE `participant` ADD `last_confirmed_attendance_at` text;

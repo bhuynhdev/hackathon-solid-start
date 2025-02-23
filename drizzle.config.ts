@@ -1,7 +1,7 @@
 import { defineConfig, Config } from 'drizzle-kit'
-import crypto from 'node:crypto'
-import { mkdirSync } from 'node:fs'
-import path from 'node:path'
+import crypto from 'crypto'
+import { mkdirSync } from 'fs'
+import path from 'path'
 
 // Based on https://github.com/cloudflare/workers-sdk/blob/main/packages/miniflare/src/plugins/shared/index.ts#L194
 function idFromName(uniqueKey: string, name: string) {
@@ -22,6 +22,8 @@ export function getLocalD1Path(databaseBindingName: string) {
 }
 
 let config
+
+console.log(`Environment: ${process.env.NODE_ENV}`)
 
 if (process.env.NODE_ENV === 'production') {
 	config = {

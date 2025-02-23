@@ -22,7 +22,7 @@ export const event = sqliteTable(
 	]
 )
 
-const attendanceStatuses = ['registered', 'confirmed', 'confirmed-delayedcheckin', 'attended', 'waitlist', 'waitlist-attended'] as const
+const attendanceStatuses = ['registered', 'declined', 'confirmed', 'confirmed-delayedcheckin', 'attended', 'waitlist', 'waitlist-attended'] as const
 
 export const participant = sqliteTable('participant', {
 	id: integer('id').primaryKey(),
@@ -44,6 +44,7 @@ export const participant = sqliteTable('participant', {
 	createdAt: text('created_at').notNull(),
 	updatedAt: text('updated_at'),
 	deletedAt: text('deleted_at'),
+	lastConfirmedAttendanceAt: text('last_confirmed_attendance_at'),
 	checkedInAt: text('checkedin_at'),
 	nameEmail: text('name_email')
 		.notNull()

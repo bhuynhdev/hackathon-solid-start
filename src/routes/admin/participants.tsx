@@ -83,6 +83,8 @@ const advanceAttendanceStaus = action(async (formData: FormData) => {
 		updateContent.attendanceStatus = newAttendanceStatus
 		if (attendanceAction === 'CheckIn') {
 			updateContent.checkedInAt = now
+		} else if (attendanceAction === 'ConfirmAttendance') {
+			updateContent.lastConfirmedAttendanceAt = now
 		}
 	}
 
@@ -100,6 +102,9 @@ function AttendanceStatusBadge(props: { attendanceStatus: AttendanceStatus }) {
 		<Switch fallback={<span>{props.attendanceStatus}</span>}>
 			<Match when={props.attendanceStatus === 'registered'}>
 				<span class="badge badge-neutral badge-soft">Registered</span>
+			</Match>
+			<Match when={props.attendanceStatus === 'declined'}>
+				<span class="badge bg-gray-300">Declined</span>
 			</Match>
 			<Match when={props.attendanceStatus === 'confirmed'}>
 				<span class="badge badge-primary">Confirmed</span>
@@ -274,8 +279,10 @@ function ParticipantInfoForm(props: { participant: ParticipantDto; onClose: () =
 					Created: <br /> {datetimeFormatter.format(new Date(props.participant.createdAt))}
 				</p>
 				<p class="text-sm text-gray-600 italic">
-					Updated: <br />
-					{props.participant.updatedAt ? `${datetimeFormatter.format(new Date(props.participant.updatedAt))}` : 'No updates yet'}
+					Confirmed Attendance: <br />
+					{props.participant.lastConfirmedAttendanceAt
+						? `${datetimeFormatter.format(new Date(props.participant.lastConfirmedAttendanceAt))}`
+						: 'No changes yet'}
 				</p>
 				<p class="text-sm text-gray-600 italic">
 					Checked in: <br />
