@@ -7,7 +7,7 @@ export default function EmailsPage() {
 	const emailData = () => emails[params.template as keyof typeof emails]
 	return (
 		<>
-			<h2 class="mb-2 text-lg font-bold">{params.template}</h2>
+			<h2>{params.template}</h2>
 			<div class="tabs tabs-lift h-[calc(100%-60px)]" role="tablist">
 				<input type="radio" name="view" class="tab [--tab-bg:var(--color-base-200)]" aria-label="Desktop" role="tab" checked />
 				<div class="tab-content bg-base-200 border-base-300 p-6" role="tabpanel">

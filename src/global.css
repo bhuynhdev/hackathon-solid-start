@@ -32,3 +32,9 @@
 		padding-inline-end: 0;
 	}
 }
+
+@layer base {
+	main h2 {
+		@apply mt-2 mb-2 text-lg font-bold;
+	}
+}

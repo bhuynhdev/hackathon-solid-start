@@ -171,9 +171,7 @@ export default function ParticipantPage() {
 				</form>
 				<section aria-labelleby="participant-list-heading">
 					<div class="my-5 flex items-center gap-16">
-						<h2 id="participant-list-heading" class="text-lg font-bold">
-							Participant list
-						</h2>
+						<h2 id="participant-list-heading">Participant list</h2>
 						<div class="flex items-center gap-2">
 							<button
 								class="btn btn-sm btn-soft btn-primary"
