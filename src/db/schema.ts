@@ -61,6 +61,27 @@ export const user = sqliteTable('user', {
 	isJudge: integer('is_judge', { mode: 'boolean' }).default(false).notNull()
 })
 
+export const mailCampaign = sqliteTable('mail_campaign', {
+	id: integer('id').primaryKey(),
+	template: text('template').notNull(),
+	createdAt: text('created_at').notNull(),
+	recipientCount: integer('recipient_count').notNull()
+})
+
+export const mailLog = sqliteTable('mail_log', {
+	id: integer('id').primaryKey(),
+	mailCampaignId: integer('mail_campaign_id')
+		.references(() => mailCampaign.id)
+		.notNull(),
+	recipientId: integer('recipient_id')
+		.references(() => participant.id)
+		.notNull(),
+	createdAt: text('created_at').notNull(),
+	status: text('status', { enum: ['new', 'failed', 'success'] })
+		.default('new')
+		.notNull()
+})
+
 export const session = sqliteTable('session', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
@@ -74,7 +95,12 @@ export type Session = typeof session.$inferSelect
 export type Participant = typeof participant.$inferSelect
 export type ParticipantInsert = typeof participant.$inferSelect
 export type ParticipantUpdate = Partial<ParticipantInsert>
-
 export type AttendanceStatus = (typeof attendanceStatuses)[number]
+
+export type MailCampaign = typeof mailCampaign.$inferSelect
+export type MailCampaignInsert = typeof mailCampaign.$inferInsert
+
+export type MailLog = typeof mailLog.$inferSelect
+export type MailLogInsert = typeof mailLog.$inferInsert
 
 export type User = typeof user.$inferSelect
