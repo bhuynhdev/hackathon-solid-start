@@ -1,13 +1,21 @@
 import emails from '@emailtemplates/emails.json'
 import { useParams } from '@solidjs/router'
 import { Show } from 'solid-js/web'
+import SendEmailForm from '~/components/SendEmailForm'
 
 export default function EmailsPage() {
 	const params = useParams()
 	const emailData = () => emails[params.template as keyof typeof emails]
+	let sendEmailModal!: HTMLDialogElement
+
 	return (
 		<>
-			<h2>{params.template}</h2>
+			<div class="flex w-full items-center justify-between">
+				<h2 class="mb-2 text-lg font-bold">{params.template}</h2>
+				<button class="btn btn-primary mr-[10vw]" type="button" onclick={() => sendEmailModal.showModal()}>
+					Send
+				</button>
+			</div>
 			<div class="tabs tabs-lift h-[calc(100%-60px)]" role="tablist">
 				<input type="radio" name="view" class="tab [--tab-bg:var(--color-base-200)]" aria-label="Desktop" role="tab" checked />
 				<div class="tab-content bg-base-200 border-base-300 p-6" role="tabpanel">
@@ -32,6 +40,19 @@ export default function EmailsPage() {
 					</Show>
 				</div>
 			</div>
+			<dialog id="sendEmailModal" ref={sendEmailModal} class="modal">
+				<div class="modal-box">
+					<SendEmailForm chosenTemplate={params.template} />
+					<div class="modal-action">
+						<form method="dialog">
+							<button class="btn">Close</button>
+						</form>
+					</div>
+				</div>
+				<form method="dialog" class="modal-backdrop">
+					<button>Close</button>
+				</form>
+			</dialog>
 		</>
 	)
 }
