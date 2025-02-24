@@ -1,21 +1,33 @@
 import emails from '@emailtemplates/emails.json'
 import { A, RouteSectionProps } from '@solidjs/router'
+import { For, JSX, Show } from 'solid-js'
 import IconTablerChalkboard from '~icons/tabler/chalkboard'
-import { For, Show } from 'solid-js'
+import IconTablerMailFast from '~icons/tabler/mail-fast'
 
 type NavLinkData = {
-	title: string
+	title: JSX.Element
 	href?: string
-	sublinks?: Array<{ title: string; href?: string }>
+	sublinks?: Array<Omit<NavLinkData, 'sublinks'>>
 }
 
 const links = [
 	{ title: 'Participants', href: '/admin/participants' },
 	{
 		title: 'Emails',
-		sublinks: Object.keys(emails).map((emailName) => {
-			return { title: emailName, href: `/admin/emails/${emailName}` }
-		})
+		sublinks: [
+			{
+				title: (
+					<span>
+						<IconTablerMailFast class="mr-2 inline" />
+						Send
+					</span>
+				),
+				href: `/admin/emails/send`
+			},
+			...Object.keys(emails).map((emailName) => {
+				return { title: emailName, href: `/admin/emails/${emailName}` }
+			})
+		]
 	}
 ] satisfies Array<NavLinkData>
 
