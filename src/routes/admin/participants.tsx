@@ -262,17 +262,17 @@ function ParticipantInfoForm(props: { participant: ParticipantDto; onClose: () =
 	] satisfies Array<keyof Participant>
 
 	return (
-		<div class="flex w-full flex-col gap-2">
-			<div class="flex w-full justify-between">
-				<div class="flex gap-2">
-					<h2 class="font-bold">Participant #{props.participant.id}</h2>
+		<section class="flex w-full flex-col gap-2">
+			<header class="flex w-full justify-between">
+				<div class="flex items-center gap-2">
+					<h2 class="text-base">Participant #{props.participant.id}</h2>
 					<AttendanceStatusBadge attendanceStatus={props.participant.attendanceStatus} />
 				</div>
 				<button aria-label="Close" type="button" onclick={props.onClose} class="cursor-pointer">
 					<IconTablerX width="32" height="32" />
 				</button>
-			</div>
-			<div class="flex gap-6">
+			</header>
+			<section class="flex gap-6" aria-label="Timestamp information">
 				<p class="text-sm text-gray-600 italic">
 					Created: <br /> {datetimeFormatter.format(new Date(props.participant.createdAt))}
 				</p>
@@ -286,7 +286,7 @@ function ParticipantInfoForm(props: { participant: ParticipantDto; onClose: () =
 					Checked in: <br />
 					{props.participant.checkedInAt ? `${datetimeFormatter.format(new Date(props.participant.checkedInAt))}` : 'Not yet'}
 				</p>
-			</div>
+			</section>
 			<form id="participant-profile" method="post" action={updateParticipantInfo} class="border-base-300 mt-4 rounded-md border-1">
 				<header class="bg-gray-200 px-4 py-3">
 					<h3 class="font-semibold">Profile</h3>
@@ -306,7 +306,7 @@ function ParticipantInfoForm(props: { participant: ParticipantDto; onClose: () =
 						<span class="fieldset-legend text-sm">Email</span>
 						<input type="text" name="email" value={props.participant.email} class="input input-bordered w-full" />
 					</label>
-					<div tabindex="0" class="collapse-arrow collapse">
+					<div tabindex="0" class="collapse-arrow collapse-open collapse">
 						<input type="checkbox" />
 						<div class="collapse-title px-0 text-sm font-semibold">Additional Information</div>
 						<div class="collapse-content pl-1 text-sm">
@@ -327,7 +327,6 @@ function ParticipantInfoForm(props: { participant: ParticipantDto; onClose: () =
 					</button>
 				</div>
 			</form>
-			<hr class="divider mx-auto w-4/5 border-none" />
 			<form method="post" action={advanceAttendanceStaus} class="border-base-300 rounded-md border-1">
 				<header class="bg-gray-200 px-4 py-3">
 					<h3 class="font-semibold">Attendance Status</h3>
@@ -369,7 +368,7 @@ function ParticipantInfoForm(props: { participant: ParticipantDto; onClose: () =
 					</div>
 				</div>
 			</form>
-		</div>
+		</section>
 	)
 }
 
