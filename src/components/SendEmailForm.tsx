@@ -1,7 +1,9 @@
 import emails from '@emailtemplates/emails.json'
+import { action } from '@solidjs/router'
 import { For, Match, Switch } from 'solid-js'
+import { attendanceStatuses } from '~/db/schema'
 
-const emailRecipientTypes = ['all', 'minors', 'specific'] as const
+const emailRecipientTypes = ['all', 'minors', 'bystatus', 'specific'] as const
 export type EmailRecipientType = (typeof emailRecipientTypes)[number]
 
 type SendEmailFormProps = {
@@ -10,9 +12,13 @@ type SendEmailFormProps = {
 	disableChoosingTemplate?: boolean
 }
 
+const sendEmail = action(async (formData) => {
+	console.log(Object.fromEntries(formData))
+}, 'send-email')
+
 export default function SendEmailForm(props: SendEmailFormProps) {
 	return (
-		<form>
+		<form action={sendEmail} method="post">
 			<header>
 				<h2 class="m-0">Send email</h2>
 			</header>
@@ -33,8 +39,8 @@ export default function SendEmailForm(props: SendEmailFormProps) {
 						</For>
 					</select>
 				</label>
-				<fieldset class="flex flex-col gap-2">
-					<legend class="contents">Choose recipients</legend>
+				<fieldset class="space-y-2">
+					<legend>Choose recipients</legend>
 					<For each={emailRecipientTypes}>
 						{(recipientType) => (
 							<Switch>
@@ -61,6 +67,34 @@ export default function SendEmailForm(props: SendEmailFormProps) {
 										/>
 										<span>Minors-only</span>
 									</label>
+								</Match>
+								<Match when={recipientType === 'bystatus'}>
+									<div class="flex gap-3">
+										<label class="peer flex items-center gap-2">
+											<input
+												type="radio"
+												class="radio radio-xs"
+												name="recipientChoice"
+												value={recipientType}
+												checked={!props.chosenRecipientType || recipientType === props.chosenRecipientType}
+											/>
+											<span>Participants with status</span>
+										</label>
+										<label class="hidden peer-has-checked:block">
+											<select class="select select-sm w-56" name="bystatusoption">
+												<option value="" disabled selected>
+													Choose a status
+												</option>
+												<For each={attendanceStatuses}>{(status) => <option value={status}>{status}</option>}</For>
+											</select>
+										</label>
+										{/* Fake select to give appearance of form field only */}
+										<select disabled class="select select-sm w-56 peer-has-checked:hidden">
+											<option disabled selected>
+												Choose a status
+											</option>
+										</select>
+									</div>
 								</Match>
 								<Match when={recipientType === 'specific'}>
 									<label class="peer flex items-center gap-2">

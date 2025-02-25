@@ -22,7 +22,15 @@ export const event = sqliteTable(
 	]
 )
 
-const attendanceStatuses = ['registered', 'declined', 'confirmed', 'confirmed-delayedcheckin', 'attended', 'waitlist', 'waitlist-attended'] as const
+export const attendanceStatuses = [
+	'registered',
+	'declined',
+	'confirmed',
+	'confirmed-delayedcheckin',
+	'attended',
+	'waitlist',
+	'waitlist-attended'
+] as const
 
 export const participant = sqliteTable('participant', {
 	id: integer('id').primaryKey(),
