@@ -1,6 +1,7 @@
 import emails from '@emailtemplates/emails.json'
 import { action } from '@solidjs/router'
-import { For, Match, Switch } from 'solid-js'
+import { Component, For, Match, Switch } from 'solid-js'
+import { renderToString } from 'solid-js/web'
 import { attendanceStatuses } from '~/db/schema'
 
 const emailRecipientTypes = ['all', 'minors', 'bystatus', 'specific'] as const
@@ -12,8 +13,16 @@ type SendEmailFormProps = {
 	disableChoosingTemplate?: boolean
 }
 
-const sendEmail = action(async (formData) => {
-	console.log(Object.fromEntries(formData))
+const sendEmail = action(async (formData: FormData) => {
+	'use server'
+	const { template, recipientChoice } = Object.fromEntries(formData)
+	if (!template || !recipientChoice) {
+		throw new Error('Invalid Form submission')
+	}
+	const allEmailTemplates = import.meta.glob<Component>([`@emailtemplates/*`, '!@emailtemplates/*.json'], { import: 'default' })
+	const EmailTemplateComponent = await allEmailTemplates[String(template)]()
+	const html = renderToString(() => EmailTemplateComponent({}))
+	return html
 }, 'send-email')
 
 export default function SendEmailForm(props: SendEmailFormProps) {
@@ -26,7 +35,7 @@ export default function SendEmailForm(props: SendEmailFormProps) {
 				<label class="flex flex-col gap-2">
 					<span>Template</span>
 					{/* If a template has been chosen, then disabled the template select field */}
-					<select class="select" disabled={props.disableChoosingTemplate}>
+					<select name="template" class="select" disabled={props.disableChoosingTemplate}>
 						<option disabled selected={!props.chosenTemplate}>
 							Choose a template to send
 						</option>
@@ -76,7 +85,7 @@ export default function SendEmailForm(props: SendEmailFormProps) {
 												class="radio radio-xs"
 												name="recipientChoice"
 												value={recipientType}
-												checked={!props.chosenRecipientType || recipientType === props.chosenRecipientType}
+												checked={recipientType === props.chosenRecipientType}
 											/>
 											<span>Participants with status</span>
 										</label>
