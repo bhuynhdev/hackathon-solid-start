@@ -2,16 +2,17 @@
 	"name": "example-with-tailwindcss",
 	"type": "module",
 	"scripts": {
-		"dev": "vinxi dev",
-		"build": "vinxi build",
-		"start": "vinxi start",
-		"preview": "pnpm run build && wrangler pages dev",
+		"encrypt": "dotenvx encrypt -f .env*.local",
+		"decrypt": "dotenvx decrypt -f .env*.local",
+		"dev": "dotenvx run -f .env.development.local -- vinxi dev",
+		"build": "dotenvx run -f .env.production.local -- vinxi build",
+		"preview": "dotenvx run -f .env.production.local -- pnpm run build && wrangler pages dev",
 		"db:gen": "drizzle-kit generate",
-		"db:migrate": "dotenvx run -f .env -- drizzle-kit migrate",
-		"db:migrate:prod": "dotenvx run -f .env.prod -- drizzle-kit migrate",
-		"db:seed": "dotenvx run -f .env -- tsx ./src/db/seed.ts",
-		"db:studio": "dotenvx run -f .env -- drizzle-kit studio",
-		"db:studio:prod": "dotenvx run -f .env.prod -- drizzle-kit studio"
+		"db:seed": "dotenvx run -f .env.development.local -- tsx ./src/db/seed.ts",
+		"db:migrate": "dotenvx run -f .env.development.local -- drizzle-kit migrate",
+		"db:studio": "dotenvx run -f .env.development.local -- drizzle-kit studio",
+		"db:migrate:prod": "dotenvx run -f .env.production.local -- drizzle-kit migrate",
+		"db:studio:prod": "dotenvx run -f .env.production.local -- drizzle-kit studio"
 	},
 	"dependencies": {
 		"@iconify-json/tabler": "^1.2.16",
