@@ -9,13 +9,6 @@ import path from 'path'
 import { renderToString } from 'solid-js/web'
 import Icons from 'unplugin-icons/vite'
 import { type Plugin } from 'vinxi'
-/**
- * Extract the module name from a path
- * i.e. './email_templates/TextEmail.tsx' -> 'TestEmail'
- **/
-export function convertPathToModuleName(filePath: string) {
-	return path.basename(filePath, path.extname(filePath))
-}
 
 /**
  * Compile the email_templates using esbuild, then use SolidJS to render the compiled components to HTML strings
@@ -49,11 +42,15 @@ async function buildEmailTemplates() {
 	const renderResult = await Promise.all(
 		Object.entries(buildResult.metafile.outputs).map(async ([compiledPath, { entryPoint }]) => {
 			if (!entryPoint) return
+
 			const component = (await import(path.resolve('./', compiledPath))).default
 			if (typeof component !== 'function') return
-			const html = renderToString(() => component())
+
+			const html = renderToString(() => component({}))
 			const rawSource = fs.readFileSync(path.resolve('./', entryPoint), 'utf-8')
-			return [convertPathToModuleName(entryPoint), { html, jsx: rawSource }] as const
+
+			const moduleName = path.basename(entryPoint, path.extname(entryPoint))
+			return [moduleName, { html, jsx: rawSource }] as const
 		})
 	)
 

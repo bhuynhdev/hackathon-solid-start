@@ -1,5 +1,4 @@
 import { createMiddleware } from '@solidjs/start/middleware'
-
 import { drizzle as drizzleD1 } from 'drizzle-orm/d1'
 
 export default createMiddleware({
