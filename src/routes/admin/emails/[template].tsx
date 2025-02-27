@@ -1,7 +1,7 @@
 import emails from '@emailtemplates/emails.json'
 import { useParams } from '@solidjs/router'
 import { Show } from 'solid-js/web'
-import SendEmailForm from '~/components/SendEmailForm'
+import SendEmailForm from '@emails/SendEmailForm'
 
 export default function EmailsPage() {
 	const params = useParams()

@@ -14,7 +14,9 @@
 		"isolatedModules": true,
 		"paths": {
 			"~/*": ["./src/*"],
-			"@emailtemplates/*": ["./src/email_templates/*"]
+			"@emailtemplates/*": ["./src/email_templates/*"],
+			"@emails/*": ["./src/features/emails/*"],
+			"@participants/*": ["./src/features/participants/*"]
 		}
 	}
 }

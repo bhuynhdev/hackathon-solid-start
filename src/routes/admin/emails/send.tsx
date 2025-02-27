@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import SendEmailForm from '~/components/SendEmailForm'
+import SendEmailForm from '@emails/SendEmailForm'
 
 export default function EmailSenderPage() {
 	const [searchParams, _] = useSearchParams()

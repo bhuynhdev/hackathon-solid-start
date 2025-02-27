@@ -1,8 +1,8 @@
 import emails from '@emailtemplates/emails.json'
-import { action } from '@solidjs/router'
-import { Component, For, Match, Switch } from 'solid-js'
-import { renderToString } from 'solid-js/web'
+import { For, Match, Switch } from 'solid-js'
 import { attendanceStatuses } from '~/db/schema'
+import { sendEmail } from './actions'
+import { useSubmission } from '@solidjs/router'
 
 const emailRecipientTypes = ['all', 'minors', 'bystatus', 'specific'] as const
 export type EmailRecipientType = (typeof emailRecipientTypes)[number]
@@ -13,21 +13,11 @@ type SendEmailFormProps = {
 	disableChoosingTemplate?: boolean
 }
 
-const sendEmail = action(async (formData: FormData) => {
-	'use server'
-	const { template, recipientChoice } = Object.fromEntries(formData)
-	if (!template || !recipientChoice) {
-		throw new Error('Invalid Form submission')
-	}
-	const allEmailTemplates = import.meta.glob<Component>([`@emailtemplates/*`, '!@emailtemplates/*.json'], { import: 'default' })
-	const EmailTemplateComponent = await allEmailTemplates[String(template)]()
-	const html = renderToString(() => EmailTemplateComponent({}))
-	return html
-}, 'send-email')
-
 export default function SendEmailForm(props: SendEmailFormProps) {
+	const sendEmailSubmission = useSubmission(sendEmail)
 	return (
 		<form action={sendEmail} method="post">
+			<pre class="whitespace-pre-wrap">{JSON.stringify(sendEmailSubmission.result, null, 2)}</pre>
 			<header>
 				<h2 class="m-0">Send email</h2>
 			</header>
