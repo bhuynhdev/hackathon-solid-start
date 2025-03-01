@@ -1,8 +1,9 @@
 import { action, query } from '@solidjs/router'
-import { like, eq } from 'drizzle-orm'
-import { Participant, participant, ParticipantUpdate } from '~/db/schema'
+import { like, eq, sql } from 'drizzle-orm'
+import { AttendanceStatus, attendanceStatuses, Participant, participant, ParticipantUpdate } from '~/db/schema'
 import { getDb, getNextAttendanceActions, determineNextAttendanceStatus, AttendanceAction } from '~/utils'
 
+/** QUERIES */
 export const ITEMS_PER_PAGE = 20
 
 type GetParticipantsArg = {
@@ -46,6 +47,27 @@ export const getParticipants = query(async ({ query = '', page = 1 }: GetPartici
 	}
 }, 'participants')
 
+export const getQuickStats = query(async () => {
+	'use server'
+	const db = getDb()
+	const result = await db
+		.select({
+			status: participant.attendanceStatus,
+			count: sql<number>`COUNT(*)`.mapWith(Number)
+		})
+		.from(participant)
+		.groupBy(participant.attendanceStatus)
+
+	// Convert to object format { [status]: [count] }
+	const participantCountByStatus = Object.fromEntries(attendanceStatuses.map((status) => [status, 0])) as Record<AttendanceStatus, number> // Init with 0s
+	result.forEach(({ status, count }) => (participantCountByStatus[status] += count))
+
+	return {
+		participantCountByStatus
+	}
+}, 'participants-quick-stats')
+
+/** ACTIONS **/
 export const updateParticipantInfo = action(async (formData: FormData) => {
 	'use server'
 	const db = getDb()

@@ -1,4 +1,4 @@
-import { getParticipants, ITEMS_PER_PAGE } from '@participants/actions'
+import { getParticipants, getQuickStats, ITEMS_PER_PAGE } from '@participants/actions'
 import { AttendanceStatusBadge } from '@participants/AttendanceStatusBadge'
 import { ParticipantInfoForm } from '@participants/ParticipantInfoForm'
 import { createAsync, RouteDefinition, useSearchParams } from '@solidjs/router'
@@ -8,7 +8,10 @@ import IconTablerChevronRight from '~icons/tabler/chevron-right'
 import IconTablerSearch from '~icons/tabler/search'
 
 export const route = {
-	preload: () => getParticipants({})
+	preload: () => {
+		getParticipants({})
+		getQuickStats()
+	}
 } satisfies RouteDefinition
 
 export default function ParticipantPage() {
@@ -17,9 +20,10 @@ export default function ParticipantPage() {
 	const page = () => Number(searchParams.page ?? 1)
 
 	const participants = createAsync(() => getParticipants({ query: query(), page: page() }))
-
 	const totalCount = () => participants()?.totalCount ?? 999
 	const recordRange = () => ({ start: Math.max((page() - 1) * ITEMS_PER_PAGE + 1, 1), end: Math.min(page() * ITEMS_PER_PAGE, totalCount()) })
+
+	const participantsQuickStats = createAsync(() => getQuickStats())
 
 	const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
 	const participant = () => participants()?.participants.find((p) => p.id == selectedParticipantId())
@@ -43,6 +47,25 @@ export default function ParticipantPage() {
 				onChange={(e) => !e.currentTarget.checked && setSelectedParticipantId(null)} /** Set participant to null if drawer is checked off **/
 			/>
 			<div class="drawer-content w-full">
+				<Show when={participantsQuickStats()?.participantCountByStatus} keyed>
+					{({ attended, waitlist, waitlistattended, confirmed, confirmeddelayedcheckin }) => (
+						<div class="mb-6 grid grid-cols-3 gap-3">
+							<div class="rounded-lg bg-sky-200 p-4">
+								<p class="text-xl font-bold">{confirmed + confirmeddelayedcheckin + attended + waitlistattended}</p>
+								<p class="text-gray-500">Confirmed Attendance</p>
+							</div>
+							<div class="rounded-lg bg-emerald-200 p-4">
+								<p class="text-xl font-bold">{attended + waitlistattended}</p>
+								<p class="text-gray-500">Checked in</p>
+								<p class="text-gray-500 italic">{waitlistattended} from waitlist</p>
+							</div>
+							<div class="rounded-lg bg-amber-200 p-4">
+								<p class="text-xl font-bold">{waitlist}</p>
+								<p class="text-gray-500">Waitlist</p>
+							</div>
+						</div>
+					)}
+				</Show>
 				<form method="get" class="w-full" role="search">
 					<label class="input input-bordered flex w-full items-center gap-2 text-base">
 						<IconTablerSearch width="18" height="18" />
