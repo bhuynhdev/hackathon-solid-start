@@ -64,7 +64,7 @@ export function ParticipantInfoForm(props: { participant: ParticipantDto; onClos
 						<span class="fieldset-legend text-sm">Email</span>
 						<input type="text" name="email" value={props.participant.email} class="input input-bordered w-full" />
 					</label>
-					<div tabindex="0" class="collapse-arrow collapse-open collapse">
+					<div tabindex="0" class="collapse-arrow collapse">
 						<input type="checkbox" />
 						<div class="collapse-title px-0 text-sm font-semibold">Additional Information</div>
 						<div class="collapse-content pl-1 text-sm">
