@@ -1,4 +1,4 @@
-import { getParticipants, getQuickStats, ITEMS_PER_PAGE } from '@participants/actions'
+import { getParticipants, ITEMS_PER_PAGE } from '@participants/actions'
 import { AttendanceStatusBadge } from '@participants/AttendanceStatusBadge'
 import { ParticipantInfoForm } from '@participants/ParticipantInfoForm'
 import { createAsync, RouteDefinition, useSearchParams } from '@solidjs/router'
@@ -8,10 +8,7 @@ import IconTablerChevronRight from '~icons/tabler/chevron-right'
 import IconTablerSearch from '~icons/tabler/search'
 
 export const route = {
-	preload: () => {
-		getParticipants({})
-		getQuickStats()
-	}
+	preload: () => getParticipants({})
 } satisfies RouteDefinition
 
 export default function ParticipantPage() {
@@ -19,14 +16,12 @@ export default function ParticipantPage() {
 	const query = () => String(searchParams.q ?? '')
 	const page = () => Number(searchParams.page ?? 1)
 
-	const participants = createAsync(() => getParticipants({ query: query(), page: page() }))
-	const totalCount = () => participants()?.totalCount ?? 999
+	const participantData = createAsync(() => getParticipants({ query: query(), page: page() }))
+	const totalCount = () => participantData()?.totalCount ?? 999
 	const recordRange = () => ({ start: Math.max((page() - 1) * ITEMS_PER_PAGE + 1, 1), end: Math.min(page() * ITEMS_PER_PAGE, totalCount()) })
 
-	const participantsQuickStats = createAsync(() => getQuickStats())
-
 	const [selectedParticipantId, setSelectedParticipantId] = createSignal<number | null>(null)
-	const participant = () => participants()?.participants.find((p) => p.id == selectedParticipantId())
+	const participant = () => participantData()?.participants.find((p) => p.id == selectedParticipantId())
 
 	function nextPage() {
 		setSearchParams({ page: page() + 1 })
@@ -47,7 +42,7 @@ export default function ParticipantPage() {
 				onChange={(e) => !e.currentTarget.checked && setSelectedParticipantId(null)} /** Set participant to null if drawer is checked off **/
 			/>
 			<div class="drawer-content w-full">
-				<Show when={participantsQuickStats()?.participantCountByStatus} keyed>
+				<Show when={participantData()?.alltimeStats.participantCountByStatus} keyed>
 					{({ attended, waitlist, waitlistattended, confirmed, confirmeddelayedcheckin }) => (
 						<div class="mb-6 grid grid-cols-3 gap-3">
 							<div class="rounded-lg bg-sky-200 p-4">
@@ -95,7 +90,7 @@ export default function ParticipantPage() {
 								<IconTablerChevronRight />
 							</button>
 							<p class="ml-2 text-sm text-gray-600 italic">
-								{recordRange().start} - {recordRange().end} of {participants()?.totalCount}
+								{recordRange().start} - {recordRange().end} of {participantData()?.totalCount}
 							</p>
 						</div>
 					</div>
@@ -109,7 +104,7 @@ export default function ParticipantPage() {
 							</tr>
 						</thead>
 						<tbody>
-							<For each={participants()?.participants}>
+							<For each={participantData()?.participants}>
 								{(p) => (
 									<tr onpointerup={(e) => e.pointerType === 'touch' && setSelectedParticipantId(p.id)}>
 										<td>

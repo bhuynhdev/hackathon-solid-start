@@ -16,6 +16,9 @@ export type ParticipantDto = Participant & { availableAttendanceActions: ReturnT
 type GetParticipantsReturn = {
 	totalCount: number
 	participants: Array<ParticipantDto>
+	alltimeStats: {
+		participantCountByStatus: Record<AttendanceStatus, number>
+	}
 }
 
 export const getParticipants = query(async ({ query = '', page = 1 }: GetParticipantsArg): Promise<GetParticipantsReturn> => {
@@ -38,19 +41,9 @@ export const getParticipants = query(async ({ query = '', page = 1 }: GetPartici
 
 	const participants = await db.select().from(participant).innerJoin(sq, eq(participant.id, sq.id)).orderBy(participant.createdAt, participant.id)
 
-	return {
-		totalCount,
-		participants: participants.map(({ participant }) => ({
-			...participant,
-			availableAttendanceActions: getNextAttendanceActions(participant.attendanceStatus)
-		}))
-	}
-}, 'participants')
-
-export const getQuickStats = query(async () => {
-	'use server'
-	const db = getDb()
-	const result = await db
+	// Get some stats
+	// Determine participants count by status
+	const rawStatusCountArray = await db
 		.select({
 			status: participant.attendanceStatus,
 			count: sql<number>`COUNT(*)`.mapWith(Number)
@@ -60,12 +53,19 @@ export const getQuickStats = query(async () => {
 
 	// Convert to object format { [status]: [count] }
 	const participantCountByStatus = Object.fromEntries(attendanceStatuses.map((status) => [status, 0])) as Record<AttendanceStatus, number> // Init with 0s
-	result.forEach(({ status, count }) => (participantCountByStatus[status] += count))
+	rawStatusCountArray.forEach(({ status, count }) => (participantCountByStatus[status] += count))
 
 	return {
-		participantCountByStatus
+		totalCount,
+		participants: participants.map(({ participant }) => ({
+			...participant,
+			availableAttendanceActions: getNextAttendanceActions(participant.attendanceStatus)
+		})),
+		alltimeStats: {
+			participantCountByStatus
+		}
 	}
-}, 'participants-quick-stats')
+}, 'participants-data-and-stats')
 
 /** ACTIONS **/
 export const updateParticipantInfo = action(async (formData: FormData) => {
