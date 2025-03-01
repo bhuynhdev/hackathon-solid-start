@@ -27,7 +27,8 @@
 		"solid-jsx-email": "^0.0.7",
 		"tailwindcss": "^4.0.6",
 		"unplugin-icons": "^22.0.0",
-		"vinxi": "^0.5.3"
+		"vinxi": "^0.5.3",
+		"vite-tsconfig-paths": "^5.1.4"
 	},
 	"engines": {
 		"node": ">=18"

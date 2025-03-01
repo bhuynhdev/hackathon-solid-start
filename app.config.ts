@@ -9,7 +9,7 @@ import path from 'path'
 import { renderToString } from 'solid-js/web'
 import Icons from 'unplugin-icons/vite'
 import { type Plugin } from 'vinxi'
-
+import tsconfigPaths from 'vite-tsconfig-paths'
 /**
  * Compile the email_templates using esbuild, then use SolidJS to render the compiled components to HTML strings
  * And write the result to json
@@ -86,12 +86,7 @@ export default defineConfig({
 	middleware: './src/middleware.ts',
 	vite: {
 		ssr: { external: ['drizzle-orm'] },
-		plugins: [tailwindcss(), emailTemplatesPlugin(), Icons({ compiler: 'solid' })],
-		resolve: {
-			alias: {
-				'@emailtemplates': path.resolve('./src/email_templates/')
-			}
-		}
+		plugins: [tailwindcss(), emailTemplatesPlugin(), Icons({ compiler: 'solid' }), tsconfigPaths()]
 	},
 	server: {
 		preset: 'cloudflare-pages',
