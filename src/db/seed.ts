@@ -35,7 +35,8 @@ async function main() {
 					notes: f.default({ defaultValue: null }),
 					updatedAt: f.default({ defaultValue: null }),
 					deletedAt: f.default({ defaultValue: null }),
-					checkedInAt: f.default({ defaultValue: null })
+					checkedInAt: f.default({ defaultValue: null }),
+					lastConfirmedAttendanceAt: f.default({ defaultValue: null })
 				}
 			}
 		}
