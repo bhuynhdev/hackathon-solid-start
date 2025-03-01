@@ -26,10 +26,10 @@ export const attendanceStatuses = [
 	'registered',
 	'declined',
 	'confirmed',
-	'confirmed-delayedcheckin',
+	'confirmeddelayedcheckin',
 	'attended',
 	'waitlist',
-	'waitlist-attended'
+	'waitlistattended'
 ] as const
 
 export const participant = sqliteTable('participant', {

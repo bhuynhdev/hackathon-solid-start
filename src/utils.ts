@@ -29,18 +29,18 @@ const ATTENDANCE_STATUS_STATE_MACHINE: Record<AttendanceStatus, Partial<Record<A
 	},
 	confirmed: {
 		CheckIn: 'attended',
-		ToggleLateCheckIn: 'confirmed-delayedcheckin',
+		ToggleLateCheckIn: 'confirmeddelayedcheckin',
 		Unconfirm: 'declined'
 	},
-	'confirmed-delayedcheckin': {
+	confirmeddelayedcheckin: {
 		CheckIn: 'attended',
 		ToggleLateCheckIn: 'confirmed'
 	},
 	waitlist: {
-		CheckIn: 'waitlist-attended'
+		CheckIn: 'waitlistattended'
 	},
 	attended: {},
-	'waitlist-attended': {}
+	waitlistattended: {}
 } as const
 
 /**

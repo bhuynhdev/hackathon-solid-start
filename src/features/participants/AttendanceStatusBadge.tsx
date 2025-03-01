@@ -19,13 +19,13 @@ export function AttendanceStatusBadge(props: { attendanceStatus: AttendanceStatu
 			<Match when={props.attendanceStatus === 'waitlist'}>
 				<span class="badge bg-amber-400">Waitlist</span>
 			</Match>
-			<Match when={props.attendanceStatus === 'waitlist-attended'}>
+			<Match when={props.attendanceStatus === 'waitlistattended'}>
 				<div class="flex gap-1">
 					<span class="badge bg-emerald-400">Attended</span>
 					<span class="badge bg-amber-400">Waitlist</span>
 				</div>
 			</Match>
-			<Match when={props.attendanceStatus === 'confirmed-delayedcheckin'}>
+			<Match when={props.attendanceStatus === 'confirmeddelayedcheckin'}>
 				<div class="flex gap-1">
 					<span class="badge badge-primary">Confirmed</span>
 					<span class="badge badge-error">Late</span>
