@@ -25,8 +25,8 @@ export default function SendEmailForm(props: SendEmailFormProps) {
 				<label class="flex flex-col gap-2">
 					<span>Template</span>
 					{/* If a template has been chosen, then disabled the template select field */}
-					<select name="template" class="select" disabled={props.disableChoosingTemplate}>
-						<option disabled selected={!props.chosenTemplate}>
+					<select required name="template" class="select" disabled={props.disableChoosingTemplate}>
+						<option value="" disabled selected={!props.chosenTemplate}>
 							Choose a template to send
 						</option>
 						<For each={Object.keys(emails)}>
