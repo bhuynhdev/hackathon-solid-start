@@ -3,6 +3,7 @@ import { AttendanceStatusBadge } from '@participants/AttendanceStatusBadge'
 import { ParticipantInfoForm } from '@participants/ParticipantInfoForm'
 import { createAsync, RouteDefinition, useSearchParams } from '@solidjs/router'
 import { createSignal, For, Show } from 'solid-js'
+import { attendanceStatuses } from '~/db/schema'
 import IconTablerChevronLeft from '~icons/tabler/chevron-left'
 import IconTablerChevronRight from '~icons/tabler/chevron-right'
 import IconTablerSearch from '~icons/tabler/search'
@@ -14,9 +15,10 @@ export const route = {
 export default function ParticipantPage() {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const query = () => String(searchParams.q ?? '')
+	const status = () => String(searchParams.status ?? '')
 	const page = () => Number(searchParams.page ?? 1)
 
-	const participantData = createAsync(() => getParticipants({ query: query(), page: page() }))
+	const participantData = createAsync(() => getParticipants({ query: query(), page: page(), status: status() }))
 	const totalCount = () => participantData()?.totalCount ?? 999
 	const recordRange = () => ({ start: Math.max((page() - 1) * ITEMS_PER_PAGE + 1, 1), end: Math.min(page() * ITEMS_PER_PAGE, totalCount()) })
 
@@ -61,17 +63,35 @@ export default function ParticipantPage() {
 						</div>
 					)}
 				</Show>
-				<form method="get" class="w-full" role="search">
-					<label class="input input-bordered flex w-full items-center gap-2 text-base">
+				<form method="get" class="grid-cols-[repeat(auto-fit, minmax(100px, 1fr)] grid grid-flow-col gap-2 rounded-lg bg-gray-100 p-4" role="search">
+					<label class="input input-bordered flex items-center gap-2 text-base">
 						<IconTablerSearch width="18" height="18" />
-						<input aria-label="Search participant" id="query" type="text" name="q" placeholder="Search" class="grow" value={query()} />
+						<input aria-label="Search participant" id="query" type="text" name="q" placeholder="Search" value={query()} />
 					</label>
+					<label>
+						<select class="select" name="status">
+							<option value="" selected={!status()}>
+								--All--
+							</option>
+							<For each={attendanceStatuses}>
+								{(attendanceStatus) => (
+									<option value={attendanceStatus} selected={status() === attendanceStatus}>
+										{attendanceStatus}
+									</option>
+								)}
+							</For>
+						</select>
+					</label>
+					<button type="submit" class="btn btn-primary max-w-42">
+						Search
+					</button>
 				</form>
 				<section aria-labelleby="participant-list-heading">
 					<div class="my-5 flex items-center gap-16">
 						<h2 id="participant-list-heading">Participant list</h2>
 						<div class="flex items-center gap-2">
 							<button
+								type="button"
 								class="btn btn-sm btn-soft btn-primary"
 								aria-label="Previous page"
 								title="Previous page"
@@ -81,6 +101,7 @@ export default function ParticipantPage() {
 								<IconTablerChevronLeft />
 							</button>
 							<button
+								type="button"
 								class="btn btn-sm btn-soft btn-primary"
 								aria-label="Next page"
 								title="Next page"

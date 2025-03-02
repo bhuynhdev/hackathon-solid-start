@@ -1,7 +1,7 @@
 import { For, Show } from 'solid-js'
 import { Participant } from '~/db/schema'
 import IconTablerX from '~icons/tabler/x'
-import { advanceAttendanceStaus, ParticipantDto, updateParticipantInfo } from './actions'
+import { advanceAttendanceStatus, ParticipantDto, updateParticipantInfo } from './actions'
 import { AttendanceStatusBadge } from './AttendanceStatusBadge'
 
 export function ParticipantInfoForm(props: { participant: ParticipantDto; onClose: () => void }) {
@@ -85,7 +85,7 @@ export function ParticipantInfoForm(props: { participant: ParticipantDto; onClos
 					</button>
 				</div>
 			</form>
-			<form method="post" action={advanceAttendanceStaus} class="border-base-300 rounded-md border-1">
+			<form method="post" action={advanceAttendanceStatus} class="border-base-300 rounded-md border-1">
 				<header class="bg-gray-200 px-4 py-3">
 					<h3 class="font-semibold">Attendance Status</h3>
 				</header>

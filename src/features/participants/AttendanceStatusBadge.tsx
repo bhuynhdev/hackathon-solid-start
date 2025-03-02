@@ -20,7 +20,7 @@ export function AttendanceStatusBadge(props: { attendanceStatus: AttendanceStatu
 				<span class="badge bg-amber-400">Waitlist</span>
 			</Match>
 			<Match when={props.attendanceStatus === 'waitlistattended'}>
-				<div class="flex gap-1">
+				<div class="flex flex-col gap-1 md:flex-row">
 					<span class="badge bg-emerald-400">Attended</span>
 					<span class="badge bg-amber-400">Waitlist</span>
 				</div>

@@ -1,5 +1,5 @@
 import { action, query } from '@solidjs/router'
-import { like, eq, sql } from 'drizzle-orm'
+import { like, eq, sql, and } from 'drizzle-orm'
 import { AttendanceStatus, attendanceStatuses, Participant, participant, ParticipantUpdate } from '~/db/schema'
 import { getDb, getNextAttendanceActions, determineNextAttendanceStatus, AttendanceAction } from '~/utils'
 
@@ -8,6 +8,7 @@ export const ITEMS_PER_PAGE = 20
 
 type GetParticipantsArg = {
 	query?: string
+	status?: string
 	page?: number
 }
 
@@ -21,10 +22,13 @@ type GetParticipantsReturn = {
 	}
 }
 
-export const getParticipants = query(async ({ query = '', page = 1 }: GetParticipantsArg): Promise<GetParticipantsReturn> => {
+export const getParticipants = query(async ({ query = '', page = 1, status = '' }: GetParticipantsArg): Promise<GetParticipantsReturn> => {
 	'use server'
 	const db = getDb()
-	const searchCriteria = query ? like(participant.nameEmail, `%${query}%`) : undefined
+	let searchCriteria = query ? like(participant.nameEmail, `%${query}%`) : undefined
+	if (status) {
+		searchCriteria = and(searchCriteria, eq(participant.attendanceStatus, status as AttendanceStatus))
+	}
 	const totalCount = await db.$count(participant, searchCriteria)
 
 	/* Deferred Join technique to optimize offset-based pagination
@@ -83,7 +87,7 @@ export const updateParticipantInfo = action(async (formData: FormData) => {
 	return updated
 })
 
-export const advanceAttendanceStaus = action(async (formData: FormData) => {
+export const advanceAttendanceStatus = action(async (formData: FormData) => {
 	'use server'
 	const db = getDb()
 	const now = new Date().toISOString()
