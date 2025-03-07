@@ -13,6 +13,16 @@ type NavLinkData = {
 const links = [
 	{ title: 'Participants', href: '/admin/participants' },
 	{
+		title: 'Judging',
+		sublinks: [
+			{ title: 'Categories', href: '/admin/judging/categories' },
+			{ title: 'Judges & Groups', href: '/admin/judging/judges' },
+			{ title: 'Projects', href: '/admin/judging/projects' },
+			{ title: 'Project assignments', href: '/admin/judging/assignments' },
+			{ title: 'Prizing', href: '/admin/judging/prizing' }
+		]
+	},
+	{
 		title: 'Emails',
 		sublinks: [
 			{
