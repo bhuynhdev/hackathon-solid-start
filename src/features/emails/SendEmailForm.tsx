@@ -17,7 +17,6 @@ export default function SendEmailForm(props: SendEmailFormProps) {
 	const sendEmailSubmission = useSubmission(sendEmail)
 	return (
 		<form action={sendEmail} method="post">
-			<pre class="whitespace-pre-wrap">{JSON.stringify(sendEmailSubmission.result, null, 2)}</pre>
 			<header>
 				<h2 class="m-0">Send email</h2>
 			</header>

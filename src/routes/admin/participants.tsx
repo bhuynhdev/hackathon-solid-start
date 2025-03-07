@@ -6,7 +6,6 @@ import { createSignal, For, Show } from 'solid-js'
 import { attendanceStatuses } from '~/db/schema'
 import IconTablerChevronLeft from '~icons/tabler/chevron-left'
 import IconTablerChevronRight from '~icons/tabler/chevron-right'
-import IconTablerSearch from '~icons/tabler/search'
 
 export const route = {
 	preload: () => getParticipants({})
@@ -34,8 +33,9 @@ export default function ParticipantPage() {
 	}
 
 	return (
-		<div class="drawer drawer-end m-auto flex flex-col items-center justify-center gap-6 lg:w-4/5">
+		<div class="drawer drawer-end m-auto flex flex-col items-center justify-center gap-6">
 			<input
+				/** This is a 'hidden' input that controls the drawer **/
 				id="participant-info-drawer"
 				type="checkbox"
 				class="drawer-toggle"
@@ -63,12 +63,18 @@ export default function ParticipantPage() {
 						</div>
 					)}
 				</Show>
-				<form method="get" class="grid-cols-[repeat(auto-fit, minmax(100px, 1fr)] grid grid-flow-col gap-2 rounded-lg bg-gray-100 p-4" role="search">
-					<label class="input input-bordered flex items-center gap-2 text-base">
-						<IconTablerSearch width="18" height="18" />
-						<input aria-label="Search participant" id="query" type="text" name="q" placeholder="Search" value={query()} />
+				<form
+					method="get"
+					class="grid-cols-[repeat(auto-fit, minmax(100px, 1fr)] grid grid-flow-col items-end gap-2 rounded-lg bg-gray-100 p-4"
+					role="search"
+				>
+					<label class="fieldset py-0">
+						<span class="fieldset-legend pt-0 text-sm">Name &amp; Email</span>
+						{/* <IconTablerSearch width="18" height="18" /> */}
+						<input class="input pb-0" aria-label="Search participant" type="text" name="q" placeholder="Search" value={query()} />
 					</label>
-					<label>
+					<label class="fieldset py-0">
+						<span class="fieldset-legend pt-0 text-sm">Attendance status</span>
 						<select class="select" name="status">
 							<option value="" selected={!status()}>
 								--All--
@@ -82,7 +88,7 @@ export default function ParticipantPage() {
 							</For>
 						</select>
 					</label>
-					<button type="submit" class="btn btn-primary max-w-42">
+					<button type="submit" class="btn btn-primary my-1 max-w-42">
 						Search
 					</button>
 				</form>
@@ -137,7 +143,7 @@ export default function ParticipantPage() {
 										<td>
 											<AttendanceStatusBadge attendanceStatus={p.attendanceStatus} />
 										</td>
-										<td class="hidden md:table-cell">
+										<td class="hidden sm:table-cell">
 											<button
 												aria-label="Open Participant edit modal"
 												class="btn btn-primary h-8 min-h-8 text-white"

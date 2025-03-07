@@ -39,23 +39,29 @@ export default function AdminLayout(props: RouteSectionProps) {
 			</header>
 			<div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
 				{/* Left-side navbar */}
-				<nav class="hidden w-64 py-4 md:block" aria-label="Main navigation">
-					<ul class="menu w-full space-y-1">
-						<For each={links}>
-							{(link) => (
-								<li>
-									<NavLink {...link} />
-								</li>
-							)}
-						</For>
-					</ul>
-				</nav>
+				<NavBar links={links} />
 				{/* Main Content */}
-				<main class="p-4">{props.children}</main>
+				<main class="mx-auto p-4 lg:w-11/12">{props.children}</main>
 			</div>
 			{/* Footer */}
 			<footer class="p-4">(footer)</footer>
 		</div>
+	)
+}
+
+function NavBar(props: { links: Array<NavLinkData> }) {
+	return (
+		<nav class="hidden w-64 py-4 md:block" aria-label="Main navigation">
+			<ul class="menu w-full space-y-1">
+				<For each={props.links}>
+					{(link) => (
+						<li>
+							<NavLink {...link} />
+						</li>
+					)}
+				</For>
+			</ul>
+		</nav>
 	)
 }
 
