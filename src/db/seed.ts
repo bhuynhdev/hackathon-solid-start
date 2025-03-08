@@ -2,7 +2,7 @@ import assert from 'assert'
 import { drizzle } from 'drizzle-orm/libsql'
 import { reset, seed } from 'drizzle-seed'
 import { getLocalD1Path } from '../../drizzle.config'
-import { participant } from './schema'
+import { participant, category } from './schema'
 
 async function main() {
 	assert(process.env.NODE_ENV == 'development', 'Can only seed in development mode')
@@ -11,8 +11,8 @@ async function main() {
 
 	const SEED = 1234
 
-	await reset(db, { participant })
-	await seed(db, { participant }, { seed: SEED }).refine((f) => {
+	await reset(db, { participant, category })
+	await seed(db, { participant, category }, { seed: SEED }).refine((f) => {
 		return {
 			participant: {
 				count: 50,
@@ -37,6 +37,27 @@ async function main() {
 					deletedAt: f.default({ defaultValue: null }),
 					checkedInAt: f.default({ defaultValue: null }),
 					lastConfirmedAttendanceAt: f.default({ defaultValue: null })
+				}
+			},
+			category: {
+				count: 10,
+				columns: {
+					name: f.valuesFromArray({
+						values: [
+							'Most Technically Impressive',
+							'Best "Useless" Hack',
+							'General',
+							'Best Social Impact Hack',
+							'Best Business Plan',
+							'Kinetic Vision',
+							'Fifth Third',
+							'Medpace Sponsor Challenge',
+							'AWS Sponsor Prize',
+							'Parkingson Together'
+						],
+						isUnique: true
+					}),
+					type: f.valuesFromArray({ values: ['sponsor', 'inhouse'] })
 				}
 			}
 		}

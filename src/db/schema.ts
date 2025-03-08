@@ -69,6 +69,12 @@ export const user = sqliteTable('user', {
 	isJudge: integer('is_judge', { mode: 'boolean' }).default(false).notNull()
 })
 
+export const category = sqliteTable('category', {
+	id: integer('id').primaryKey(),
+	name: text('name').unique().notNull(),
+	type: text('type', { enum: ['sponsor', 'inhouse', 'general'] }).notNull()
+})
+
 export const mailCampaign = sqliteTable('mail_campaign', {
 	id: integer('id').primaryKey(),
 	template: text('template').notNull(),
@@ -104,6 +110,9 @@ export type Participant = typeof participant.$inferSelect
 export type ParticipantInsert = typeof participant.$inferSelect
 export type ParticipantUpdate = Partial<ParticipantInsert>
 export type AttendanceStatus = (typeof attendanceStatuses)[number]
+
+export type Category = typeof category.$inferSelect
+export type NewCategory = typeof category.$inferInsert
 
 export type MailCampaign = typeof mailCampaign.$inferSelect
 export type MailCampaignInsert = typeof mailCampaign.$inferInsert
