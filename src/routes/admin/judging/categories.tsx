@@ -1,6 +1,6 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { For, Switch, Match } from 'solid-js'
-import { getCategoriesQuery } from '~/features/judging/actions'
+import { deleteCategory, getCategoriesQuery } from '~/features/judging/actions'
 import { AddCategoriesForm } from '~/features/judging/AddCategoriesForm'
 import IconTablerPlus from '~icons/tabler/plus'
 
@@ -32,6 +32,7 @@ export default function CategoriesPage() {
 						<th>Name</th>
 						<th>Type</th>
 						<th class="sr-only">Edit</th>
+						<th class="sr-only">Delete</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -53,8 +54,18 @@ export default function CategoriesPage() {
 										</Match>
 									</Switch>
 								</td>
-								<td>
-									<button class="btn btn-primary h-8 text-white">Edit</button>
+								<td class="space-x-3">
+									<button type="button" class="btn btn-primary h-8 text-white">
+										Edit
+									</button>
+								</td>
+								<td class="space-x-3">
+									<form action={deleteCategory} method="post">
+										<input type="hidden" name="categoryId" value={category.id} />
+										<button type="submit" class="btn btn-error btn-soft h-8">
+											Delete
+										</button>
+									</form>
 								</td>
 							</tr>
 						)}

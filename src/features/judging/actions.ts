@@ -44,4 +44,11 @@ export const createCategoriesBulk = action(async (form: FormData) => {
 			target: category.name,
 			set: { type: sql.raw(`excluded.${category.type.name}`) }
 		})
+}, 'create-categories-bulk')
+
+export const deleteCategory = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const categoryId = form.get('categoryId') as string
+	await db.delete(category).where(eq(category.id, Number(categoryId)))
 })
