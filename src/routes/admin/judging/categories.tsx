@@ -16,7 +16,7 @@ export default function CategoriesPage() {
 			<div class="flex items-end gap-10">
 				<div>
 					<h2>Categories</h2>
-					<p>Name should appear exactly as in DevPost</p>
+					<p>Names should appear exactly as in DevPost</p>
 				</div>
 				<button type="button" class="btn btn-primary btn-outline w-fit" onclick={() => addCategoriesModal.showModal()}>
 					<span aria-hidden>
@@ -62,7 +62,7 @@ export default function CategoriesPage() {
 				</tbody>
 			</table>
 			<dialog id="add-categories-modal" class="modal" ref={addCategoriesModal}>
-				<div class="modal-box h-[550px]">
+				<div class="modal-box h-[600px] max-w-xl">
 					<AddCategoriesForm />
 				</div>
 			</dialog>
