@@ -14,11 +14,11 @@ export function AddCategoriesForm(props: AddCategoriesFormProps) {
 				<input type="radio" name="add_categories_form_tab" class="tab" aria-label="Manual entry" checked />
 				<div class="tab-content border-base-300 bg-base-100 p-5">
 					<form method="post" class="space-y-4" action={createCategory}>
-						<label class="grid grid-cols-[120px_1fr] items-center">
+						<label class="grid grid-cols-[7rem_1fr] items-center">
 							<span class="text-sm">Category name</span>
 							<input class="input" name="categoryName" placeholder="Best Education Hack" required />
 						</label>
-						<fieldset class="grid grid-cols-[120px_1fr] items-center">
+						<fieldset class="grid grid-cols-[7rem_1fr] items-center">
 							<legend class="contents text-sm">Category type</legend>
 							<div class="flex gap-4">
 								<label>

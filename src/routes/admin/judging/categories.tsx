@@ -3,6 +3,7 @@ import { For, Switch, Match } from 'solid-js'
 import { deleteCategory, getCategoriesQuery } from '~/features/judging/actions'
 import { AddCategoriesForm } from '~/features/judging/AddCategoriesForm'
 import IconTablerPlus from '~icons/tabler/plus'
+import IconTablerTrash from '~icons/tabler/trash'
 
 export const route = {
 	preload: () => getCategoriesQuery()
@@ -28,7 +29,6 @@ export default function CategoriesPage() {
 			<table class="mt-6 table">
 				<thead>
 					<tr>
-						<th>Id</th>
 						<th>Name</th>
 						<th>Type</th>
 						<th class="sr-only">Edit</th>
@@ -39,12 +39,11 @@ export default function CategoriesPage() {
 					<For each={categories()}>
 						{(category) => (
 							<tr>
-								<th>{category.id}</th>
 								<td>{category.name}</td>
 								<td>
 									<Switch>
 										<Match when={category.type === 'inhouse'}>
-											<span class="badge bg-amber-300">In-house</span>
+											<span class="badge bg-amber-300">Inhouse</span>
 										</Match>
 										<Match when={category.type === 'sponsor'}>
 											<span class="badge bg-rose-400">Sponsor</span>
@@ -54,16 +53,19 @@ export default function CategoriesPage() {
 										</Match>
 									</Switch>
 								</td>
-								<td class="space-x-3">
+								<td>
 									<button type="button" class="btn btn-primary h-8 text-white">
 										Edit
 									</button>
 								</td>
-								<td class="space-x-3">
+								<td class="pl-0">
 									<form action={deleteCategory} method="post">
 										<input type="hidden" name="categoryId" value={category.id} />
-										<button type="submit" class="btn btn-error btn-soft h-8">
-											Delete
+										<button type="submit" class="btn btn-error btn-soft h-8" aria-label="Delete">
+											<span class="hidden md:inline">Delete </span>
+											<span>
+												<IconTablerTrash />
+											</span>
 										</button>
 									</form>
 								</td>
@@ -73,7 +75,7 @@ export default function CategoriesPage() {
 				</tbody>
 			</table>
 			<dialog id="add-categories-modal" class="modal" ref={addCategoriesModal}>
-				<div class="modal-box h-[600px] max-w-xl">
+				<div class="modal-box h-[600px] max-w-md lg:max-w-lg">
 					<AddCategoriesForm />
 				</div>
 			</dialog>
