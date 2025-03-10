@@ -1,22 +1,45 @@
 import IconTablerInfoCircle from '~icons/tabler/info-circle'
-import { bulkCreateCategories } from './actions'
+import { createCategoriesBulk, createCategory } from './actions'
 
 interface AddCategoriesFormProps {
 	isInModal?: boolean
 }
 
 export function AddCategoriesForm(props: AddCategoriesFormProps) {
-	let formRef!: HTMLFormElement
+	let bulkEntryFormRef!: HTMLFormElement
 	return (
 		<>
 			<h3 class="mb-4 text-lg font-bold">Add Categories</h3>
 			<div class="tabs tabs-lift">
-				<input type="radio" name="my_tabs_2" class="tab" aria-label="Manual entry" />
-				<div class="tab-content border-base-300 bg-base-100 p-5">Tab content 1</div>
-
-				<input type="radio" name="my_tabs_2" class="tab" aria-label="Bulk entry" checked />
+				<input type="radio" name="add_categories_form_tab" class="tab" aria-label="Manual entry" checked />
 				<div class="tab-content border-base-300 bg-base-100 p-5">
-					<form method="post" class="space-y-3" action={bulkCreateCategories} enctype="multipart/form-data" ref={formRef}>
+					<form method="post" class="space-y-4" action={createCategory}>
+						<label class="grid grid-cols-[120px_1fr] items-center">
+							<span class="text-sm">Category name</span>
+							<input class="input" name="categoryName" placeholder="Best Education Hack" required />
+						</label>
+						<fieldset class="grid grid-cols-[120px_1fr] items-center">
+							<legend class="contents text-sm">Category type</legend>
+							<div class="flex gap-4">
+								<label>
+									<input type="radio" class="radio radio-xs" name="categoryType" value="sponsor" checked />
+									<span class="ml-1">Sponsor</span>
+								</label>
+								<label>
+									<input type="radio" class="radio radio-xs" name="categoryType" value="inhouse" />
+									<span class="ml-1">In-house</span>
+								</label>
+							</div>
+						</fieldset>
+						<button type="submit" class="btn btn-primary ml-auto block">
+							Submit
+						</button>
+					</form>
+				</div>
+
+				<input type="radio" name="add_categories_form_tab" class="tab" aria-label="Bulk entry" />
+				<div class="tab-content border-base-300 bg-base-100 p-5">
+					<form method="post" class="space-y-3" action={createCategoriesBulk} enctype="multipart/form-data" ref={bulkEntryFormRef}>
 						<p>Upload categories data as a CSV file</p>
 						<input type="file" name="csvFile" class="file-input" aria-label="Upload CSV file" />
 						<p>Or enter categories as comma-separated strings</p>
@@ -27,7 +50,7 @@ export function AddCategoriesForm(props: AddCategoriesFormProps) {
 							placeholder="category1,sponsor&#10;category2,inhouse"
 						/>
 						<div class="space-x-3 text-right">
-							<button type="submit" class="btn btn-neutral btn-outline" onclick={() => formRef.reset()}>
+							<button type="submit" class="btn btn-neutral btn-outline" onclick={() => bulkEntryFormRef.reset()}>
 								Reset
 							</button>
 							<button type="submit" class="btn btn-primary">

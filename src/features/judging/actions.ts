@@ -1,7 +1,7 @@
 import { action, query } from '@solidjs/router'
 import { category } from '~/db/schema'
 import { getDb } from '~/utils'
-import { sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { parse } from 'csv-parse/sync'
 
 export const getCategoriesQuery = query(async () => {
@@ -11,7 +11,16 @@ export const getCategoriesQuery = query(async () => {
 	return categories
 }, 'get-categories')
 
-export const bulkCreateCategories = action(async (form: FormData) => {
+export const createCategory = action(async (form: FormData) => {
+	'use server'
+	const categoryName = form.get('categoryName') as string
+	const categoryType = form.get('categoryType') as 'sponsor' | 'inhouse'
+	const db = getDb()
+
+	await db.insert(category).values({ name: categoryName, type: categoryType })
+}, 'create-category')
+
+export const createCategoriesBulk = action(async (form: FormData) => {
 	'use server'
 	const db = getDb()
 	const csvFile = form.get('csvFile') as File
