@@ -45,7 +45,7 @@ export function ParticipantInfoForm(props: { participant: ParticipantDto; onClos
 					{props.participant.checkedInAt ? `${datetimeFormatter.format(new Date(props.participant.checkedInAt))}` : 'Not yet'}
 				</p>
 			</section>
-			<form id="participant-profile" method="post" action={updateParticipantInfo} class="border-base-300 mt-4 rounded-md border-1">
+			<form id="participant-profile" method="post" action={updateParticipantInfo} class="border-base-300 mt-4 rounded-md border">
 				<header class="bg-gray-200 px-4 py-3">
 					<h3 class="font-semibold">Profile</h3>
 				</header>

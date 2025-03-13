@@ -7,7 +7,7 @@ import { parse } from 'csv-parse/sync'
 export const getCategoriesQuery = query(async () => {
 	'use server'
 	const db = getDb()
-	const categories = await db.select().from(category)
+	const categories = await db.select().from(category).orderBy(category.name)
 	return categories
 }, 'get-categories')
 
@@ -46,9 +46,20 @@ export const createCategoriesBulk = action(async (form: FormData) => {
 		})
 }, 'create-categories-bulk')
 
+export const updateCategory = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const categoryId = form.get('categoryId') as string
+	const { categoryName, categoryType } = Object.fromEntries(form)
+	await db
+		.update(category)
+		.set({ name: String(categoryName), type: categoryType as 'sponsor' | 'inhouse' | 'general' })
+		.where(eq(category.id, Number(categoryId)))
+}, 'update-category')
+
 export const deleteCategory = action(async (form: FormData) => {
 	'use server'
 	const db = getDb()
 	const categoryId = form.get('categoryId') as string
 	await db.delete(category).where(eq(category.id, Number(categoryId)))
-})
+}, 'delete-category')
