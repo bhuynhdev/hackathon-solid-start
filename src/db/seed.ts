@@ -2,7 +2,7 @@ import assert from 'assert'
 import { drizzle } from 'drizzle-orm/libsql'
 import { reset, seed } from 'drizzle-seed'
 import { getLocalD1Path } from '../../drizzle.config'
-import { participant, category } from './schema'
+import { participant, category, judge } from './schema'
 
 async function main() {
 	assert(process.env.NODE_ENV == 'development', 'Can only seed in development mode')
@@ -11,8 +11,8 @@ async function main() {
 
 	const SEED = 1234
 
-	await reset(db, { participant, category })
-	await seed(db, { participant, category }, { seed: SEED }).refine((f) => {
+	await reset(db, { participant, category, judge })
+	await seed(db, { participant, category, judge }, { seed: SEED }).refine((f) => {
 		return {
 			participant: {
 				count: 50,
@@ -59,7 +59,15 @@ async function main() {
 					}),
 					type: f.valuesFromArray({ values: ['sponsor', 'inhouse'] })
 				}
-			}
+			},
+			judge: {
+				count: 20,
+				columns: {
+					email: f.email(),
+					name: f.fullName(),
+					categoryId: f.int({ minValue: 1, maxValue: 10 })
+				}
+			},
 		}
 	})
 

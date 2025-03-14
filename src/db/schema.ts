@@ -75,6 +75,13 @@ export const category = sqliteTable('category', {
 	type: text('type', { enum: ['sponsor', 'inhouse', 'general'] }).notNull()
 })
 
+export const judge = sqliteTable('judge', {
+	id: integer('id').primaryKey(),
+	email: text('email').unique().notNull(),
+	name: text('name').notNull(),
+	categoryId: integer('category_id').references(() => category.id).notNull()
+})
+
 export const mailCampaign = sqliteTable('mail_campaign', {
 	id: integer('id').primaryKey(),
 	template: text('template').notNull(),
@@ -121,3 +128,6 @@ export type MailLog = typeof mailLog.$inferSelect
 export type MailLogInsert = typeof mailLog.$inferInsert
 
 export type User = typeof user.$inferSelect
+
+export type Judge = typeof judge.$inferSelect
+export type NewJudge = typeof judge.$inferInsert
