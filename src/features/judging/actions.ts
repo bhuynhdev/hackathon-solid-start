@@ -1,9 +1,10 @@
 import { action, query } from '@solidjs/router'
-import { category } from '~/db/schema'
+import { category, judge } from '~/db/schema'
 import { getDb } from '~/utils'
 import { eq, sql } from 'drizzle-orm'
 import { parse } from 'csv-parse/sync'
 
+/** CATEGORIES */
 export const getCategoriesQuery = query(async () => {
 	'use server'
 	const db = getDb()
@@ -63,3 +64,68 @@ export const deleteCategory = action(async (form: FormData) => {
 	const categoryId = form.get('categoryId') as string
 	await db.delete(category).where(eq(category.id, Number(categoryId)))
 }, 'delete-category')
+
+/** JUDGES */
+export const getJudgesQuery = query(async () => {
+	'use server'
+	const db = getDb()
+	const judges = await db.select().from(judge).orderBy(judge.name)
+	return judges
+}, 'get-judges')
+
+export const createJudge = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const judgeName = form.get('name') as string
+	const email = form.get('email') as string
+	const categoryId = form.get('categoryId') as string
+	await db.insert(judge).values({ name: judgeName, email, categoryId: Number(categoryId) })
+})
+
+export const createJudgesBulk = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const csvFile = form.get('csvFile') as File
+	const csvText = form.get('csvText') as string
+
+	if (csvFile.size === 0 && !csvText) {
+		throw new Error('Please provide either File or Text input')
+	}
+	if (csvFile.size > 0 && csvText) {
+		throw new Error('Please provide only one of File or Text input')
+	}
+
+	const csvContent = csvText || (await csvFile.text())
+	const judgesInput: Array<{ name: string; email: string; categoryId: number }> = parse(csvContent, {
+		columns: ['name', 'email', 'categoryId'],
+		skip_empty_lines: true,
+		cast: (value, context) => {
+			return context.column === 'categoryId' ? Number(value) : String(value)
+		},
+	})
+
+	await db.insert(judge).values(judgesInput)
+}, 'create-judges-bulk')
+
+export const updateJudge = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const judgeId = form.get('judgeId') as string
+	const { name, email, categoryId } = Object.fromEntries(form)
+
+	await db
+		.update(judge)
+		.set({
+			name: String(name),
+			email: String(email),
+			categoryId: Number(categoryId)
+		})
+		.where(eq(judge.id, Number(judgeId)))
+}, 'update-judge')
+
+export const deleteJudge = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const judgeId = form.get('judgeId') as string
+	await db.delete(judge).where(eq(judge.id, Number(judgeId)))
+}, 'delete-judge')
