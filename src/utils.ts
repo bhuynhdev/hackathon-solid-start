@@ -1,6 +1,7 @@
 import { getRequestEvent } from 'solid-js/web'
 import { AttendanceStatus } from './db/schema'
 import { type DrizzleD1Database } from 'drizzle-orm/d1'
+import * as schema from './db/schema'
 
 export type AttendanceAction = 'CheckIn' | 'ConfirmAttendance' | 'Unconfirm' | 'ToggleLateCheckIn'
 
@@ -70,5 +71,5 @@ export function getNextAttendanceActions(currentStatus: AttendanceStatus): Array
 
 export const getDb = () => {
 	const event = getRequestEvent()
-	return event?.locals.db as DrizzleD1Database
+	return event?.locals.db as DrizzleD1Database<typeof schema>
 }

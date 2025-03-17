@@ -1,5 +1,5 @@
 import { action, query } from '@solidjs/router'
-import { category, judge } from '~/db/schema'
+import { category, judge, project, projectSubmission } from '~/db/schema'
 import { getDb } from '~/utils'
 import { eq, sql } from 'drizzle-orm'
 import { parse } from 'csv-parse/sync'
@@ -99,9 +99,7 @@ export const createJudgesBulk = action(async (form: FormData) => {
 	const judgesInput: Array<{ name: string; email: string; categoryId: number }> = parse(csvContent, {
 		columns: ['name', 'email', 'categoryId'],
 		skip_empty_lines: true,
-		cast: (value, context) => {
-			return context.column === 'categoryId' ? Number(value) : String(value)
-		},
+		cast: (value, context) => (context.column === 'categoryId' ? Number(value) : String(value))
 	})
 
 	await db.insert(judge).values(judgesInput)
@@ -129,3 +127,30 @@ export const deleteJudge = action(async (form: FormData) => {
 	const judgeId = form.get('judgeId') as string
 	await db.delete(judge).where(eq(judge.id, Number(judgeId)))
 }, 'delete-judge')
+
+/** Projects **/
+
+export const getProjectsQuery = query(async () => {
+	'use server'
+	const db = getDb()
+	const projectAndSubmissions = await db.query.project.findMany({ with: { submissions: true } })
+	return projectAndSubmissions
+}, 'get-projects')
+
+export const createProjectAndSubmissions = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const projectName = form.get('projectName') as string
+	const categoryIds = form.getAll('categoryId') as string[]
+	const [newProject] = await db.insert(project).values({ name: projectName }).returning()
+	await Promise.all(
+		categoryIds.map((categoryId) => db.insert(projectSubmission).values({ projectId: newProject.id, categoryId: Number(categoryId) }))
+	)
+}, 'create-project-and-submissions')
+
+export const deleteProject = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const projectId = form.get('projectId') as string
+	await db.delete(project).where(eq(project.id, Number(projectId)))
+}, 'delete-project')
