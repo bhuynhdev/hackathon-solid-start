@@ -79,7 +79,24 @@ export const judge = sqliteTable('judge', {
 	id: integer('id').primaryKey(),
 	email: text('email').unique().notNull(),
 	name: text('name').notNull(),
-	categoryId: integer('category_id').references(() => category.id).notNull()
+	categoryId: integer('category_id')
+		.references(() => category.id)
+		.notNull()
+})
+
+export const project = sqliteTable('project', {
+	id: integer('id').primaryKey(),
+	name: text('name').notNull()
+})
+
+export const projectSubmission = sqliteTable('project_submission', {
+	id: integer('id').primaryKey(),
+	projectId: integer('project_id')
+		.notNull()
+		.references(() => project.id),
+	categoryId: integer('category_id')
+		.notNull()
+		.references(() => category.id)
 })
 
 export const mailCampaign = sqliteTable('mail_campaign', {
