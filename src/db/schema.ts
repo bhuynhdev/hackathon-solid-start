@@ -1,5 +1,5 @@
-import { sql, type SQL } from 'drizzle-orm'
-import { sqliteTable, text, integer, check } from 'drizzle-orm/sqlite-core'
+import { relations, sql, type SQL } from 'drizzle-orm'
+import { sqliteTable, text, integer, check, unique } from 'drizzle-orm/sqlite-core'
 
 export const event = sqliteTable(
 	'event',
@@ -89,15 +89,27 @@ export const project = sqliteTable('project', {
 	name: text('name').notNull()
 })
 
-export const projectSubmission = sqliteTable('project_submission', {
-	id: integer('id').primaryKey(),
-	projectId: integer('project_id')
-		.notNull()
-		.references(() => project.id),
-	categoryId: integer('category_id')
-		.notNull()
-		.references(() => category.id)
-})
+export const projectRelations = relations(project, ({ many }) => ({
+	submissions: many(projectSubmission)
+}))
+
+export const projectSubmission = sqliteTable(
+	'project_submission',
+	{
+		id: integer('id').primaryKey(),
+		projectId: integer('project_id')
+			.notNull()
+			.references(() => project.id, { onDelete: 'cascade' }),
+		categoryId: integer('category_id')
+			.notNull()
+			.references(() => category.id, { onDelete: 'set null' })
+	},
+	(table) => [unique('project_and_category').on(table.projectId, table.categoryId)]
+)
+
+export const projectSubmissionsRelations = relations(projectSubmission, ({ one }) => ({
+	project: one(project, { fields: [projectSubmission.projectId], references: [project.id] })
+}))
 
 export const mailCampaign = sqliteTable('mail_campaign', {
 	id: integer('id').primaryKey(),

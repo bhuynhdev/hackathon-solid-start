@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "650b855b-33f8-40a7-bc15-df0b4464ffb3",
+  "id": "80dec6d7-9f75-41a3-b845-b015f1fc10b4",
   "prevId": "07f96f7f-8ae0-4225-a1fa-7166b6a2b35d",
   "tables": {
     "category": {
@@ -537,7 +537,16 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "project_and_category": {
+          "name": "project_and_category",
+          "columns": [
+            "project_id",
+            "category_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "project_submission_project_id_project_id_fk": {
           "name": "project_submission_project_id_project_id_fk",
@@ -549,7 +558,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "project_submission_category_id_category_id_fk": {
@@ -562,7 +571,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
