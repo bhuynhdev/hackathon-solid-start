@@ -2,6 +2,7 @@ import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Show } from 'solid-js'
 import { deleteJudge, getCategoriesQuery, getJudgesQuery } from '~/features/judging/actions'
 import { AddJudgesForm } from '~/features/judging/AddJudgeForm'
+import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerTrash from '~icons/tabler/trash'
 
@@ -90,11 +91,10 @@ export default function JudgesPage() {
 				<label for="participant-info-drawer" class="drawer-overlay"></label>
 				<div class="bg-base-100 min-h-full w-full max-w-[500px] p-6">
 					<Show when={judge()} fallback={<p>No judge selected</p>} keyed>
-						<pre>Judge form here</pre>
+						{(j) => <JudgeEditForm judge={j} onClose={() => setSelectedJudgeId(null)} />}
 					</Show>
 				</div>
 			</div>
 		</div>
 	)
 }
-
