@@ -69,7 +69,7 @@ export const deleteCategory = action(async (form: FormData) => {
 export const getJudgesQuery = query(async () => {
 	'use server'
 	const db = getDb()
-	const judges = await db.select().from(judge).orderBy(judge.name)
+	const judges = await db.query.judge.findMany({ with: { category: true } })
 	return judges
 }, 'get-judges')
 
@@ -80,7 +80,7 @@ export const createJudge = action(async (form: FormData) => {
 	const email = form.get('email') as string
 	const categoryId = form.get('categoryId') as string
 	await db.insert(judge).values({ name: judgeName, email, categoryId: Number(categoryId) })
-})
+}, 'create-judge')
 
 export const createJudgesBulk = action(async (form: FormData) => {
 	'use server'

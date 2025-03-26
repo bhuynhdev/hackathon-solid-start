@@ -11,7 +11,7 @@ export default createMiddleware({
 				const db = drizzleD1(proxy.env.DB as D1Database, { schema: schema })
 				event.locals.db = db
 			} else {
-				const db = drizzleD1(event.nativeEvent.context.cloudflare.env.DB)
+				const db = drizzleD1(event.nativeEvent.context.cloudflare.env.DB, { schema: schema })
 				event.locals.db = db
 			}
 		}
