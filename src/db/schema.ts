@@ -84,6 +84,10 @@ export const judge = sqliteTable('judge', {
 		.notNull()
 })
 
+export const judgeRelations = relations(judge, ({ one }) => ({
+	category: one(category, { fields: [judge.categoryId], references: [category.id] })
+}))
+
 export const project = sqliteTable('project', {
 	id: integer('id').primaryKey(),
 	name: text('name').notNull()
