@@ -1,42 +1,38 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Show } from 'solid-js'
-import { deleteJudge, getCategoriesQuery, getJudgesQuery } from '~/features/judging/actions'
+import { deleteJudge, getJudgesQuery } from '~/features/judging/actions'
 import { AddJudgesForm } from '~/features/judging/AddJudgeForm'
 import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerTrash from '~icons/tabler/trash'
 
 export const route = {
-	preload: () => {
-		getJudgesQuery()
-		getCategoriesQuery()
-	}
+	preload: () => getJudgesQuery()
 } satisfies RouteDefinition
 
 export default function JudgesPage() {
 	const judges = createAsync(() => getJudgesQuery())
-	const categories = createAsync(() => getCategoriesQuery())
 	const [selectedJudgeId, setSelectedJudgeId] = createSignal<number | null>(null)
-	const judge = () => judges()?.find((p) => p.id == selectedJudgeId())
+	const judge = () => judges()?.find((j) => j.id == selectedJudgeId())
 
-	let addCategoriesModal!: HTMLDialogElement
+	let addJudgesModal!: HTMLDialogElement
 	return (
 		<div class="drawer drawer-end m-auto flex flex-col items-center justify-center gap-6">
 			<input
-				id="participant-info-drawer"
+				/** This is a 'hidden' input that controls the drawer **/
+				id="judge-info-drawer"
 				type="checkbox"
 				class="drawer-toggle"
-				aria-hidden
+				hidden
 				checked={selectedJudgeId() !== null}
-				onChange={(e) => !e.currentTarget.checked && setSelectedJudgeId(null)}
+				onChange={(e) => !e.currentTarget.checked && setSelectedJudgeId(null)} /** Set category to null if drawer is checked off **/
 			/>
-
 			<div class="drawer-content w-full">
 				<div class="flex items-end gap-10">
 					<div>
 						<h2>Judges</h2>
 					</div>
-					<button type="button" class="btn btn-primary btn-outline w-fit" onclick={() => addCategoriesModal.showModal()}>
+					<button type="button" class="btn btn-primary btn-outline w-fit" onclick={() => addJudgesModal.showModal()}>
 						<span aria-hidden>
 							<IconTablerPlus />
 						</span>
@@ -59,7 +55,7 @@ export default function JudgesPage() {
 								<tr>
 									<td>{judge.name}</td>
 									<td>{judge.email}</td>
-									<td>{categories()?.find((c) => c.id === judge.categoryId)?.name}</td>
+									<td>{judge.category.name}</td>
 									<td>
 										<button type="button" class="btn btn-primary h-8 text-white" onclick={() => setSelectedJudgeId(judge.id)}>
 											Edit
@@ -81,17 +77,17 @@ export default function JudgesPage() {
 						</For>
 					</tbody>
 				</table>
-				<dialog id="add-judges-modal" class="modal" ref={addCategoriesModal}>
+				<dialog id="add-judges-modal" class="modal" ref={addJudgesModal}>
 					<div class="modal-box h-[600px] max-w-md lg:max-w-lg">
 						<AddJudgesForm />
 					</div>
 				</dialog>
 			</div>
 			<div role="dialog" class="drawer-side">
-				<label for="participant-info-drawer" class="drawer-overlay"></label>
+				<label for="judge-info-drawer" class="drawer-overlay"></label>
 				<div class="bg-base-100 min-h-full w-full max-w-[500px] p-6">
-					<Show when={judge()} fallback={<p>No judge selected</p>} keyed>
-						{(j) => <JudgeEditForm judge={j} onClose={() => setSelectedJudgeId(null)} />}
+					<Show when={judge()} fallback={<p>No judge selected</p>}>
+						<JudgeEditForm judge={judge()!} onClose={() => setSelectedJudgeId(null)} />
 					</Show>
 				</div>
 			</div>

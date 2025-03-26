@@ -1,5 +1,5 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
-import { For, Switch, Match, createSignal, Show } from 'solid-js'
+import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { deleteCategory, getCategoriesQuery } from '~/features/judging/actions'
 import { AddCategoriesForm } from '~/features/judging/AddCategoriesForm'
 import { CategoryEditForm } from '~/features/judging/CategoryEditForm'
@@ -13,21 +13,20 @@ export const route = {
 export default function CategoriesPage() {
 	const categories = createAsync(() => getCategoriesQuery())
 	const [selectedCategoryId, setSelectedCategoryId] = createSignal<number | null>(null)
-	const category = () => categories()?.find((p) => p.id == selectedCategoryId())
+	const category = () => categories()?.find((c) => c.id == selectedCategoryId())
 
 	let addCategoriesModal!: HTMLDialogElement
 	return (
 		<div class="drawer drawer-end m-auto flex flex-col items-center justify-center gap-6">
 			<input
 				/** This is a 'hidden' input that controls the drawer **/
-				id="participant-info-drawer"
+				id="category-info-drawer"
 				type="checkbox"
 				class="drawer-toggle"
-				aria-hidden
+				hidden
 				checked={selectedCategoryId() !== null}
-				onChange={(e) => !e.currentTarget.checked && setSelectedCategoryId(null)} /** Set participant to null if drawer is checked off **/
+				onChange={(e) => !e.currentTarget.checked && setSelectedCategoryId(null)} /** Set category to null if drawer is checked off **/
 			/>
-
 			<div class="drawer-content w-full">
 				<div class="flex items-end gap-10">
 					<div>
@@ -96,7 +95,7 @@ export default function CategoriesPage() {
 				</dialog>
 			</div>
 			<div role="dialog" class="drawer-side">
-				<label for="participant-info-drawer" class="drawer-overlay"></label>
+				<label for="category-info-drawer" class="drawer-overlay"></label>
 				<div class="bg-base-100 min-h-full w-full max-w-[500px] p-6">
 					<Show when={category()} fallback={<p>No category selected</p>} keyed>
 						{(c) => <CategoryEditForm category={c} onClose={() => setSelectedCategoryId(null)} />}

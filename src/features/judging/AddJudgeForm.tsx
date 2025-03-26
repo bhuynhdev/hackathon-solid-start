@@ -14,7 +14,7 @@ export function AddJudgesForm() {
 					<form method="post" action={createJudge} class="space-y-4">
 						<div class="grid grid-cols-[7rem_1fr] items-center">
 							<span class="text-sm">Judge Name</span>
-							<input class="input" name="name" placeholder="Best Education Judge" required />
+							<input class="input" name="name" placeholder="John Doe" required />
 						</div>
 						<div class="grid grid-cols-[7rem_1fr] items-center">
 							<span class="text-sm">Email</span>
@@ -34,7 +34,7 @@ export function AddJudgesForm() {
 
 				<input type="radio" name="add_judges_form_tab" class="tab" aria-label="Bulk entry" />
 				<div class="tab-content border-base-300 bg-base-100 p-5">
-					<form method="post" action={createJudgesBulk} enctype="multipart/form-data" ref={bulkEntryFormRef}>
+					<form method="post" class="space-y-3" action={createJudgesBulk} enctype="multipart/form-data" ref={bulkEntryFormRef}>
 						<p>Upload judges data as a CSV file</p>
 						<input type="file" name="csvFile" class="file-input" aria-label="Upload CSV file" />
 						<p>Or enter judges as comma-separated strings</p>
@@ -42,7 +42,7 @@ export function AddJudgesForm() {
 							aria-label="Judges string input"
 							name="csvText"
 							class="textarea w-full"
-							placeholder="judge1,judge2&#10;email1,email2"
+							placeholder="judge1,email1&#10;judge2,email2"
 						/>
 						<div class="space-x-3 text-right">
 							<button type="submit" class="btn btn-neutral btn-outline" onclick={() => bulkEntryFormRef.reset()}>
@@ -56,11 +56,11 @@ export function AddJudgesForm() {
 							<p class="font-semibold">
 								<IconTablerInfoCircle class="inline align-text-bottom" /> CSV format
 							</p>
-							<p>First column: Judge's name</p>
-							<p>Second column: Email</p>
-							<p>Third column: Category ID</p>
+							<p>1st column: Judge name</p>
+							<p>2nd column: Email</p>
+							<p>You can edit judges' categories after creation</p>
 							<p>
-								<span class="font-semibold">Note:</span> Don't provide headers. Entries will override existing judges if same name
+								<span class="font-semibold">Note:</span> Don't provide headers. Entries will override existing judges if same email
 							</p>
 						</div>
 					</form>
