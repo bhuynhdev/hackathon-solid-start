@@ -80,6 +80,9 @@ export default function JudgesPage() {
 				<dialog id="add-judges-modal" class="modal" ref={addJudgesModal}>
 					<div class="modal-box h-[600px] max-w-md lg:max-w-lg">
 						<AddJudgesForm />
+						<form method="dialog" class="modal-action">
+							<button class="btn">Close</button>
+						</form>
 					</div>
 				</dialog>
 			</div>
