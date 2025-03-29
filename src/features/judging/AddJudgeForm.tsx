@@ -7,7 +7,6 @@ export function AddJudgesForm() {
 	let bulkEntryFormRef!: HTMLFormElement
 	return (
 		<>
-			<h3 class="mb-4 text-lg font-bold">Add Judges</h3>
 			<div class="tabs tabs-lift">
 				<input type="radio" name="add_judges_form_tab" class="tab" aria-label="Manual entry" checked />
 				<div class="tab-content border-base-300 bg-base-100 p-5">
@@ -58,7 +57,7 @@ export function AddJudgesForm() {
 							</p>
 							<p>1st column: Judge name</p>
 							<p>2nd column: Email</p>
-							<p>You can edit judges' categories after creation</p>
+							<p>Edit judges' categories after creation</p>
 							<p>
 								<span class="font-semibold">Note:</span> Don't provide headers. Entries will override existing judges if same email
 							</p>

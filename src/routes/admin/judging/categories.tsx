@@ -5,6 +5,7 @@ import { AddCategoriesForm } from '~/features/judging/AddCategoriesForm'
 import { CategoryEditForm } from '~/features/judging/CategoryEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerTrash from '~icons/tabler/trash'
+import IconTablerX from '~icons/tabler/x'
 
 export const route = {
 	preload: () => getCategoriesQuery()
@@ -90,6 +91,12 @@ export default function CategoriesPage() {
 				</table>
 				<dialog id="add-categories-modal" class="modal" ref={addCategoriesModal}>
 					<div class="modal-box h-[600px] max-w-md lg:max-w-lg">
+						<div class="flex justify-between">
+							<h3 class="mb-4 text-lg font-bold">Add Categories</h3>
+							<button class="cursor-pointer" aria-label="Close" onclick={() => addCategoriesModal.close()}>
+								<IconTablerX />
+							</button>
+						</div>
 						<AddCategoriesForm />
 						<form method="dialog" class="modal-action">
 							<button class="btn">Close</button>

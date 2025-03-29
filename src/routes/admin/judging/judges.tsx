@@ -5,6 +5,7 @@ import { AddJudgesForm } from '~/features/judging/AddJudgeForm'
 import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerTrash from '~icons/tabler/trash'
+import IconTablerX from '~icons/tabler/x'
 
 export const route = {
 	preload: () => getJudgesQuery()
@@ -79,6 +80,12 @@ export default function JudgesPage() {
 				</table>
 				<dialog id="add-judges-modal" class="modal" ref={addJudgesModal}>
 					<div class="modal-box h-[600px] max-w-md lg:max-w-lg">
+						<div class="flex justify-between">
+							<h3 class="mb-4 text-lg font-bold">Add Judges</h3>
+							<button class="cursor-pointer" aria-label="Close" onclick={() => addJudgesModal.close()}>
+								<IconTablerX />
+							</button>
+						</div>
 						<AddJudgesForm />
 						<form method="dialog" class="modal-action">
 							<button class="btn">Close</button>

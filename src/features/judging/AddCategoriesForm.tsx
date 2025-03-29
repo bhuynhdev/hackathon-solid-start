@@ -9,7 +9,6 @@ export function AddCategoriesForm(props: AddCategoriesFormProps) {
 	let bulkEntryFormRef!: HTMLFormElement
 	return (
 		<>
-			<h3 class="mb-4 text-lg font-bold">Add Categories</h3>
 			<div class="tabs tabs-lift">
 				<input type="radio" name="add_categories_form_tab" class="tab" aria-label="Manual entry" checked />
 				<div class="tab-content border-base-300 bg-base-100 p-5">
