@@ -145,24 +145,3 @@ export const session = sqliteTable('session', {
 		.references(() => participant.id),
 	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
 })
-
-export type Session = typeof session.$inferSelect
-
-export type Participant = typeof participant.$inferSelect
-export type ParticipantInsert = typeof participant.$inferSelect
-export type ParticipantUpdate = Partial<ParticipantInsert>
-export type AttendanceStatus = (typeof attendanceStatuses)[number]
-
-export type Category = typeof category.$inferSelect
-export type NewCategory = typeof category.$inferInsert
-
-export type MailCampaign = typeof mailCampaign.$inferSelect
-export type MailCampaignInsert = typeof mailCampaign.$inferInsert
-
-export type MailLog = typeof mailLog.$inferSelect
-export type MailLogInsert = typeof mailLog.$inferInsert
-
-export type User = typeof user.$inferSelect
-
-export type Judge = typeof judge.$inferSelect
-export type NewJudge = typeof judge.$inferInsert
