@@ -128,8 +128,7 @@ export const deleteJudge = action(async (form: FormData) => {
 	await db.delete(judge).where(eq(judge.id, Number(judgeId)))
 }, 'delete-judge')
 
-/** Projects **/
-
+/** PROJECTS **/
 export const getProjectsQuery = query(async () => {
 	'use server'
 	const db = getDb()
@@ -140,13 +139,20 @@ export const getProjectsQuery = query(async () => {
 export const createProjectAndSubmissions = action(async (form: FormData) => {
 	'use server'
 	const db = getDb()
-	const projectName = form.get('projectName') as string
-	const categoryIds = form.getAll('categoryId') as string[]
-	const [newProject] = await db.insert(project).values({ name: projectName }).returning()
+	const projectName = form.get('name') as string
+	const categoryIds = form.getAll('categoryIds') as string[]
+	const location = (form.get('location') as string) || ''
+	const location2 = (form.get('location2') as string) || ''
+	const [newProject] = await db.insert(project).values({ name: projectName, location, location2 }).returning()
 	await Promise.all(
 		categoryIds.map((categoryId) => db.insert(projectSubmission).values({ projectId: newProject.id, categoryId: Number(categoryId) }))
 	)
 }, 'create-project-and-submissions')
+
+export const createProjectsBulk = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+}, 'create-projects-bulk')
 
 export const deleteProject = action(async (form: FormData) => {
 	'use server'

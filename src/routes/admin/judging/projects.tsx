@@ -1,6 +1,7 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Show } from 'solid-js'
 import { deleteProject, getCategoriesQuery, getProjectsQuery } from '~/features/judging/actions'
+import { AddProjectsForm } from '~/features/judging/AddProjectsForm'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerX from '~icons/tabler/x'
 
@@ -23,10 +24,10 @@ export default function ProjectsPage() {
 	return (
 		<div class="drawer drawer-end m-auto flex flex-col items-center justify-center gap-6">
 			<input
-				id="participant-info-drawer"
+				id="project-info-drawer"
 				type="checkbox"
 				class="drawer-toggle"
-				aria-hidden
+				hidden
 				checked={selectedProjectId() !== null}
 				onChange={(e) => !e.currentTarget.checked && setSelectedProjectId(null)}
 			/>
@@ -37,7 +38,7 @@ export default function ProjectsPage() {
 						<h2>Projects</h2>
 					</div>
 					<button type="button" class="btn btn-primary btn-outline w-fit" onclick={() => addProjectsModal.showModal()}>
-						<span aria-hidden>
+						<span aria-hidden="true">
 							<IconTablerPlus />
 						</span>
 						Add projects
@@ -57,7 +58,7 @@ export default function ProjectsPage() {
 							{(project) => (
 								<tr>
 									<td>{project.name}</td>
-									<td>{project.submissions.map(({ categoryId }) => categoryNameMap()?.[categoryId])}</td>
+									<td>{project.submissions.map(({ categoryId }) => categoryNameMap()?.[categoryId]).join(', ')}</td>
 									<td>
 										<button type="button" class="btn btn-primary h-8 text-white" onclick={() => setSelectedProjectId(project.id)}>
 											Edit
@@ -81,22 +82,25 @@ export default function ProjectsPage() {
 				</table>
 				<dialog id="add-projects-modal" class="modal" ref={addProjectsModal}>
 					<div class="modal-box h-[600px] max-w-md lg:max-w-lg">
-						{/* 		<Show when={categories()}>{(categories) => <AddProjectsForm categories={categories()} />}</Show> */}
+						<div class="flex justify-between">
+							<h3 class="mb-4 text-lg font-bold">Add Judges</h3>
+							<button class="cursor-pointer" aria-label="Close" onclick={() => addProjectsModal.close()}>
+								<IconTablerX />
+							</button>
+						</div>
+						<AddProjectsForm />
+						<form method="dialog" class="modal-action">
+							<button class="btn">Close</button>
+						</form>
 					</div>
 				</dialog>
 			</div>
 			<div role="dialog" class="drawer-side">
-				<label for="participant-info-drawer" class="drawer-overlay"></label>
+				<label for="project-info-drawer" class="drawer-overlay"></label>
 				<div class="bg-base-100 min-h-full w-full max-w-[500px] p-6">
-					<Show when={project()} fallback={<p>No project selected</p>} keyed>
-						{(c) => (
-							// <CategoryEditForm
-							//   category={{ id: c.id, name: c.name }}
-							//   onClose={() => setSelectedProjectId(null)}
-							// />
-							<pre>Project form here</pre> // Update form component
-						)}
-					</Show>
+					{/* <Show when={project()} fallback={<p>No project selected</p>} keyed> */}
+					{/* 	{(p) => <ProjectEditForm project={p} onClose={() => setSelectedProjectId(null)} />} */}
+					{/* </Show> */}
 				</div>
 			</div>
 		</div>
