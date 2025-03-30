@@ -154,6 +154,27 @@ export const createProjectsBulk = action(async (form: FormData) => {
 	const db = getDb()
 }, 'create-projects-bulk')
 
+export const updateProject = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const projectId = Number(form.get('projectId'))
+	const projectName = form.get('name') as string
+	const categoryIds = form.getAll('categoryIds') as string[]
+	const location = (form.get('location') as string) || ''
+	const location2 = (form.get('location2') as string) || ''
+	await db.update(project).set({ name: projectName, location, location2 }).where(eq(project.id, projectId))
+	// Note that we're only inserting new categories (if any) - we don't allow deleting already existed categories
+	await Promise.all(
+		categoryIds.map(
+			(categoryId) =>
+				db
+					.insert(projectSubmission)
+					.values({ projectId: projectId, categoryId: Number(categoryId) })
+					.onConflictDoNothing({ target: [projectSubmission.categoryId, projectSubmission.projectId] }) // If this project and category combination already exists, do nothing
+		)
+	)
+}, 'create-project-and-submissions')
+
 export const deleteProject = action(async (form: FormData) => {
 	'use server'
 	const db = getDb()

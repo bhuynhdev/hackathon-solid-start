@@ -2,7 +2,9 @@ import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Show } from 'solid-js'
 import { deleteProject, getCategoriesQuery, getProjectsQuery } from '~/features/judging/actions'
 import { AddProjectsForm } from '~/features/judging/AddProjectsForm'
+import { ProjectEditForm } from '~/features/judging/ProjectEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
+import IconTablerTrash from '~icons/tabler/trash'
 import IconTablerX from '~icons/tabler/x'
 
 export const route = {
@@ -70,7 +72,7 @@ export default function ProjectsPage() {
 											<button type="submit" class="btn btn-error btn-soft h-8" aria-label="Delete">
 												<span class="hidden md:inline">Delete </span>
 												<span>
-													<IconTablerX />
+													<IconTablerTrash />
 												</span>
 											</button>
 										</form>
@@ -98,9 +100,9 @@ export default function ProjectsPage() {
 			<div role="dialog" class="drawer-side">
 				<label for="project-info-drawer" class="drawer-overlay"></label>
 				<div class="bg-base-100 min-h-full w-full max-w-[500px] p-6">
-					{/* <Show when={project()} fallback={<p>No project selected</p>} keyed> */}
-					{/* 	{(p) => <ProjectEditForm project={p} onClose={() => setSelectedProjectId(null)} />} */}
-					{/* </Show> */}
+					<Show when={project()} fallback={<p>No project selected</p>} keyed>
+						{(p) => <ProjectEditForm project={p} onClose={() => setSelectedProjectId(null)} />}
+					</Show>
 				</div>
 			</div>
 		</div>
