@@ -1,6 +1,8 @@
 CREATE TABLE `project` (
 	`id` integer PRIMARY KEY NOT NULL,
-	`name` text NOT NULL
+	`name` text NOT NULL,
+	`location` text NOT NULL,
+	`location2` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `project_submission` (

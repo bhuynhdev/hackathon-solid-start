@@ -90,7 +90,9 @@ export const judgeRelations = relations(judge, ({ one }) => ({
 
 export const project = sqliteTable('project', {
 	id: integer('id').primaryKey(),
-	name: text('name').notNull()
+	name: text('name').notNull(),
+	location: text('location').notNull(),
+	location2: text('location2').notNull()
 })
 
 export const projectRelations = relations(project, ({ many }) => ({
