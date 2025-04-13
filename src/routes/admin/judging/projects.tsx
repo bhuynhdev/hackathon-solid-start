@@ -17,8 +17,7 @@ export const route = {
 export default function ProjectsPage() {
 	const projects = createAsync(() => getProjectsQuery())
 	const categories = createAsync(() => getCategoriesQuery())
-	// Map each category ID to its name
-	const categoryNameMap = () => categories()?.reduce((acc, cat) => ({ ...acc, [cat.id]: cat.name }), {} as Record<number, string>)
+	const categoryIdToNameMap = () => categories()?.reduce((acc, cat) => ({ ...acc, [cat.id]: cat.name }), {} as Record<number, string>)
 	const [selectedProjectId, setSelectedProjectId] = createSignal<number | null>(null)
 	const project = () => projects()?.find((p) => p.id == selectedProjectId())
 
@@ -60,7 +59,7 @@ export default function ProjectsPage() {
 							{(project) => (
 								<tr>
 									<td>{project.name}</td>
-									<td>{project.submissions.map(({ categoryId }) => categoryNameMap()?.[categoryId]).join(', ')}</td>
+									<td>{project.submissions.map(({ categoryId }) => categoryIdToNameMap()?.[categoryId]).join(', ')}</td>
 									<td>
 										<button type="button" class="btn btn-primary h-8 text-white" onclick={() => setSelectedProjectId(project.id)}>
 											Edit
