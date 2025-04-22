@@ -1,8 +1,8 @@
 import { action, query } from '@solidjs/router'
+import { ColumnOption, parse } from 'csv-parse/sync'
+import { eq, notInArray, sql } from 'drizzle-orm'
 import { category, judge, project, projectSubmission } from '~/db/schema'
 import { getDb } from '~/utils'
-import { eq, sql } from 'drizzle-orm'
-import { parse } from 'csv-parse/sync'
 
 /** CATEGORIES */
 export const getCategoriesQuery = query(async () => {
@@ -149,10 +149,55 @@ export const createProjectAndSubmissions = action(async (form: FormData) => {
 	)
 }, 'create-project-and-submissions')
 
-export const createProjectsBulk = action(async (form: FormData) => {
+export const importProjectsFromDevpost = action(async (form: FormData) => {
 	'use server'
 	const db = getDb()
-}, 'create-projects-bulk')
+	const devPostCsvColsMapping = {
+		'Project Title': 'title',
+		'Submission Url': 'url',
+		'Project Status': 'status',
+		'Project Created At': 'createdAt',
+		'"Try it out" Links': 'links',
+		'Video Demo Link': 'videoLink',
+		'Opt-In Prizes': 'prizes',
+		'Submitter First Name': 'submitterFistName',
+		'Submitter Last Name': 'submitterLastName',
+		'Submitter Email': 'submitterEmail',
+		'What Is The Table Number You Have Been Assigned By Organizers (Eg. 50)': 'location',
+		'What School Do You Attend? If You Are No Longer In School, What University Did You Attend Most Recently?': 'school',
+		'List All Of The Domain Names Your Team Has Registered With .Tech During This Hackathon.': 'domains'
+	} as const
+
+	type DevPostProject = Record<keyof typeof devPostCsvColsMapping, string> & {
+		[key: string]: string
+	}
+
+	const categories = await db.select().from(category)
+	const categoryNameToIdMap = categories.reduce((acc, category) => ({ ...acc, [category.name]: category.id }), {} as Record<string, number>)
+
+	const csvFile = form.get('csvFile') as File
+	if (csvFile.size === 0) {
+		throw new Error('Error: File is empty!')
+	}
+	const csvContent = await csvFile.text()
+	const projectsInput: Array<DevPostProject> = parse(csvContent, {
+		relaxColumnCount: true,
+		skipEmptyLines: true,
+		columns: (headers: string[]) =>
+			headers.flatMap((header) => {
+				if (header in devPostCsvColsMapping) {
+					// Map DevPost long-text header to shorter headers
+					return devPostCsvColsMapping[header as keyof typeof devPostCsvColsMapping]
+				}
+				if (header === '...') {
+					// DevPost doesn't have headers for team members after 1 (it's just '...'), so we supply the headers manually here
+					return [2, 3, 4].flatMap((i) => [`Team Member ${i} First Name`, `Team Member ${i} Last Name`, `Team Member ${i} Email`])
+				}
+				return header
+			})
+	})
+	console.log(projectsInput[2])
+}, 'import-devpost-projects')
 
 export const updateProject = action(async (form: FormData) => {
 	'use server'

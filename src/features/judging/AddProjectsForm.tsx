@@ -1,10 +1,10 @@
 import { createAsync } from '@solidjs/router'
 import IconTablerInfoCircle from '~icons/tabler/info-circle'
-import { createProjectAndSubmissions, createProjectsBulk, getCategoriesQuery } from './actions'
+import { createProjectAndSubmissions, importProjectsFromDevpost, getCategoriesQuery } from './actions'
 
 export function AddProjectsForm() {
 	const categories = createAsync(() => getCategoriesQuery())
-	let bulkEntryFormRef!: HTMLFormElement
+	let importCsvFormRef!: HTMLFormElement
 	return (
 		<>
 			<div class="tabs tabs-lift">
@@ -37,18 +37,11 @@ export function AddProjectsForm() {
 
 				<input type="radio" name="add_judges_form_tab" class="tab" aria-label="Bulk entry" />
 				<div class="tab-content border-base-300 bg-base-100 p-5">
-					<form method="post" class="space-y-3" action={createProjectsBulk} enctype="multipart/form-data" ref={bulkEntryFormRef}>
-						<p>Upload judges data as a CSV file</p>
-						<input type="file" name="csvFile" class="file-input" aria-label="Upload CSV file" />
-						<p>Or enter judges as comma-separated strings</p>
-						<textarea
-							aria-label="Judges string input"
-							name="csvText"
-							class="textarea w-full"
-							placeholder="judge1,email1&#10;judge2,email2"
-						/>
+					<form method="post" class="space-y-3" action={importProjectsFromDevpost} enctype="multipart/form-data" ref={importCsvFormRef}>
+						<p>Upload projects CSV from DevPost</p>
+						<input type="file" name="csvFile" class="file-input" aria-label="Upload Projects CSV file from DevPost" />
 						<div class="space-x-3 text-right">
-							<button type="submit" class="btn btn-neutral btn-outline" onclick={() => bulkEntryFormRef.reset()}>
+							<button type="submit" class="btn btn-neutral btn-outline" onclick={() => importCsvFormRef.reset()}>
 								Reset
 							</button>
 							<button type="submit" class="btn btn-primary">
