@@ -140,13 +140,11 @@ export const createProjectAndSubmissions = action(async (form: FormData) => {
 	'use server'
 	const db = getDb()
 	const projectName = form.get('name') as string
-	const categoryIds = form.getAll('categoryIds') as string[]
+	const categoryIds = form.getAll('categoryIds').map(Number)
 	const location = (form.get('location') as string) || ''
 	const location2 = (form.get('location2') as string) || ''
 	const [newProject] = await db.insert(project).values({ name: projectName, location, location2 }).returning()
-	await Promise.all(
-		categoryIds.map((categoryId) => db.insert(projectSubmission).values({ projectId: newProject.id, categoryId: Number(categoryId) }))
-	)
+	await db.insert(projectSubmission).values(categoryIds.map((categoryId) => ({ projectId: newProject.id, categoryId })))
 }, 'create-project-and-submissions')
 
 export const importProjectsFromDevpost = action(async (form: FormData) => {
@@ -224,15 +222,11 @@ export const updateProject = action(async (form: FormData) => {
 
 	// Remove submissions not in the given category Ids
 	await db.delete(projectSubmission).where(notInArray(projectSubmission.categoryId, categoryIds))
-	// Add new categories, ignoring already existed
-	await Promise.all(
-		categoryIds.map((categoryId) =>
-			db
-				.insert(projectSubmission)
-				.values({ projectId: projectId, categoryId: categoryId })
-				.onConflictDoNothing({ target: [projectSubmission.categoryId, projectSubmission.projectId] })
-		)
-	)
+	// Add new submissions, ignoring already existed
+	await db
+		.insert(projectSubmission)
+		.values(categoryIds.map((categoryId) => ({ projectId: projectId, categoryId })))
+		.onConflictDoNothing({ target: [projectSubmission.categoryId, projectSubmission.projectId] })
 }, 'create-project-and-submissions')
 
 export const deleteProject = action(async (form: FormData) => {
