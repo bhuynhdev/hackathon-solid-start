@@ -151,6 +151,7 @@ export const createProjectAndSubmissions = action(async (form: FormData) => {
 
 export const importProjectsFromDevpost = action(async (form: FormData) => {
 	'use server'
+	// TODO: Don't allow create/import projects with judging has been assigned
 	const db = getDb()
 	const devPostCsvColsMapping = {
 		'Project Title': 'title',
@@ -159,7 +160,7 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 		'Project Created At': 'createdAt',
 		'"Try it out" Links': 'links',
 		'Video Demo Link': 'videoLink',
-		'Opt-In Prizes': 'prizes',
+		'Opt-In Prizes': 'categoriesCsv',
 		'Submitter First Name': 'submitterFistName',
 		'Submitter Last Name': 'submitterLastName',
 		'Submitter Email': 'submitterEmail',
@@ -168,7 +169,7 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 		'List All Of The Domain Names Your Team Has Registered With .Tech During This Hackathon.': 'domains'
 	} as const
 
-	type DevPostProject = Record<keyof typeof devPostCsvColsMapping, string> & {
+	type DevPostProject = Record<(typeof devPostCsvColsMapping)[keyof typeof devPostCsvColsMapping], string> & {
 		[key: string]: string
 	}
 
@@ -196,7 +197,19 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 				return header
 			})
 	})
-	console.log(projectsInput[2])
+
+	// Delete all current projects and submissions, and insert new ones obtained from the CSV
+	await db.delete(projectSubmission)
+	await db.delete(project)
+
+	for (const p of projectsInput) {
+		const [{ insertedProjectId }] = await db
+			.insert(project)
+			.values({ name: p.title, location: p.location, location2: '', id: 1 })
+			.returning({ insertedProjectId: project.id })
+		const submittedCategoryIds = p.categoriesCsv.split(',').map((individualCategoryName) => categoryNameToIdMap[individualCategoryName])
+		await db.insert(projectSubmission).values(submittedCategoryIds.map((c) => ({ categoryId: c, projectId: insertedProjectId })))
+	}
 }, 'import-devpost-projects')
 
 export const updateProject = action(async (form: FormData) => {
