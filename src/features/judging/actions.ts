@@ -1,8 +1,32 @@
 import { action, query } from '@solidjs/router'
-import { ColumnOption, parse } from 'csv-parse/sync'
+import { parse } from 'csv-parse/sync'
 import { eq, notInArray, sql } from 'drizzle-orm'
 import { category, judge, project, projectSubmission } from '~/db/schema'
 import { getDb } from '~/utils'
+
+const devPostCsvColsMapping = {
+	'Project Title': 'title',
+	'Submission Url': 'url',
+	'Project Status': 'status',
+	'Project Created At': 'createdAt',
+	'"Try it out" Links': 'links',
+	'Video Demo Link': 'videoLink',
+	'Opt-In Prizes': 'categoriesCsv',
+	'Submitter First Name': 'submitterFistName',
+	'Submitter Last Name': 'submitterLastName',
+	'Submitter Email': 'submitterEmail',
+	'What Is The Table Number You Have Been Assigned By Organizers (Eg. 50)': 'location',
+	'What School Do You Attend? If You Are No Longer In School, What University Did You Attend Most Recently?': 'school',
+	'List All Of The Domain Names Your Team Has Registered With .Tech During This Hackathon.': 'domains'
+} as const
+
+type RawDevPostProject = Record<keyof typeof devPostCsvColsMapping, string> & {
+	[key: string]: string
+}
+
+type TransformedDevPostProject = Record<(typeof devPostCsvColsMapping)[keyof typeof devPostCsvColsMapping], string> & {
+	[key: string]: string
+}
 
 /** CATEGORIES */
 export const getCategoriesQuery = query(async () => {
@@ -24,27 +48,37 @@ export const createCategory = action(async (form: FormData) => {
 export const createCategoriesBulk = action(async (form: FormData) => {
 	'use server'
 	const db = getDb()
-	const csvFile = form.get('csvFile') as File
+	const devPostProjectsFile = form.get('devPostProjectsFile') as File
 	const csvText = form.get('csvText') as string
-	if (csvFile.size === 0 && !csvText) {
+	if (devPostProjectsFile.size === 0 && !csvText) {
 		throw new Error('Please provide either File or Text input')
 	}
-	if (csvFile.size > 0 && csvText) {
+	if (devPostProjectsFile.size > 0 && csvText) {
 		throw new Error('Please provide only one of File or Text input')
 	}
-	const csvContent = csvText || (await csvFile.text())
-	const categoriesInput: Array<{ name: string; type: 'sponsor' | 'inhouse' }> = parse(csvContent, {
-		columns: ['name', 'type'],
-		skip_empty_lines: true
-	})
-	// Upsert - data in the file will override any existing data in Database
-	await db
-		.insert(category)
-		.values(categoriesInput)
-		.onConflictDoUpdate({
-			target: category.name,
-			set: { type: sql.raw(`excluded.${category.type.name}`) }
+	if (csvText) {
+		const categoriesInput: Array<{ name: string; type: 'sponsor' | 'inhouse' }> = parse(csvText, {
+			columns: ['name', 'type'],
+			skip_empty_lines: true
 		})
+		// Upsert - data in the file will override any existing data in Database
+		await db
+			.insert(category)
+			.values(categoriesInput)
+			.onConflictDoUpdate({ target: category.name, set: { type: sql.raw(`excluded.${category.type.name}`) } })
+	} else {
+		const csvContent = await devPostProjectsFile.text()
+		const projectsInput: Array<RawDevPostProject> = parse(csvContent, {
+			relaxColumnCount: true,
+			skipEmptyLines: true,
+			columns: true
+		})
+		const extractedCategories = Array.from(new Set(projectsInput.flatMap((p) => p['Opt-In Prizes'].split(',').map((c) => c.trim())))).filter(Boolean)
+		await db
+			.insert(category)
+			.values(extractedCategories.map((c) => ({ name: c, type: 'inhouse' as const }))) // Since we can't know category type from DevPost, default to 'inhouse'
+			.onConflictDoUpdate({ target: category.name, set: { type: sql.raw(`excluded.${category.type.name}`) } })
+	}
 }, 'create-categories-bulk')
 
 export const updateCategory = action(async (form: FormData) => {
@@ -151,26 +185,6 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 	'use server'
 	// TODO: Don't allow create/import projects with judging has been assigned
 	const db = getDb()
-	const devPostCsvColsMapping = {
-		'Project Title': 'title',
-		'Submission Url': 'url',
-		'Project Status': 'status',
-		'Project Created At': 'createdAt',
-		'"Try it out" Links': 'links',
-		'Video Demo Link': 'videoLink',
-		'Opt-In Prizes': 'categoriesCsv',
-		'Submitter First Name': 'submitterFistName',
-		'Submitter Last Name': 'submitterLastName',
-		'Submitter Email': 'submitterEmail',
-		'What Is The Table Number You Have Been Assigned By Organizers (Eg. 50)': 'location',
-		'What School Do You Attend? If You Are No Longer In School, What University Did You Attend Most Recently?': 'school',
-		'List All Of The Domain Names Your Team Has Registered With .Tech During This Hackathon.': 'domains'
-	} as const
-
-	type DevPostProject = Record<(typeof devPostCsvColsMapping)[keyof typeof devPostCsvColsMapping], string> & {
-		[key: string]: string
-	}
-
 	const categories = await db.select().from(category)
 	const categoryNameToIdMap = categories.reduce((acc, category) => ({ ...acc, [category.name]: category.id }), {} as Record<string, number>)
 
@@ -179,7 +193,7 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 		throw new Error('Error: File is empty!')
 	}
 	const csvContent = await csvFile.text()
-	const projectsInput: Array<DevPostProject> = parse(csvContent, {
+	const projectsInput: Array<TransformedDevPostProject> = parse(csvContent, {
 		relaxColumnCount: true,
 		skipEmptyLines: true,
 		columns: (headers: string[]) =>

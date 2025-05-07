@@ -39,8 +39,8 @@ export function AddCategoriesForm(props: AddCategoriesFormProps) {
 				<input type="radio" name="add_categories_form_tab" class="tab" aria-label="Bulk entry" />
 				<div class="tab-content border-base-300 bg-base-100 p-5">
 					<form method="post" class="space-y-3" action={createCategoriesBulk} enctype="multipart/form-data" ref={bulkEntryFormRef}>
-						<p>Upload categories data as a CSV file</p>
-						<input type="file" name="csvFile" class="file-input" aria-label="Upload CSV file" />
+						<p>Extract categories from DevPost Projects CSV</p>
+						<input type="file" name="devPostProjectsFile" class="file-input" aria-label="Upload DevPost Projects CSV" />
 						<p>Or enter categories as comma-separated strings</p>
 						<textarea
 							aria-label="Categories string input"
