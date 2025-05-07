@@ -203,9 +203,15 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 	for (const p of projectsInput) {
 		const [{ insertedProjectId }] = await db
 			.insert(project)
-			.values({ name: p.title, location: p.location, location2: '', id: 1 })
+			.values({ name: p.title, location: p.location, location2: '' })
 			.returning({ insertedProjectId: project.id })
-		const submittedCategoryIds = p.categoriesCsv.split(',').map((individualCategoryName) => categoryNameToIdMap[individualCategoryName])
+
+		const submittedCategoryIds = p.categoriesCsv
+			.split(',')
+			.filter(Boolean)
+			.concat('General')
+			.map((individualCategoryName) => categoryNameToIdMap[individualCategoryName.trim()])
+
 		await db.insert(projectSubmission).values(submittedCategoryIds.map((c) => ({ categoryId: c, projectId: insertedProjectId })))
 	}
 }, 'import-devpost-projects')
