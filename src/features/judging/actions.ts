@@ -1,7 +1,7 @@
 import { action, query } from '@solidjs/router'
 import { parse } from 'csv-parse/sync'
 import { eq, notInArray, sql } from 'drizzle-orm'
-import { category, judge, project, projectSubmission } from '~/db/schema'
+import { category, categoryTypes, judge, project, projectSubmission } from '~/db/schema'
 import { CategoryType } from '~/db/types'
 import { getDb } from '~/utils'
 
@@ -34,6 +34,7 @@ export const getCategoriesQuery = query(async () => {
 	'use server'
 	const db = getDb()
 	const categories = await db.select().from(category).orderBy(category.name)
+	categories.sort((a, b) => categoryTypes.indexOf(a.type) - categoryTypes.indexOf(b.type)) // Sort by order defined in categoryTypes
 	return categories
 }, 'get-categories')
 
