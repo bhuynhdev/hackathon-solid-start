@@ -66,6 +66,9 @@ export default function CategoriesPage() {
 											<Match when={category.type === 'general'}>
 												<span class="badge bg-gray-200">General</span>
 											</Match>
+											<Match when={category.type === 'mlh'}>
+												<span class="badge bg-violet-400">MLH</span>
+											</Match>
 										</Switch>
 									</td>
 									<td>

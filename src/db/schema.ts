@@ -72,7 +72,7 @@ export const user = sqliteTable('user', {
 export const category = sqliteTable('category', {
 	id: integer('id').primaryKey(),
 	name: text('name').unique().notNull(),
-	type: text('type', { enum: ['sponsor', 'inhouse', 'general'] }).notNull()
+	type: text('type', { enum: ['sponsor', 'mlh', 'inhouse', 'general'] }).notNull()
 })
 
 export const judge = sqliteTable('judge', {
