@@ -2,17 +2,39 @@ import assert from 'assert'
 import { drizzle } from 'drizzle-orm/libsql'
 import { reset, seed } from 'drizzle-seed'
 import { getLocalD1Path } from '../../drizzle.config'
-import { participant, category, judge } from './schema'
+import { participant, category, judge, project, projectSubmission } from './schema'
+import { NewCategory } from './types'
 
-async function main() {
+async function developmentSeed() {
 	assert(process.env.NODE_ENV == 'development', 'Can only seed in development mode')
+
 	const localD1DbUrl = getLocalD1Path('DB')
 	const db = drizzle(`file:${localD1DbUrl}`)
 
 	const SEED = 1234
 
-	await reset(db, { participant, category, judge })
-	await seed(db, { participant, category, judge }, { seed: SEED }).refine((f) => {
+	await reset(db, { participant, category, judge, project, projectSubmission })
+
+	const categorySeeds: NewCategory[] = [
+		{ type: 'general', name: 'General' },
+		{ type: 'inhouse', name: 'Most Technically Impressive' },
+		{ type: 'inhouse', name: 'Best "Useless" Hack' },
+		{ type: 'inhouse', name: 'Best Social Impact' },
+		{ type: 'inhouse', name: 'Best Business Plan' },
+		{ type: 'inhouse', name: 'Best Use of Augemented Reality (AR)' },
+		{ type: 'sponsor', name: 'Kinetic Vision Sponsor Challenge' },
+		{ type: 'sponsor', name: 'Fifth Third Sponsor Challenge' },
+		{ type: 'sponsor', name: 'Medpace Sponsor Challenge' },
+		{ type: 'sponsor', name: 'AWS Sponsor Challenge' },
+		{ type: 'sponsor', name: "Parkinson's Together Sponsor Challenge" },
+		{ type: 'mlh', name: 'Best .Tech Domain Name' },
+		{ type: 'mlh', name: 'Best AI Application Built with Cloudflare' },
+		{ type: 'mlh', name: 'Best Use of Gemini API' },
+		{ type: 'mlh', name: 'Best Use of MongoDB Atlas' }
+	]
+	await db.insert(category).values(categorySeeds)
+
+	await seed(db, { participant, judge }, { seed: SEED }).refine((f) => {
 		return {
 			participant: {
 				count: 50,
@@ -39,35 +61,14 @@ async function main() {
 					lastConfirmedAttendanceAt: f.default({ defaultValue: null })
 				}
 			},
-			category: {
-				count: 10,
-				columns: {
-					name: f.valuesFromArray({
-						values: [
-							'Most Technically Impressive',
-							'Best "Useless" Hack',
-							'General',
-							'Best Social Impact Hack',
-							'Best Business Plan',
-							'Kinetic Vision',
-							'Fifth Third',
-							'Medpace Sponsor Challenge',
-							'AWS Sponsor Prize',
-							'Parkingson Together'
-						],
-						isUnique: true
-					}),
-					type: f.valuesFromArray({ values: ['sponsor', 'inhouse'] })
-				}
-			},
 			judge: {
 				count: 20,
 				columns: {
 					email: f.email(),
 					name: f.fullName(),
-					categoryId: f.int({ minValue: 1, maxValue: 10 })
+					categoryId: f.int({ minValue: 1, maxValue: categorySeeds.length })
 				}
-			},
+			}
 		}
 	})
 
@@ -75,4 +76,4 @@ async function main() {
 	process.exit(0)
 }
 
-main()
+developmentSeed()
