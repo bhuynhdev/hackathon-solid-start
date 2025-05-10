@@ -1,5 +1,7 @@
 import IconTablerInfoCircle from '~icons/tabler/info-circle'
 import { createCategoriesBulk, createCategory } from './actions'
+import { For } from 'solid-js'
+import { categoryTypes } from '~/db/schema'
 
 interface AddCategoriesFormProps {
 	isInModal?: boolean
@@ -13,21 +15,21 @@ export function AddCategoriesForm(props: AddCategoriesFormProps) {
 				<input type="radio" name="add_categories_form_tab" class="tab" aria-label="Manual entry" checked />
 				<div class="tab-content border-base-300 bg-base-100 p-5">
 					<form method="post" class="space-y-4" action={createCategory}>
-						<label class="grid grid-cols-[7rem_1fr] items-center">
-							<span class="text-sm">Category name</span>
+						<label class="grid grid-cols-1 items-center gap-2 md:grid-cols-[3rem_1fr]">
+							<span class="text-sm">Name</span>
 							<input class="input" name="categoryName" placeholder="Best Education Hack" required />
 						</label>
-						<fieldset class="grid grid-cols-[7rem_1fr] items-center">
-							<legend class="contents text-sm">Category type</legend>
-							<div class="flex gap-4">
-								<label>
-									<input type="radio" class="radio radio-xs" name="categoryType" value="sponsor" checked />
-									<span class="ml-1">Sponsor</span>
-								</label>
-								<label>
-									<input type="radio" class="radio radio-xs" name="categoryType" value="inhouse" />
-									<span class="ml-1">In-house</span>
-								</label>
+						<fieldset class="grid grid-cols-1 items-center gap-2 md:grid-cols-[3rem_1fr]">
+							<legend class="contents text-sm">Type</legend>
+							<div class="flex gap-2 sm:gap-4">
+								<For each={categoryTypes}>
+									{(categoryType, index) => (
+										<label>
+											<input type="radio" class="radio radio-xs mr-1.5" name="categoryType" value={categoryType} checked={index() === 1} />
+											<span class="capitalize">{categoryType}</span>
+										</label>
+									)}
+								</For>
 							</div>
 						</fieldset>
 						<button type="submit" class="btn btn-primary ml-auto block">

@@ -32,6 +32,8 @@ export const attendanceStatuses = [
 	'waitlistattended'
 ] as const
 
+export const categoryTypes = ['general', 'inhouse', 'sponsor', 'mlh'] as const
+
 export const participant = sqliteTable('participant', {
 	id: integer('id').primaryKey(),
 	firstName: text('first_name').notNull(),
@@ -72,7 +74,7 @@ export const user = sqliteTable('user', {
 export const category = sqliteTable('category', {
 	id: integer('id').primaryKey(),
 	name: text('name').unique().notNull(),
-	type: text('type', { enum: ['sponsor', 'mlh', 'inhouse', 'general'] }).notNull()
+	type: text('type', { enum: categoryTypes }).notNull(),
 })
 
 export const judge = sqliteTable('judge', {

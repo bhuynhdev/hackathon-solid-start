@@ -25,6 +25,7 @@ export type AttendanceStatus = (typeof schema.attendanceStatuses)[number]
 
 export type Category = typeof schema.category.$inferSelect
 export type NewCategory = typeof schema.category.$inferInsert
+export type CategoryType = Category['type']
 
 export type MailCampaign = typeof schema.mailCampaign.$inferSelect
 export type MailCampaignInsert = typeof schema.mailCampaign.$inferInsert

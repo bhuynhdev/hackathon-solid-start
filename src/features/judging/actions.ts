@@ -2,6 +2,7 @@ import { action, query } from '@solidjs/router'
 import { parse } from 'csv-parse/sync'
 import { eq, notInArray, sql } from 'drizzle-orm'
 import { category, judge, project, projectSubmission } from '~/db/schema'
+import { CategoryType } from '~/db/types'
 import { getDb } from '~/utils'
 
 const devPostCsvColsMapping = {
@@ -39,7 +40,7 @@ export const getCategoriesQuery = query(async () => {
 export const createCategory = action(async (form: FormData) => {
 	'use server'
 	const categoryName = form.get('categoryName') as string
-	const categoryType = form.get('categoryType') as 'sponsor' | 'inhouse'
+	const categoryType = form.get('categoryType') as CategoryType
 	const db = getDb()
 
 	await db.insert(category).values({ name: categoryName, type: categoryType })

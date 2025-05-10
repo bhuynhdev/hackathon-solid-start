@@ -1,6 +1,8 @@
-import { Category } from '~/db/schema'
-import { updateCategory } from './actions'
+import { For } from 'solid-js'
+import { categoryTypes } from '~/db/schema'
+import { Category } from '~/db/types'
 import IconTablerX from '~icons/tabler/x'
+import { updateCategory } from './actions'
 
 interface CategoryEditFormProps {
 	category: Category
@@ -28,18 +30,20 @@ export function CategoryEditForm(props: CategoryEditFormProps) {
 					</label>
 					<fieldset class="fieldset">
 						<legend class="fieldset-legend text-sm">Type</legend>
-						<label class="flex items-center gap-2">
-							<input type="radio" name="categoryType" value="sponsor" class="radio radio-sm" checked={props.category.type === 'sponsor'} />
-							<span class="text-base">Sponsor</span>
-						</label>
-						<label class="flex items-center gap-2">
-							<input type="radio" name="categoryType" value="inhouse" class="radio radio-sm" checked={props.category.type === 'inhouse'} />
-							<span class="text-base">In-house</span>
-						</label>
-						<label class="flex items-center gap-2">
-							<input type="radio" name="categoryType" value="general" class="radio radio-sm" checked={props.category.type === 'general'} />
-							<span class="text-base">General</span>
-						</label>
+						<For each={categoryTypes}>
+							{(categoryType) => (
+								<label class="flex items-center gap-2">
+									<input
+										type="radio"
+										name="categoryType"
+										value={categoryType}
+										class="radio radio-sm"
+										checked={props.category.type === categoryType}
+									/>
+									<span class="text-base first-letter:capitalize">{categoryType}</span>
+								</label>
+							)}
+						</For>
 					</fieldset>
 					<button type="submit" class="btn btn-primary ml-auto block text-white">
 						Save Changes
