@@ -63,11 +63,7 @@ export const createCategoriesBulk = action(async (form: FormData) => {
 			columns: ['name', 'type'],
 			skip_empty_lines: true
 		})
-		// Upsert - data in the file will override any existing data in Database
-		await db
-			.insert(category)
-			.values(categoriesInput)
-			.onConflictDoUpdate({ target: category.name, set: { type: sql.raw(`excluded.${category.type.name}`) } })
+		await db.insert(category).values(categoriesInput).onConflictDoNothing()
 	} else {
 		const csvContent = await devPostProjectsFile.text()
 		const projectsInput: Array<RawDevPostProject> = parse(csvContent, {
@@ -78,8 +74,8 @@ export const createCategoriesBulk = action(async (form: FormData) => {
 		const extractedCategories = Array.from(new Set(projectsInput.flatMap((p) => p['Opt-In Prizes'].split(',').map((c) => c.trim())))).filter(Boolean)
 		await db
 			.insert(category)
-			.values(extractedCategories.map((c) => ({ name: c, type: 'inhouse' as const }))) // Since we can't know category type from DevPost, default to 'inhouse'
-			.onConflictDoUpdate({ target: category.name, set: { type: sql.raw(`excluded.${category.type.name}`) } })
+			.values(extractedCategories.map((c) => ({ name: c, type: c.includes('Sponsor') ? ('sponsor' as const) : ('inhouse' as const) }))) // Since we can't know category type from DevPost, default to 'inhouse'
+			.onConflictDoNothing()
 	}
 }, 'create-categories-bulk')
 
