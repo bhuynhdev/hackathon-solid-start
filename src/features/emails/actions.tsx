@@ -11,11 +11,7 @@ export const sendEmail = action(async (formData: FormData) => {
 	const allEmailTemplates = import.meta.glob<Component>([`/src/email_templates/*.tsx`], { import: 'default' })
 	const emailTemplateEntryPoint = `/src/email_templates/${template}.tsx`
 	const EmailTemplateComponent = await allEmailTemplates[emailTemplateEntryPoint]()
-	const html = renderToString(() => (
-		<NoHydration>
-			<EmailTemplateComponent />
-		</NoHydration>
-	))
+	const html = renderToString(() => EmailTemplateComponent({}))
 	console.log('HTML', html)
 	return html
 }, 'send-email')
