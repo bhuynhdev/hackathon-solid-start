@@ -1,6 +1,6 @@
 import { createAsync } from '@solidjs/router'
 import { For, Suspense } from 'solid-js'
-import { Judge } from '~/db/schema'
+import { Judge } from '~/db/types'
 import IconTablerX from '~icons/tabler/x'
 import { getCategoriesQuery, updateJudge } from './actions'
 

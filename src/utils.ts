@@ -1,5 +1,5 @@
 import { getRequestEvent } from 'solid-js/web'
-import { AttendanceStatus } from './db/schema'
+import { AttendanceStatus } from './db/types'
 import { type DrizzleD1Database } from 'drizzle-orm/d1'
 import * as schema from './db/schema'
 

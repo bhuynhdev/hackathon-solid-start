@@ -1,5 +1,5 @@
 import { For, Show } from 'solid-js'
-import { Participant } from '~/db/schema'
+import { Participant } from '~/db/types'
 import IconTablerX from '~icons/tabler/x'
 import { advanceAttendanceStatus, ParticipantDto, updateParticipantInfo } from './actions'
 import { AttendanceStatusBadge } from './AttendanceStatusBadge'

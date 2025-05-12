@@ -1,7 +1,8 @@
 import { action, query } from '@solidjs/router'
-import { like, eq, sql, and } from 'drizzle-orm'
-import { AttendanceStatus, attendanceStatuses, Participant, participant, ParticipantUpdate } from '~/db/schema'
-import { getDb, getNextAttendanceActions, determineNextAttendanceStatus, AttendanceAction } from '~/utils'
+import { and, eq, like, sql } from 'drizzle-orm'
+import { attendanceStatuses, participant } from '~/db/schema'
+import { AttendanceStatus, Participant, ParticipantUpdate } from '~/db/types'
+import { AttendanceAction, determineNextAttendanceStatus, getDb, getNextAttendanceActions } from '~/utils'
 
 /** QUERIES */
 export const ITEMS_PER_PAGE = 20

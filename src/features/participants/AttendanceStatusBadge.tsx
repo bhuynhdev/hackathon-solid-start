@@ -1,5 +1,5 @@
 import { Match, Switch } from 'solid-js'
-import { AttendanceStatus } from '~/db/schema'
+import { AttendanceStatus } from '~/db/types'
 
 export function AttendanceStatusBadge(props: { attendanceStatus: AttendanceStatus }) {
 	return (
