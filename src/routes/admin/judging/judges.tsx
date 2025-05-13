@@ -1,5 +1,5 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
-import { createSignal, For, Show } from 'solid-js'
+import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { deleteJudge, getJudgesQuery } from '~/features/judging/actions'
 import { AddJudgesForm } from '~/features/judging/AddJudgeForm'
 import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
@@ -54,7 +54,25 @@ export default function JudgesPage() {
 						<For each={judges()}>
 							{(judge) => (
 								<tr>
-									<td>{judge.name}</td>
+									<td>
+										<div class="flex w-56 justify-between">
+											<span>{judge.name}</span>
+											<Switch>
+												<Match when={judge.category.type === 'inhouse'}>
+													<span class="badge bg-amber-300">Inhouse</span>
+												</Match>
+												<Match when={judge.category.type === 'sponsor'}>
+													<span class="badge bg-rose-400">Sponsor</span>
+												</Match>
+												<Match when={judge.category.type === 'general'}>
+													<span class="badge bg-gray-200">General</span>
+												</Match>
+												<Match when={judge.category.type === 'mlh'}>
+													<span class="badge bg-violet-400">MLH</span>
+												</Match>
+											</Switch>
+										</div>
+									</td>
 									<td>{judge.email}</td>
 									<td>{judge.category.name}</td>
 									<td>
