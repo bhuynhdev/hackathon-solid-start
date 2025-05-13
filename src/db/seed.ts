@@ -62,7 +62,7 @@ async function developmentSeed() {
 				}
 			},
 			judge: {
-				count: 20,
+				count: 40,
 				columns: {
 					email: f.email(),
 					name: f.fullName(),
