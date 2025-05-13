@@ -101,7 +101,7 @@ export const deleteCategory = action(async (form: FormData) => {
 export const getJudgesQuery = query(async () => {
 	'use server'
 	const db = getDb()
-	const judges = await db.query.judge.findMany({ with: { category: true } })
+	const judges = await db.query.judge.findMany({ with: { category: true }, orderBy: judge.categoryId })
 	return judges
 }, 'get-judges')
 
