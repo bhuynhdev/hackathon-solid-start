@@ -1,12 +1,13 @@
 import { createAsync } from '@solidjs/router'
 import IconTablerInfoCircle from '~icons/tabler/info-circle'
 import { createJudge, createJudgesBulk, getCategoriesQuery } from './actions'
+import { Suspense } from 'solid-js'
 
 export function AddJudgesForm() {
 	const categories = createAsync(() => getCategoriesQuery())
 	let bulkEntryFormRef!: HTMLFormElement
 	return (
-		<>
+		<Suspense>
 			<div class="tabs tabs-lift">
 				<input type="radio" name="add_judges_form_tab" class="tab" aria-label="Manual entry" checked />
 				<div class="tab-content border-base-300 bg-base-100 p-5">
@@ -65,6 +66,6 @@ export function AddJudgesForm() {
 					</form>
 				</div>
 			</div>
-		</>
+		</Suspense>
 	)
 }
