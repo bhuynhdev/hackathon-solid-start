@@ -3,7 +3,7 @@ import '@total-typescript/ts-reset/filter-boolean'
 import { parse } from 'csv-parse/sync'
 import { eq, notInArray } from 'drizzle-orm'
 import { category, categoryTypes, judge, project, projectSubmission } from '~/db/schema'
-import { CategoryType } from '~/db/types'
+import { CategoryType, Judge } from '~/db/types'
 import { getDb } from '~/utils'
 
 const devPostCsvColsMapping = {
@@ -137,6 +137,54 @@ export const createJudgesBulk = action(async (form: FormData) => {
 
 	await db.insert(judge).values(judgesInput)
 }, 'create-judges-bulk')
+
+export const organizeJudgesIntoGroups = action(async () => {
+	'use server'
+	const db = getDb()
+	const allJudges = await db.query.judge.findMany({ with: { category: true } })
+	const judgesByCategories = allJudges.reduce(
+		(acc, judge) => {
+			const categoryId = judge.categoryId
+			if (!acc.has(categoryId)) {
+				acc.set(categoryId, [])
+			}
+			acc.get(categoryId)!.push(judge)
+			return acc
+		},
+		{} as Map<Judge['categoryId'], Array<(typeof allJudges)[number]>>
+	)
+
+	// Group organization logic: If they are in a sponsor category, put these judges in one group
+	// Else, split off into group of 2
+	const groups: Array<Record<string, any>> = []
+	for (const [categoryId, judges] of judgesByCategories) {
+		const category = judges[0].category
+		if (category.type === 'sponsor') {
+			groups.push({ categoryId, judges })
+		} else {
+			// Chunk array into groups of two
+			const judgesSubgroups = []
+			for (let i = 0; i < judges.length; i += 2) {
+				judgesSubgroups.push(judges.slice(i, i + 2))
+			}
+
+			judgesSubgroups.forEach((judgesChunks) => groups.push({ categoryId, judges: judgesChunks }))
+		}
+	}
+
+	console.log(groups)
+	return groups
+})
+
+const chunkArrayInGroupOfTwos = <T>(arr: T[]) =>
+	arr.reduce(
+		(acc, val, i) => {
+			if (i % 2 === 0) acc.push([val])
+			else acc[acc.length - 1].push(val)
+			return acc
+		},
+		[] as Array<T[]>
+	)
 
 export const updateJudge = action(async (form: FormData) => {
 	'use server'
