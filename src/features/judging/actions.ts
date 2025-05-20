@@ -1,6 +1,7 @@
 import { action, query } from '@solidjs/router'
+import '@total-typescript/ts-reset/filter-boolean'
 import { parse } from 'csv-parse/sync'
-import { eq, notInArray, sql } from 'drizzle-orm'
+import { eq, notInArray } from 'drizzle-orm'
 import { category, categoryTypes, judge, project, projectSubmission } from '~/db/schema'
 import { CategoryType } from '~/db/types'
 import { getDb } from '~/utils'
@@ -220,9 +221,17 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 
 		const submittedCategoryIds = p.categoriesCsv
 			.split(',')
-			.filter(Boolean)
 			.concat('General')
-			.map((individualCategoryName) => categoryNameToIdMap[individualCategoryName.trim()])
+			.map((individualCategoryName) => {
+				const trimmedCategoryName = individualCategoryName.trim()
+				if (!trimmedCategoryName) return
+				if (!(trimmedCategoryName in categoryNameToIdMap)) {
+					console.log(`Project: '${p.title}': Category '${trimmedCategoryName}' doesn't exist. Skipping submission to this category.`)
+					return
+				}
+				return categoryNameToIdMap[trimmedCategoryName]
+			})
+			.filter(Boolean)
 
 		await db.insert(projectSubmission).values(submittedCategoryIds.map((c) => ({ categoryId: c, projectId: insertedProjectId })))
 	}
