@@ -1,6 +1,6 @@
 import { action } from '@solidjs/router'
 import { Component } from 'solid-js'
-import { renderToString, NoHydration } from 'solid-js/web'
+import { renderToString } from 'solid-js/web'
 
 export const sendEmail = action(async (formData: FormData) => {
 	'use server'

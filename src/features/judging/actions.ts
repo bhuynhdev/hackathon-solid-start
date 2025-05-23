@@ -1,9 +1,9 @@
 import { action, query } from '@solidjs/router'
 import '@total-typescript/ts-reset/filter-boolean'
 import { parse } from 'csv-parse/sync'
-import { eq, notInArray } from 'drizzle-orm'
-import { category, categoryTypes, judge, project, projectSubmission } from '~/db/schema'
-import { CategoryType, Judge } from '~/db/types'
+import { eq, inArray, notInArray } from 'drizzle-orm'
+import { category, categoryTypes, judge, judgeGroup, project, projectSubmission } from '~/db/schema'
+import { Category, CategoryType, Judge, JudgeWithCategory } from '~/db/types'
 import { getDb } from '~/utils'
 
 const devPostCsvColsMapping = {
@@ -138,7 +138,13 @@ export const createJudgesBulk = action(async (form: FormData) => {
 	await db.insert(judge).values(judgesInput)
 }, 'create-judges-bulk')
 
-export const organizeJudgesIntoGroups = action(async () => {
+export const listJudgeGroups = query(async () => {
+	'use server'
+	const db = getDb()
+	return await db.query.judgeGroup.findMany({ orderBy: judgeGroup.categoryId, with: { judges: true, category: true } })
+}, 'query-judge-groups')
+
+export const resetAndOrganizeJudgeGroups = action(async () => {
 	'use server'
 	const db = getDb()
 	const allJudges = await db.query.judge.findMany({ with: { category: true } })
@@ -151,40 +157,31 @@ export const organizeJudgesIntoGroups = action(async () => {
 			acc.get(categoryId)!.push(judge)
 			return acc
 		},
-		{} as Map<Judge['categoryId'], Array<(typeof allJudges)[number]>>
+		new Map() as Map<Judge['categoryId'], Array<(typeof allJudges)[number]>>
 	)
 
-	// Group organization logic: If they are in a sponsor category, put these judges in one group
-	// Else, split off into group of 2
-	const groups: Array<Record<string, any>> = []
-	for (const [categoryId, judges] of judgesByCategories) {
-		const category = judges[0].category
+	// Judge group organization logic: If they are in a sponsor category, put these judges into one group
+	// Else, split off into groups of 2
+	const judgeGroups = []
+	for (const [categoryId, judgesOfThisCategory] of judgesByCategories) {
+		const category = judgesOfThisCategory[0].category
 		if (category.type === 'sponsor') {
-			groups.push({ categoryId, judges })
+			judgeGroups.push({ categoryId, members: judgesOfThisCategory, name: 'AB' })
 		} else {
-			// Chunk array into groups of two
-			const judgesSubgroups = []
-			for (let i = 0; i < judges.length; i += 2) {
-				judgesSubgroups.push(judges.slice(i, i + 2))
+			// Chunk into groups of two
+			for (let i = 0; i < judgesOfThisCategory.length; i += 2) {
+				judgeGroups.push({ categoryId, members: judgesOfThisCategory.slice(i, i + 2), name: 'AB' })
 			}
-
-			judgesSubgroups.forEach((judgesChunks) => groups.push({ categoryId, judges: judgesChunks }))
 		}
 	}
 
-	console.log(groups)
-	return groups
-})
-
-const chunkArrayInGroupOfTwos = <T>(arr: T[]) =>
-	arr.reduce(
-		(acc, val, i) => {
-			if (i % 2 === 0) acc.push([val])
-			else acc[acc.length - 1].push(val)
-			return acc
-		},
-		[] as Array<T[]>
-	)
+	await db.delete(judgeGroup)
+	for (const g of judgeGroups) {
+		const [{ id: createdGroupId }] = await db.insert(judgeGroup).values(g).returning({ id: judgeGroup.id })
+		const judgeIds = g.members.map((j) => j.id)
+		await db.update(judge).set({ judgeGroupId: createdGroupId }).where(inArray(judge.id, judgeIds))
+	}
+}, 'organize-judge-groups')
 
 export const updateJudge = action(async (form: FormData) => {
 	'use server'
