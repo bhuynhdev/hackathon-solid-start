@@ -2,7 +2,7 @@ import assert from 'assert'
 import { drizzle } from 'drizzle-orm/libsql'
 import { reset, seed } from 'drizzle-seed'
 import { getLocalD1Path } from '../../drizzle.config'
-import { participant, category, judge, project, projectSubmission } from './schema'
+import { participant, category, judge, judgeGroup, project, projectSubmission } from './schema'
 import { NewCategory } from './types'
 
 async function developmentSeed() {
@@ -13,7 +13,7 @@ async function developmentSeed() {
 
 	const SEED = 1234
 
-	await reset(db, { participant, category, judge, project, projectSubmission })
+	await reset(db, { participant, category, judge, judgeGroup, project, projectSubmission })
 
 	const categorySeeds: NewCategory[] = [
 		{ type: 'general', name: 'General' },
@@ -66,7 +66,8 @@ async function developmentSeed() {
 				columns: {
 					email: f.email(),
 					name: f.fullName(),
-					categoryId: f.int({ minValue: 1, maxValue: categorySeeds.length })
+					categoryId: f.int({ minValue: 1, maxValue: categorySeeds.filter((c) => c.type !== 'mlh').length }),
+					judgeGroupId: f.default({ defaultValue: null })
 				}
 			}
 		}

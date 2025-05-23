@@ -1,5 +1,5 @@
 import { relations, sql, type SQL } from 'drizzle-orm'
-import { sqliteTable, text, integer, check, unique } from 'drizzle-orm/sqlite-core'
+import { check, integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
 
 export const event = sqliteTable(
 	'event',
@@ -74,7 +74,15 @@ export const user = sqliteTable('user', {
 export const category = sqliteTable('category', {
 	id: integer('id').primaryKey(),
 	name: text('name').unique().notNull(),
-	type: text('type', { enum: categoryTypes }).notNull(),
+	type: text('type', { enum: categoryTypes }).notNull()
+})
+
+export const judgeGroup = sqliteTable('judge_group', {
+	id: integer('id').primaryKey(),
+	name: text('name').notNull(),
+	categoryId: integer('category_id')
+		.references(() => category.id)
+		.notNull()
 })
 
 export const judge = sqliteTable('judge', {
@@ -82,12 +90,19 @@ export const judge = sqliteTable('judge', {
 	email: text('email').unique().notNull(),
 	name: text('name').notNull(),
 	categoryId: integer('category_id')
-		.references(() => category.id)
-		.notNull()
+		.references(() => category.id, { onDelete: 'set null' })
+		.notNull(),
+	judgeGroupId: integer('judge_group_id').references(() => judgeGroup.id, { onDelete: 'set null' })
 })
 
+export const judgeGroupRelations = relations(judgeGroup, ({ one, many }) => ({
+	judges: many(judge),
+	category: one(category, { fields: [judgeGroup.categoryId], references: [category.id] })
+}))
+
 export const judgeRelations = relations(judge, ({ one }) => ({
-	category: one(category, { fields: [judge.categoryId], references: [category.id] })
+	category: one(category, { fields: [judge.categoryId], references: [category.id] }),
+	group: one(judgeGroup, { fields: [judge.judgeGroupId], references: [judgeGroup.id] })
 }))
 
 export const project = sqliteTable('project', {

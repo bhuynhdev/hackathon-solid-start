@@ -3,12 +3,11 @@ import * as schema from './schema'
 
 // Infering table model with relations
 // Credit: https://github.com/drizzle-team/drizzle-orm/issues/695#issuecomment-1881454650
-type Schema = typeof schema
-type TSchema = ExtractTablesWithRelations<Schema>
+type TSchema = ExtractTablesWithRelations<typeof schema>
 
 export type IncludeRelation<TableName extends keyof TSchema> = DBQueryConfig<'one' | 'many', boolean, TSchema, TSchema[TableName]>['with']
 
-export type InferResultType<TableName extends keyof TSchema, With extends IncludeRelation<TableName> | undefined = undefined> = BuildQueryResult<
+export type ResultWithRelation<TableName extends keyof TSchema, With extends IncludeRelation<TableName> | undefined = undefined> = BuildQueryResult<
 	TSchema,
 	TSchema[TableName],
 	{
@@ -35,9 +34,14 @@ export type MailLogInsert = typeof schema.mailLog.$inferInsert
 
 export type User = typeof schema.user.$inferSelect
 
+export type JudgeGroup = typeof schema.judge.$inferSelect
+export type NewJudgeGroup = typeof schema.judge.$inferInsert
+
 export type Judge = typeof schema.judge.$inferSelect
+export type JudgeWithGroup = ResultWithRelation<'judge', { group: true }>
+export type JudgeWithCategory = ResultWithRelation<'judge', { category: true }>
 export type NewJudge = typeof schema.judge.$inferInsert
 
 export type Project = typeof schema.project.$inferSelect
-export type ProjectWithSubmission = InferResultType<'project', { submissions: true }>
+export type ProjectWithSubmission = ResultWithRelation<'project', { submissions: true }>
 export type NewProject = typeof schema.project.$inferInsert
