@@ -1,18 +1,20 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
-import { deleteJudge, getJudgesQuery } from '~/features/judging/actions'
+import { deleteJudge, getJudgesQuery, listJudgeGroups, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
 import { AddJudgesForm } from '~/features/judging/AddJudgeForm'
 import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
+import IconTablerStack2 from '~icons/tabler/stack-2'
 import IconTablerTrash from '~icons/tabler/trash'
 import IconTablerX from '~icons/tabler/x'
 
 export const route = {
-	preload: () => getJudgesQuery()
+	preload: () => Promise.all([getJudgesQuery(), listJudgeGroups()])
 } satisfies RouteDefinition
 
 export default function JudgesPage() {
 	const judges = createAsync(() => getJudgesQuery())
+	const judgeGroups = createAsync(() => listJudgeGroups())
 	const [selectedJudgeId, setSelectedJudgeId] = createSignal<number | null>(null)
 	const judge = () => judges()?.find((j) => j.id == selectedJudgeId())
 
@@ -33,13 +35,43 @@ export default function JudgesPage() {
 					<div>
 						<h2>Judges</h2>
 					</div>
-					<button type="button" class="btn btn-primary btn-outline w-fit" onclick={() => addJudgesModal.showModal()}>
-						<span aria-hidden>
-							<IconTablerPlus />
-						</span>
-						Add judges
-					</button>
+					<div class="flex gap-4">
+						<button type="button" class="btn btn-primary btn-outline w-fit" onclick={() => addJudgesModal.showModal()}>
+							<span aria-hidden>
+								<IconTablerPlus />
+							</span>
+							Add judges
+						</button>
+						<form action={resetAndOrganizeJudgeGroups} method="post">
+							<button type="submit" class="btn btn-primary btn-outline w-fit">
+								<span aria-hidden>
+									<IconTablerStack2 />
+								</span>
+								{judgeGroups()?.length ? 'Re-generate judge groups' : 'Generate judge groups'}
+							</button>
+						</form>
+					</div>
 				</div>
+				<Show when={judgeGroups()?.length}>
+					<div>
+						<h3 class="font-bold">Groups</h3>
+						<div class="grid grid-cols-6 gap-3">
+							<For each={judgeGroups()}>
+								{(group) => (
+									<div class="h-64 rounded-xl border p-2">
+										<p class="font-bold"> Category: {group.category.name}</p>
+										<For each={group.judges}>{(j) => <p>{j.name}</p>}</For>
+									</div>
+								)}
+							</For>
+							<div class="h-64 rounded-xl border border-dashed">
+								<button type="button" class="h-full w-full cursor-pointer">
+									New group
+								</button>
+							</div>
+						</div>
+					</div>
+				</Show>
 				<table class="mt-6 table">
 					<thead>
 						<tr>
