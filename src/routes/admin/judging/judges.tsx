@@ -94,13 +94,13 @@ export default function JudgesPage() {
 						</div>
 					</div>
 				</Show>
-				<h3 class="my-6 font-semibold">Judge List</h3>
+				<h3 class="my-6 font-semibold">Judge List ({judges()?.length})</h3>
 				<table class="table">
 					<thead>
 						<tr>
 							<th>Name</th>
+							<th>Category</th>
 							<th>Email</th>
-							<th>Category ID</th>
 							<th class="sr-only">Edit</th>
 							<th class="sr-only">Delete</th>
 						</tr>
@@ -128,8 +128,8 @@ export default function JudgesPage() {
 											</Switch>
 										</div>
 									</td>
-									<td>{judge.email}</td>
 									<td>{judge.category.name}</td>
+									<td>{judge.email}</td>
 									<td>
 										<button type="button" class="btn btn-primary h-8 text-white" onclick={() => setSelectedJudgeId(judge.id)}>
 											Edit
