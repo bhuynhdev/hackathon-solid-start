@@ -1,13 +1,14 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
-import { deleteJudge, getJudgesQuery, listJudgeGroups, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
+import { clearJudgeGroups, deleteJudge, getJudgesQuery, listJudgeGroups, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
 import { AddJudgesForm } from '~/features/judging/AddJudgeForm'
 import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
+import IconTablerHomeMove from '~icons/tabler/home-move'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerStack2 from '~icons/tabler/stack-2'
 import IconTablerTrash from '~icons/tabler/trash'
+import IconTablerTrashX from '~icons/tabler/trash-x'
 import IconTablerX from '~icons/tabler/x'
-import IconTablerHomeMove from '~icons/tabler/home-move'
 
 export const route = {
 	preload: () => Promise.all([getJudgesQuery(), listJudgeGroups()])
@@ -49,6 +50,14 @@ export default function JudgesPage() {
 									<IconTablerStack2 />
 								</span>
 								{judgeGroups()?.length ? 'Re-generate judge groups' : 'Generate judge groups'}
+							</button>
+						</form>
+						<form action={clearJudgeGroups} method="post" hidden={!judgeGroups()?.length}>
+							<button type="submit" class="btn btn-error btn-outline w-fit">
+								<span aria-hidden>
+									<IconTablerTrashX />
+								</span>
+								Clear judge group
 							</button>
 						</form>
 					</div>

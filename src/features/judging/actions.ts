@@ -144,6 +144,12 @@ export const listJudgeGroups = query(async () => {
 	return await db.query.judgeGroup.findMany({ orderBy: judgeGroup.categoryId, with: { judges: true, category: true } })
 }, 'query-judge-groups')
 
+export const clearJudgeGroups = action(async () => {
+	'use server'
+	const db = getDb()
+	await db.delete(judgeGroup)
+}, 'clear-judge-groups')
+
 export const resetAndOrganizeJudgeGroups = action(async () => {
 	'use server'
 	const db = getDb()
