@@ -7,6 +7,7 @@ import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerStack2 from '~icons/tabler/stack-2'
 import IconTablerTrash from '~icons/tabler/trash'
 import IconTablerX from '~icons/tabler/x'
+import IconTablerHomeMove from '~icons/tabler/home-move'
 
 export const route = {
 	preload: () => Promise.all([getJudgesQuery(), listJudgeGroups()])
@@ -54,17 +55,29 @@ export default function JudgesPage() {
 				</div>
 				<Show when={judgeGroups()?.length}>
 					<div>
-						<h3 class="font-bold">Groups</h3>
-						<div class="grid grid-cols-6 gap-3">
+						<h3 class="my-4 font-semibold">Judge Groups</h3>
+						<div class="grid grid-cols-[repeat(auto-fit,minmax(270px,1fr))] gap-6">
 							<For each={judgeGroups()}>
 								{(group) => (
-									<div class="h-64 rounded-xl border p-2">
-										<p class="font-bold"> Category: {group.category.name}</p>
-										<For each={group.judges}>{(j) => <p>{j.name}</p>}</For>
+									<div class="h-72 rounded-xl border border-gray-400 p-4 shadow">
+										<p class="ml-2 text-lg font-bold">Group {group.name}</p>
+										<p class="my-1 ml-2 text-sm text-gray-600 italic">{group.category.name}</p>
+										<div class="mt-2 flex flex-col">
+											<For each={group.judges}>
+												{(j) => (
+													<div class="group flex items-center justify-between px-2 py-1 hover:bg-slate-100">
+														<p>{j.name}</p>
+														<button class="cursor-pointer opacity-0 group-hover:opacity-100" aria-label={`Move judge ${j.name} to another group`}>
+															<IconTablerHomeMove />
+														</button>
+													</div>
+												)}
+											</For>
+										</div>
 									</div>
 								)}
 							</For>
-							<div class="h-64 rounded-xl border border-dashed">
+							<div class="h-72 rounded-xl border border-dashed border-gray-400 shadow">
 								<button type="button" class="h-full w-full cursor-pointer">
 									New group
 								</button>
@@ -72,7 +85,8 @@ export default function JudgesPage() {
 						</div>
 					</div>
 				</Show>
-				<table class="mt-6 table">
+				<h3 class="my-6 font-semibold">Judge List</h3>
+				<table class="table">
 					<thead>
 						<tr>
 							<th>Name</th>

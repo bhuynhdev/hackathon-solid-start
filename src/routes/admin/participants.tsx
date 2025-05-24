@@ -65,7 +65,7 @@ export default function ParticipantPage() {
 				</Show>
 				<form
 					method="get"
-					class="grid-cols-[repeat(auto-fit, minmax(100px, 1fr)] grid grid-flow-col items-end gap-2 rounded-lg bg-gray-100 p-4"
+					class="grid grid-flow-col grid-cols-[repeat(auto-fit,minmax(100px,1fr))] items-end gap-2 rounded-lg bg-gray-100 p-4"
 					role="search"
 				>
 					<label class="fieldset py-0">
