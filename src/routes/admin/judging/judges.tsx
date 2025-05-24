@@ -64,7 +64,7 @@ export default function JudgesPage() {
 				</div>
 				<Show when={judgeGroups()?.length}>
 					<div>
-						<h3 class="my-4 font-semibold">Judge Groups</h3>
+						<h3 class="my-4 font-semibold">Judge Groups ({judgeGroups()?.length})</h3>
 						<div class="grid grid-cols-[repeat(auto-fit,minmax(270px,1fr))] gap-6">
 							<For each={judgeGroups()}>
 								{(group) => (
