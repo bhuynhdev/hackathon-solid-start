@@ -172,13 +172,28 @@ export const resetAndOrganizeJudgeGroups = action(async () => {
 	for (const [categoryId, judgesOfThisCategory] of judgesByCategories) {
 		const category = judgesOfThisCategory[0].category
 		if (category.type === 'sponsor') {
-			judgeGroups.push({ categoryId, members: judgesOfThisCategory, name: 'AB' })
+			judgeGroups.push({ categoryId, members: judgesOfThisCategory, name: String.fromCharCode(categoryId + 64) })
 		} else {
 			// Chunk into groups of two
 			for (let i = 0; i < judgesOfThisCategory.length; i += 2) {
-				judgeGroups.push({ categoryId, members: judgesOfThisCategory.slice(i, i + 2), name: 'AB' })
+				judgeGroups.push({ categoryId, members: judgesOfThisCategory.slice(i, i + 2), name: '' })
 			}
 		}
+	}
+
+	const judgeGroupCountByCategory: Record<number, number> = {}
+
+	// Assign a two-character name to each group following this convention:
+	// - First char is categoryId converted to ASCII (1 -> A, 2 -> B, etc.)
+	// - Second char is the ordering of this group within the category (1st group of cateogyId 1 -> A1, etc.)
+	for (const group of judgeGroups) {
+		const count = (judgeGroupCountByCategory[group.categoryId] || 0) + 1
+		judgeGroupCountByCategory[group.categoryId] = count
+
+		const firstChar = String.fromCharCode(64 + group.categoryId)
+		const secondChar = count.toString()
+
+		group.name = `${firstChar}${secondChar}`
 	}
 
 	await db.delete(judgeGroup)
