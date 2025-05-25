@@ -1,6 +1,6 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Show } from 'solid-js'
-import { deleteProject, getCategoriesQuery, getProjectsQuery } from '~/features/judging/actions'
+import { deleteProject, listCategories, listProjects } from '~/features/judging/actions'
 import { AddProjectsForm } from '~/features/judging/AddProjectsForm'
 import { ProjectEditForm } from '~/features/judging/ProjectEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
@@ -9,14 +9,14 @@ import IconTablerX from '~icons/tabler/x'
 
 export const route = {
 	preload: () => {
-		getProjectsQuery()
-		getCategoriesQuery()
+		listProjects()
+		listCategories()
 	}
 } satisfies RouteDefinition
 
 export default function ProjectsPage() {
-	const projects = createAsync(() => getProjectsQuery())
-	const categories = createAsync(() => getCategoriesQuery())
+	const projects = createAsync(() => listProjects())
+	const categories = createAsync(() => listCategories())
 	const categoryIdToNameMap = () => categories()?.reduce((acc, cat) => ({ ...acc, [cat.id]: cat.name }), {} as Record<number, string>)
 	const [selectedProjectId, setSelectedProjectId] = createSignal<number | null>(null)
 	const project = () => projects()?.find((p) => p.id == selectedProjectId())

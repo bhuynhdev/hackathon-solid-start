@@ -18,7 +18,7 @@ export function MoveJudgeForm(props: MoveJudgeFormProps) {
 			<p>
 				Current group: {currentGroup()?.name} - {currentGroup()?.category.name}
 			</p>
-			<Show when={applicableJudgeGroups()?.length} fallback={<p class="my-3">No applicable judge groups to move to</p>}>
+			<Show when={applicableJudgeGroups()?.length} fallback={<p class="my-3">No applicable groups to move to. Consider creating new groups</p>}>
 				<form method="post" action={moveJudge}>
 					<input type="hidden" name="judgeId" value={props.judge.id} />
 					<label class="fieldset">

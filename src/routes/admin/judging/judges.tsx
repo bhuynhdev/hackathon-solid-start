@@ -1,7 +1,7 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { Judge } from '~/db/types'
-import { clearJudgeGroups, deleteJudge, getJudgesQuery, listJudgeGroups, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
+import { clearJudgeGroups, deleteJudge, listJudges, listJudgeGroups, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
 import { AddJudgesForm } from '~/features/judging/AddJudgeForm'
 import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
 import { MoveJudgeForm } from '~/features/judging/MoveJudgeForm'
@@ -13,11 +13,11 @@ import IconTablerTrashX from '~icons/tabler/trash-x'
 import IconTablerX from '~icons/tabler/x'
 
 export const route = {
-	preload: () => Promise.all([getJudgesQuery(), listJudgeGroups()])
+	preload: () => Promise.all([listJudges(), listJudgeGroups()])
 } satisfies RouteDefinition
 
 export default function JudgesPage() {
-	const allJudges = createAsync(() => getJudgesQuery())
+	const allJudges = createAsync(() => listJudges())
 	const judgeGroups = createAsync(() => listJudgeGroups())
 	const [judgeToEditId, setJudgeToEditId] = createSignal<number | null>(null)
 	const judgeToEdit = () => allJudges()?.find((j) => j.id == judgeToEditId())

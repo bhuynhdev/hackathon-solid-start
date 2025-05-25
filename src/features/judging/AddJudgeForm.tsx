@@ -1,10 +1,10 @@
 import { createAsync } from '@solidjs/router'
 import IconTablerInfoCircle from '~icons/tabler/info-circle'
-import { createJudge, createJudgesBulk, getCategoriesQuery } from './actions'
+import { createJudge, createJudgesBulk, listCategories } from './actions'
 import { Suspense } from 'solid-js'
 
 export function AddJudgesForm() {
-	const categories = createAsync(() => getCategoriesQuery())
+	const categories = createAsync(() => listCategories())
 	let bulkEntryFormRef!: HTMLFormElement
 	return (
 		<Suspense>

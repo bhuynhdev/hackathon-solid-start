@@ -2,7 +2,7 @@ import { createAsync } from '@solidjs/router'
 import { For, Suspense } from 'solid-js'
 import { Judge } from '~/db/types'
 import IconTablerX from '~icons/tabler/x'
-import { getCategoriesQuery, updateJudge } from './actions'
+import { listCategories, updateJudge } from './actions'
 
 interface JudgeEditFormProps {
 	judge: Judge
@@ -10,7 +10,7 @@ interface JudgeEditFormProps {
 }
 
 export function JudgeEditForm(props: JudgeEditFormProps) {
-	const categories = createAsync(() => getCategoriesQuery())
+	const categories = createAsync(() => listCategories())
 	return (
 		<Suspense>
 			<section>

@@ -31,7 +31,7 @@ type TransformedDevPostProject = Record<(typeof devPostCsvColsMapping)[keyof typ
 }
 
 /** CATEGORIES */
-export const getCategoriesQuery = query(async () => {
+export const listCategories = query(async () => {
 	'use server'
 	const db = getDb()
 	const categories = await db.select().from(category).orderBy(category.name)
@@ -99,10 +99,10 @@ export const deleteCategory = action(async (form: FormData) => {
 }, 'delete-category')
 
 /** JUDGES */
-export const getJudgesQuery = query(async () => {
+export const listJudges = query(async () => {
 	'use server'
 	const db = getDb()
-	const judges = await db.query.judge.findMany({ with: { category: true }, orderBy: judge.name })
+	const judges = await db.query.judge.findMany({ with: { category: true }, orderBy: judge.categoryId })
 	return judges
 }, 'get-judges')
 
@@ -141,7 +141,7 @@ export const createJudgesBulk = action(async (form: FormData) => {
 export const listJudgeGroups = query(async () => {
 	'use server'
 	const db = getDb()
-	return await db.query.judgeGroup.findMany({ orderBy: judgeGroup.categoryId, with: { judges: true, category: true } })
+	return await db.query.judgeGroup.findMany({ orderBy: judgeGroup.name, with: { judges: true, category: true } })
 }, 'query-judge-groups')
 
 export const clearJudgeGroups = action(async () => {
@@ -242,7 +242,7 @@ export const moveJudge = action(async (form: FormData) => {
 }, 'delete-judge')
 
 /** PROJECTS **/
-export const getProjectsQuery = query(async () => {
+export const listProjects = query(async () => {
 	'use server'
 	const db = getDb()
 	const projectAndSubmissions = await db.query.project.findMany({ with: { submissions: true } })

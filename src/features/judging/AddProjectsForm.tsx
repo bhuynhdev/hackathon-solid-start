@@ -1,10 +1,10 @@
 import { createAsync } from '@solidjs/router'
 import IconTablerInfoCircle from '~icons/tabler/info-circle'
-import { createProjectAndSubmissions, importProjectsFromDevpost, getCategoriesQuery } from './actions'
+import { createProjectAndSubmissions, importProjectsFromDevpost, listCategories } from './actions'
 import { Suspense } from 'solid-js'
 
 export function AddProjectsForm() {
-	const categories = createAsync(() => getCategoriesQuery())
+	const categories = createAsync(() => listCategories())
 	let importCsvFormRef!: HTMLFormElement
 	return (
 		<Suspense>

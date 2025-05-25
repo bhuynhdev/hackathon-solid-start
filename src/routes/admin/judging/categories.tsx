@@ -1,6 +1,6 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
-import { deleteCategory, getCategoriesQuery } from '~/features/judging/actions'
+import { deleteCategory, listCategories } from '~/features/judging/actions'
 import { AddCategoriesForm } from '~/features/judging/AddCategoriesForm'
 import { CategoryEditForm } from '~/features/judging/CategoryEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
@@ -8,11 +8,11 @@ import IconTablerTrash from '~icons/tabler/trash'
 import IconTablerX from '~icons/tabler/x'
 
 export const route = {
-	preload: () => getCategoriesQuery()
+	preload: () => listCategories()
 } satisfies RouteDefinition
 
 export default function CategoriesPage() {
-	const categories = createAsync(() => getCategoriesQuery())
+	const categories = createAsync(() => listCategories())
 	const [selectedCategoryId, setSelectedCategoryId] = createSignal<number | null>(null)
 	const category = () => categories()?.find((c) => c.id == selectedCategoryId())
 
