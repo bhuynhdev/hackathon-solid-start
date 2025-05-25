@@ -3,7 +3,7 @@ import '@total-typescript/ts-reset/filter-boolean'
 import { parse } from 'csv-parse/sync'
 import { eq, inArray, notInArray } from 'drizzle-orm'
 import { category, categoryTypes, judge, judgeGroup, project, projectSubmission } from '~/db/schema'
-import { Category, CategoryType, Judge, JudgeWithCategory } from '~/db/types'
+import { CategoryType, Judge } from '~/db/types'
 import { getDb } from '~/utils'
 
 const devPostCsvColsMapping = {
@@ -102,7 +102,7 @@ export const deleteCategory = action(async (form: FormData) => {
 export const getJudgesQuery = query(async () => {
 	'use server'
 	const db = getDb()
-	const judges = await db.query.judge.findMany({ with: { category: true }, orderBy: judge.categoryId })
+	const judges = await db.query.judge.findMany({ with: { category: true }, orderBy: judge.name })
 	return judges
 }, 'get-judges')
 
@@ -225,6 +225,20 @@ export const deleteJudge = action(async (form: FormData) => {
 	const db = getDb()
 	const judgeId = form.get('judgeId') as string
 	await db.delete(judge).where(eq(judge.id, Number(judgeId)))
+}, 'delete-judge')
+
+export const moveJudge = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const judgeId = Number(form.get('judgeId'))
+	const newGroupId = Number(form.get('newGroupId'))
+	const [judgeToMove] = await db.select().from(judge).where(eq(judge.id, judgeId))
+	const [newGroup] = await db.select().from(judgeGroup).where(eq(judgeGroup.id, newGroupId))
+	if (judgeToMove.categoryId !== newGroup.categoryId) {
+		throw Error(`Judge ${judgeId} of category ${judgeToMove.categoryId} cannot move to group of category ${newGroup.categoryId}`)
+	}
+
+	await db.update(judge).set({ judgeGroupId: newGroupId }).where(eq(judge.id, judgeId))
 }, 'delete-judge')
 
 /** PROJECTS **/

@@ -1,8 +1,10 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
+import { Judge } from '~/db/types'
 import { clearJudgeGroups, deleteJudge, getJudgesQuery, listJudgeGroups, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
 import { AddJudgesForm } from '~/features/judging/AddJudgeForm'
 import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
+import { MoveJudgeForm } from '~/features/judging/MoveJudgeForm'
 import IconTablerHomeMove from '~icons/tabler/home-move'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerStack2 from '~icons/tabler/stack-2'
@@ -15,12 +17,15 @@ export const route = {
 } satisfies RouteDefinition
 
 export default function JudgesPage() {
-	const judges = createAsync(() => getJudgesQuery())
+	const allJudges = createAsync(() => getJudgesQuery())
 	const judgeGroups = createAsync(() => listJudgeGroups())
-	const [selectedJudgeId, setSelectedJudgeId] = createSignal<number | null>(null)
-	const judge = () => judges()?.find((j) => j.id == selectedJudgeId())
+	const [judgeToEditId, setJudgeToEditId] = createSignal<number | null>(null)
+	const judgeToEdit = () => allJudges()?.find((j) => j.id == judgeToEditId())
+
+	const [judgeToMove, setJudgeToMove] = createSignal<Judge | null>(null)
 
 	let addJudgesModal!: HTMLDialogElement
+	let moveJudgeModal!: HTMLDialogElement
 	return (
 		<div class="drawer drawer-end m-auto flex flex-col items-center justify-center gap-6">
 			<input
@@ -29,8 +34,8 @@ export default function JudgesPage() {
 				type="checkbox"
 				class="drawer-toggle"
 				hidden
-				checked={selectedJudgeId() !== null}
-				onChange={(e) => !e.currentTarget.checked && setSelectedJudgeId(null)} /** Set category to null if drawer is checked off **/
+				checked={judgeToEditId() !== null}
+				onChange={(e) => !e.currentTarget.checked && setJudgeToEditId(null)} /** Set category to null if drawer is checked off **/
 			/>
 			<div class="drawer-content w-full">
 				<div class="flex items-end gap-10">
@@ -76,7 +81,14 @@ export default function JudgesPage() {
 												{(j) => (
 													<div class="group flex items-center justify-between px-2 py-1 hover:bg-slate-100">
 														<p>{j.name}</p>
-														<button class="cursor-pointer opacity-0 group-hover:opacity-100" aria-label={`Move judge ${j.name} to another group`}>
+														<button
+															class="cursor-pointer opacity-0 group-hover:opacity-100"
+															aria-label={`Move judge ${j.name} to another group`}
+															onClick={() => {
+																setJudgeToMove(j)
+																moveJudgeModal.showModal()
+															}}
+														>
 															<IconTablerHomeMove />
 														</button>
 													</div>
@@ -94,7 +106,7 @@ export default function JudgesPage() {
 						</div>
 					</div>
 				</Show>
-				<h3 class="my-6 font-semibold">Judge List ({judges()?.length})</h3>
+				<h3 class="my-6 font-semibold">Judge List ({allJudges()?.length})</h3>
 				<table class="table">
 					<thead>
 						<tr>
@@ -106,7 +118,7 @@ export default function JudgesPage() {
 						</tr>
 					</thead>
 					<tbody>
-						<For each={judges()}>
+						<For each={allJudges()}>
 							{(judge) => (
 								<tr>
 									<td>
@@ -131,7 +143,7 @@ export default function JudgesPage() {
 									<td>{judge.category.name}</td>
 									<td>{judge.email}</td>
 									<td>
-										<button type="button" class="btn btn-primary h-8 text-white" onclick={() => setSelectedJudgeId(judge.id)}>
+										<button type="button" class="btn btn-primary h-8 text-white" onclick={() => setJudgeToEditId(judge.id)}>
 											Edit
 										</button>
 									</td>
@@ -151,6 +163,7 @@ export default function JudgesPage() {
 						</For>
 					</tbody>
 				</table>
+
 				<dialog id="add-judges-modal" class="modal" ref={addJudgesModal}>
 					<div class="modal-box h-[600px] max-w-md lg:max-w-lg">
 						<div class="flex justify-between">
@@ -165,12 +178,27 @@ export default function JudgesPage() {
 						</form>
 					</div>
 				</dialog>
+
+				<dialog id="add-judges-modal" class="modal" ref={moveJudgeModal}>
+					<div class="modal-box h-[320px] max-w-md lg:max-w-lg">
+						<div class="flex justify-between">
+							<h3 class="mb-4 text-lg font-bold">Move Judge {judgeToMove()?.name}</h3>
+							<button class="cursor-pointer" aria-label="Close" onclick={() => moveJudgeModal.close()}>
+								<IconTablerX />
+							</button>
+						</div>
+						{judgeToMove() && <MoveJudgeForm judge={judgeToMove()!} />}
+						<form method="dialog" class="modal-action">
+							<button class="btn">Close</button>
+						</form>
+					</div>
+				</dialog>
 			</div>
 			<div role="dialog" class="drawer-side">
 				<label for="judge-info-drawer" class="drawer-overlay"></label>
 				<div class="bg-base-100 min-h-full w-full max-w-[500px] p-6">
-					<Show when={judge()} fallback={<p>No judge selected</p>}>
-						<JudgeEditForm judge={judge()!} onClose={() => setSelectedJudgeId(null)} />
+					<Show when={judgeToEdit()} fallback={<p>No judge selected</p>}>
+						<JudgeEditForm judge={judgeToEdit()!} onClose={() => setJudgeToEditId(null)} />
 					</Show>
 				</div>
 			</div>
