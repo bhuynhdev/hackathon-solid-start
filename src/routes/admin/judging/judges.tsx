@@ -1,14 +1,14 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
-import { createSignal, For, Match, Show, Switch } from 'solid-js'
+import { createSignal, For, Show } from 'solid-js'
 import { Judge } from '~/db/types'
-import { clearJudgeGroups, deleteJudge, listJudgeGroups, listJudges, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
+import { clearJudgeGroups, listJudgeGroups, listJudges, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
 import { JudgeCreateForm } from '~/features/judging/JudgeCreateForm'
 import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
+import { JudgeList } from '~/features/judging/JudgeList'
 import { MoveJudgeForm } from '~/features/judging/MoveJudgeForm'
 import IconTablerHomeMove from '~icons/tabler/home-move'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerStack2 from '~icons/tabler/stack-2'
-import IconTablerTrash from '~icons/tabler/trash'
 import IconTablerTrashX from '~icons/tabler/trash-x'
 import IconTablerX from '~icons/tabler/x'
 
@@ -19,8 +19,7 @@ export const route = {
 export default function JudgesPage() {
 	const allJudges = createAsync(() => listJudges())
 	const judgeGroups = createAsync(() => listJudgeGroups())
-	const [judgeToEditId, setJudgeToEditId] = createSignal<number | null>(null)
-	const judgeToEdit = () => allJudges()?.find((j) => j.id == judgeToEditId())
+	const [judgeToEdit, setJudgeToEdit] = createSignal<Judge | null>(null)
 
 	const [judgeToMove, setJudgeToMove] = createSignal<Judge | null>(null)
 
@@ -34,8 +33,8 @@ export default function JudgesPage() {
 				type="checkbox"
 				class="drawer-toggle"
 				hidden
-				checked={judgeToEditId() !== null}
-				onChange={(e) => !e.currentTarget.checked && setJudgeToEditId(null)} /** Set category to null if drawer is checked off **/
+				checked={judgeToEdit() !== null}
+				onChange={(e) => !e.currentTarget.checked && setJudgeToEdit(null)} /** Set category to null if drawer is checked off **/
 			/>
 			<div class="drawer-content w-full">
 				<div class="flex items-end gap-10">
@@ -107,62 +106,9 @@ export default function JudgesPage() {
 					</div>
 				</Show>
 				<h3 class="my-6 font-semibold">Judge List ({allJudges()?.length})</h3>
-				<table class="table">
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Category</th>
-							<th>Email</th>
-							<th class="sr-only">Edit</th>
-							<th class="sr-only">Delete</th>
-						</tr>
-					</thead>
-					<tbody>
-						<For each={allJudges()}>
-							{(judge) => (
-								<tr>
-									<td>
-										<div class="flex w-56 justify-between">
-											<span>{judge.name}</span>
-											<Switch>
-												<Match when={judge.category.type === 'inhouse'}>
-													<span class="badge bg-amber-300">Inhouse</span>
-												</Match>
-												<Match when={judge.category.type === 'sponsor'}>
-													<span class="badge bg-rose-400">Sponsor</span>
-												</Match>
-												<Match when={judge.category.type === 'general'}>
-													<span class="badge bg-gray-200">General</span>
-												</Match>
-												<Match when={judge.category.type === 'mlh'}>
-													<span class="badge bg-violet-400">MLH</span>
-												</Match>
-											</Switch>
-										</div>
-									</td>
-									<td>{judge.category.name}</td>
-									<td>{judge.email}</td>
-									<td>
-										<button type="button" class="btn btn-primary h-8 text-white" onclick={() => setJudgeToEditId(judge.id)}>
-											Edit
-										</button>
-									</td>
-									<td class="pl-0">
-										<form action={deleteJudge} method="post">
-											<input type="hidden" name="judgeId" value={judge.id} />
-											<button type="submit" class="btn btn-error btn-soft h-8" aria-label="Delete">
-												<span class="hidden md:inline">Delete </span>
-												<span>
-													<IconTablerTrash />
-												</span>
-											</button>
-										</form>
-									</td>
-								</tr>
-							)}
-						</For>
-					</tbody>
-				</table>
+				<Show when={allJudges()}>
+					<JudgeList judges={allJudges()!} onEditJudge={(j) => setJudgeToEdit(j)} />
+				</Show>
 
 				<dialog id="add-judges-modal" class="modal" ref={addJudgesModal}>
 					<div class="modal-box h-[600px] max-w-md lg:max-w-lg">
@@ -198,7 +144,7 @@ export default function JudgesPage() {
 				<label for="judge-info-drawer" class="drawer-overlay"></label>
 				<div class="bg-base-100 min-h-full w-full max-w-[500px] p-6">
 					<Show when={judgeToEdit()} fallback={<p>No judge selected</p>}>
-						<JudgeEditForm judge={judgeToEdit()!} onClose={() => setJudgeToEditId(null)} />
+						<JudgeEditForm judge={judgeToEdit()!} onClose={() => setJudgeToEdit(null)} />
 					</Show>
 				</div>
 			</div>
