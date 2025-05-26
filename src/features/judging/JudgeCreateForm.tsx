@@ -3,7 +3,7 @@ import IconTablerInfoCircle from '~icons/tabler/info-circle'
 import { createJudge, createJudgesBulk, listCategories } from './actions'
 import { Suspense } from 'solid-js'
 
-export function AddJudgesForm() {
+export function JudgeCreateForm() {
 	const categories = createAsync(() => listCategories())
 	let bulkEntryFormRef!: HTMLFormElement
 	return (

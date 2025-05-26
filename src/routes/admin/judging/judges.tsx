@@ -1,8 +1,8 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { Judge } from '~/db/types'
-import { clearJudgeGroups, deleteJudge, listJudges, listJudgeGroups, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
-import { AddJudgesForm } from '~/features/judging/AddJudgeForm'
+import { clearJudgeGroups, deleteJudge, listJudgeGroups, listJudges, resetAndOrganizeJudgeGroups } from '~/features/judging/actions'
+import { JudgeCreateForm } from '~/features/judging/JudgeCreateForm'
 import { JudgeEditForm } from '~/features/judging/JudgeEditForm'
 import { MoveJudgeForm } from '~/features/judging/MoveJudgeForm'
 import IconTablerHomeMove from '~icons/tabler/home-move'
@@ -172,7 +172,7 @@ export default function JudgesPage() {
 								<IconTablerX />
 							</button>
 						</div>
-						<AddJudgesForm />
+						<JudgeCreateForm />
 						<form method="dialog" class="modal-action">
 							<button class="btn">Close</button>
 						</form>

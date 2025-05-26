@@ -1,7 +1,7 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Show } from 'solid-js'
 import { deleteProject, listCategories, listProjects } from '~/features/judging/actions'
-import { AddProjectsForm } from '~/features/judging/AddProjectsForm'
+import { ProjectCreateForm } from '~/features/judging/ProjectCreateForm'
 import { ProjectEditForm } from '~/features/judging/ProjectEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerTrash from '~icons/tabler/trash'
@@ -89,7 +89,7 @@ export default function ProjectsPage() {
 								<IconTablerX />
 							</button>
 						</div>
-						<AddProjectsForm />
+						<ProjectCreateForm />
 						<form method="dialog" class="modal-action">
 							<button class="btn">Close</button>
 						</form>

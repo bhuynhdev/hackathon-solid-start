@@ -3,11 +3,7 @@ import { createCategoriesBulk, createCategory } from './actions'
 import { For } from 'solid-js'
 import { categoryTypes } from '~/db/schema'
 
-interface AddCategoriesFormProps {
-	isInModal?: boolean
-}
-
-export function AddCategoriesForm(props: AddCategoriesFormProps) {
+export function CategoryCreateForm() {
 	let bulkEntryFormRef!: HTMLFormElement
 	return (
 		<>

@@ -1,7 +1,7 @@
 import { createAsync, RouteDefinition } from '@solidjs/router'
 import { createSignal, For, Match, Show, Switch } from 'solid-js'
 import { deleteCategory, listCategories } from '~/features/judging/actions'
-import { AddCategoriesForm } from '~/features/judging/AddCategoriesForm'
+import { CategoryCreateForm } from '~/features/judging/CategoryCreateForm'
 import { CategoryEditForm } from '~/features/judging/CategoryEditForm'
 import IconTablerPlus from '~icons/tabler/plus'
 import IconTablerTrash from '~icons/tabler/trash'
@@ -100,7 +100,7 @@ export default function CategoriesPage() {
 								<IconTablerX />
 							</button>
 						</div>
-						<AddCategoriesForm />
+						<CategoryCreateForm />
 						<form method="dialog" class="modal-action">
 							<button class="btn">Close</button>
 						</form>

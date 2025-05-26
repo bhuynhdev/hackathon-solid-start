@@ -3,7 +3,10 @@ import IconTablerInfoCircle from '~icons/tabler/info-circle'
 import { createProjectAndSubmissions, importProjectsFromDevpost, listCategories } from './actions'
 import { Suspense } from 'solid-js'
 
-export function AddProjectsForm() {
+/**
+ * Tabs-based form to create project(s) - including single project create, and bulk project CSV upload
+ **/
+export function ProjectCreateForm() {
 	const categories = createAsync(() => listCategories())
 	let importCsvFormRef!: HTMLFormElement
 	return (
