@@ -108,9 +108,13 @@ export const judgeRelations = relations(judge, ({ one }) => ({
 export const project = sqliteTable('project', {
 	id: integer('id').primaryKey(),
 	name: text('name').notNull(),
+	status: text('status', { enum: ['disqualified', 'created'] })
+		.notNull()
+		.default('created'),
 	url: text('url'),
 	location: text('location').notNull(),
-	location2: text('location2').notNull()
+	location2: text('location2').notNull(),
+	disqualifyReason: text('disqualify_reason')
 })
 
 export const projectRelations = relations(project, ({ many }) => ({
