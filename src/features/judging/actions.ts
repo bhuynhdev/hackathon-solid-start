@@ -311,9 +311,12 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 			.values({ name: p.title, location: p.location, location2: '' })
 			.returning({ insertedProjectId: project.id })
 
-		const submittedCategoryIds = p.categoriesCsv
-			.split(',')
-			.concat('General')
+		const submittedCategories = p.categoriesCsv.split(',')
+		if (!submittedCategories.includes('General')) {
+			submittedCategories.push('General')
+		}
+
+		const submittedCategoryIds = submittedCategories
 			.map((individualCategoryName) => {
 				const trimmedCategoryName = individualCategoryName.trim()
 				if (!trimmedCategoryName) return
