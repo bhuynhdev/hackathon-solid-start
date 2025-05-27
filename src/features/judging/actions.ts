@@ -333,7 +333,7 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 	}
 }, 'import-devpost-projects')
 
-export const updateProject = action(async (form: FormData) => {
+export const updateProjectInfo = action(async (form: FormData) => {
 	'use server'
 	const db = getDb()
 	const projectId = Number(form.get('projectId'))
@@ -350,7 +350,26 @@ export const updateProject = action(async (form: FormData) => {
 		.insert(projectSubmission)
 		.values(categoryIds.map((categoryId) => ({ projectId: projectId, categoryId })))
 		.onConflictDoNothing({ target: [projectSubmission.categoryId, projectSubmission.projectId] })
-}, 'create-project-and-submissions')
+}, 'update-project-info')
+
+/**
+ * Disqualify project if not yet, or re-qualify if already disqualified
+ **/
+export const toggleProjectDisqualification = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const projectId = Number(form.get('projectId'))
+	const disqualifyReason = form.get('disqualifyReason') as string
+	const shouldUpdateDisqualifyReasonOnly = form.get('update-disqualify-reason-only') === 'true'
+
+	const [projectToUpdate] = await db.select().from(project).where(eq(project.id, projectId)).limit(1)
+
+	if (shouldUpdateDisqualifyReasonOnly || projectToUpdate.status !== 'disqualified') {
+		await db.update(project).set({ status: 'disqualified', disqualifyReason: disqualifyReason })
+	} else {
+		await db.update(project).set({ status: 'created', disqualifyReason: null })
+	}
+}, 'update-project-info')
 
 export const deleteProject = action(async (form: FormData) => {
 	'use server'

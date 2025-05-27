@@ -1,8 +1,8 @@
 import { createAsync } from '@solidjs/router'
-import { For, Show, Suspense } from 'solid-js'
+import { For, Match, Show, Suspense, Switch } from 'solid-js'
 import { ProjectWithSubmission } from '~/db/types'
 import IconTablerX from '~icons/tabler/x'
-import { listCategories, updateProject } from './actions'
+import { listCategories, toggleProjectDisqualification, updateProjectInfo } from './actions'
 
 interface ProjectEditFormProps {
 	project: ProjectWithSubmission
@@ -22,7 +22,7 @@ export function ProjectEditForm(props: ProjectEditFormProps) {
 						<IconTablerX width="32" height="32" />
 					</button>
 				</header>
-				<form method="post" class="border-base-300 mt-4 rounded-md border" action={updateProject}>
+				<form method="post" class="border-base-300 mt-4 rounded-md border" action={updateProjectInfo}>
 					<header class="bg-gray-200 px-4 py-3">
 						<h3 class="font-semibold">Project Info</h3>
 					</header>
@@ -62,6 +62,51 @@ export function ProjectEditForm(props: ProjectEditFormProps) {
 						<button type="submit" class="btn btn-primary mt-2 ml-auto block text-white">
 							Save Changes
 						</button>
+					</div>
+				</form>
+
+				<form method="post" class="border-base-300 mt-4 rounded-md border" action={toggleProjectDisqualification}>
+					<header class="bg-gray-200 px-4 py-3">
+						<h3 class="font-semibold">Disqualification</h3>
+					</header>
+					<div class="p-4">
+						<p class="text-sm font-semibold">
+							Status:{' '}
+							<Switch>
+								<Match when={props.project.status === 'disqualified'}>
+									<span class="badge bg-red-400">{props.project.status}</span>
+								</Match>
+								<Match when={props.project.status !== 'disqualified'}>
+									<span class="badge badge-neutral badge-soft">{props.project.status}</span>
+								</Match>
+							</Switch>
+						</p>
+						<input type="hidden" name="projectId" value={props.project.id} />
+						<Switch>
+							<Match when={props.project.status === 'disqualified'}>
+								<label class="fieldset">
+									<span class="fieldset-legend text-sm">Disqualification reason</span>
+									<input type="text" class="input w-full" name="disqualifyReason" value={props.project.disqualifyReason ?? ''} required />
+								</label>
+								<div class="mt-2 flex justify-end gap-3">
+									<button type="submit" name="update-disqualify-reason-only" value="true" class="btn btn-primary btn-outline">
+										Update disqualifcation reason
+									</button>
+									<button type="submit" class="btn btn-primary text-white">
+										Re-qualify
+									</button>
+								</div>
+							</Match>
+							<Match when={props.project.status !== 'disqualified'}>
+								<label class="fieldset">
+									<span class="fieldset-legend text-sm">Disqualification reason</span>
+									<input type="text" class="input w-full" name="disqualifyReason" value={props.project.disqualifyReason ?? ''} required />
+								</label>
+								<button type="submit" class="btn btn-error mt-2 ml-auto block text-white">
+									Disqualify
+								</button>
+							</Match>
+						</Switch>
 					</div>
 				</form>
 			</section>
