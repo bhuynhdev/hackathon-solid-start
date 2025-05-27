@@ -48,6 +48,7 @@ export default function ProjectsPage() {
 				<table class="mt-6 table">
 					<thead>
 						<tr>
+							<th>Id</th>
 							<th>Name</th>
 							<th>Categories</th>
 							<th class="sr-only">Edit</th>
@@ -58,6 +59,7 @@ export default function ProjectsPage() {
 						<For each={projects()}>
 							{(project) => (
 								<tr>
+									<td>{project.id}</td>
 									<td>{project.name}</td>
 									<td>{project.submissions.map(({ categoryId }) => categoryIdToNameMap()?.[categoryId]).join(', ')}</td>
 									<td>

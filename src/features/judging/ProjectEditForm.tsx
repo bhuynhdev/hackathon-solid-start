@@ -16,14 +16,14 @@ export function ProjectEditForm(props: ProjectEditFormProps) {
 		<Suspense>
 			<section>
 				<header class="flex w-full justify-between">
-					<h3 class="text-lg font-bold">Edit Judge</h3>
+					<h3 class="text-lg font-bold">Edit Project</h3>
 					<button aria-label="Close" type="button" onclick={props.onClose} class="cursor-pointer">
 						<IconTablerX width="32" height="32" />
 					</button>
 				</header>
 				<form method="post" class="border-base-300 mt-4 rounded-md border" action={updateProject}>
 					<header class="bg-gray-200 px-4 py-3">
-						<h3 class="font-semibold">Judge Info</h3>
+						<h3 class="font-semibold">Project Info</h3>
 					</header>
 					<div class="p-4">
 						<input type="hidden" name="projectId" value={props.project.id} />
