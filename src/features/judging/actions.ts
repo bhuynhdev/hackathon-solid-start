@@ -304,6 +304,8 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 	await db.delete(project)
 
 	for (const p of projectsInput) {
+		if (p.status.toLowerCase() === 'draft') continue // Skip 'Draft' projects
+
 		const [{ insertedProjectId }] = await db
 			.insert(project)
 			.values({ name: p.title, location: p.location, location2: '' })
