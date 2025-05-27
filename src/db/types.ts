@@ -36,6 +36,7 @@ export type User = typeof schema.user.$inferSelect
 
 export type JudgeGroup = typeof schema.judge.$inferSelect
 export type NewJudgeGroup = typeof schema.judge.$inferInsert
+export type JudgeGroupWithJudges = ResultWithRelation<'judgeGroup', { judges: true; category: true }>
 
 export type Judge = typeof schema.judge.$inferSelect
 export type JudgeWithGroup = ResultWithRelation<'judge', { group: true }>
