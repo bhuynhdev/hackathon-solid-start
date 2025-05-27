@@ -34,8 +34,8 @@ export type MailLogInsert = typeof schema.mailLog.$inferInsert
 
 export type User = typeof schema.user.$inferSelect
 
-export type JudgeGroup = typeof schema.judge.$inferSelect
-export type NewJudgeGroup = typeof schema.judge.$inferInsert
+export type JudgeGroup = typeof schema.judgeGroup.$inferSelect
+export type NewJudgeGroup = typeof schema.judgeGroup.$inferInsert
 export type JudgeGroupWithJudges = ResultWithRelation<'judgeGroup', { judges: true; category: true }>
 
 export type Judge = typeof schema.judge.$inferSelect

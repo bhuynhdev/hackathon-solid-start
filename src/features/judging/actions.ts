@@ -138,10 +138,20 @@ export const createJudgesBulk = action(async (form: FormData) => {
 	await db.insert(judge).values(judgesInput)
 }, 'create-judges-bulk')
 
+/** JUDGE GROUPS **/
 export const listJudgeGroups = query(async () => {
 	'use server'
 	const db = getDb()
-	return await db.query.judgeGroup.findMany({ orderBy: judgeGroup.name, with: { judges: true, category: true } })
+	return await db.query.judgeGroup.findMany({ orderBy: [judgeGroup.categoryId, judgeGroup.name], with: { judges: true, category: true } })
+}, 'query-judge-groups')
+
+export const createJudgeGroup = action(async (form: FormData) => {
+	'use server'
+	const categoryId = Number(form.get('categoryId'))
+	const name = form.get('name') as string
+	const db = getDb()
+	const newGroup = await db.insert(judgeGroup).values({ categoryId, name }).returning()
+	return newGroup
 }, 'query-judge-groups')
 
 export const clearJudgeGroups = action(async () => {

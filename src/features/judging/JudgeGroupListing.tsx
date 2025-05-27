@@ -1,8 +1,9 @@
 import { createSignal, For } from 'solid-js'
-import { Judge, JudgeGroupWithJudges } from '~/db/types'
+import { Judge, JudgeGroup, JudgeGroupWithJudges } from '~/db/types'
 import IconTablerHomeMove from '~icons/tabler/home-move'
 import IconTablerX from '~icons/tabler/x'
 import { MoveJudgeForm } from './MoveJudgeForm'
+import { JudgeGroupCreateForm } from './JudgeGroupCreateForm'
 
 type JudgeGroupListingProps = {
 	judgeGroups: JudgeGroupWithJudges[]
@@ -14,6 +15,7 @@ type JudgeGroupListingProps = {
 export function JudgeGroupListing(props: JudgeGroupListingProps) {
 	const [judgeToMove, setJudgeToMove] = createSignal<Judge | null>(null)
 	let moveJudgeModal!: HTMLDialogElement
+	let createJudgeGroupModal!: HTMLDialogElement
 
 	return (
 		<div class="grid grid-cols-[repeat(auto-fit,minmax(270px,1fr))] gap-6">
@@ -45,12 +47,27 @@ export function JudgeGroupListing(props: JudgeGroupListingProps) {
 				)}
 			</For>
 			<div class="h-72 rounded-xl border border-dashed border-gray-400 shadow">
-				<button type="button" class="h-full w-full cursor-pointer">
+				<button type="button" class="h-full w-full cursor-pointer" onclick={() => createJudgeGroupModal.showModal()}>
 					New group
 				</button>
 			</div>
 
-			<dialog id="add-judges-modal" class="modal" ref={moveJudgeModal}>
+			<dialog id="create-judge-group-modal" class="modal" ref={createJudgeGroupModal}>
+				<div class="modal-box h-[400px] max-w-md lg:max-w-lg">
+					<div class="flex justify-between">
+						<h3 class="mb-4 text-lg font-bold">New Judge Group</h3>
+						<button class="cursor-pointer" aria-label="Close" onclick={() => createJudgeGroupModal.close()}>
+							<IconTablerX />
+						</button>
+					</div>
+					<JudgeGroupCreateForm />
+					<form method="dialog" class="modal-action">
+						<button class="btn">Close</button>
+					</form>
+				</div>
+			</dialog>
+
+			<dialog id="move-judge-modal" class="modal" ref={moveJudgeModal}>
 				<div class="modal-box h-[320px] max-w-md lg:max-w-lg">
 					<div class="flex justify-between">
 						<h3 class="mb-4 text-lg font-bold">Move Judge {judgeToMove()?.name}</h3>
