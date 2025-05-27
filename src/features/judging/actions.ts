@@ -263,10 +263,11 @@ export const createProjectAndSubmissions = action(async (form: FormData) => {
 	'use server'
 	const db = getDb()
 	const projectName = form.get('name') as string
+	const url = form.get('url') as string
 	const categoryIds = form.getAll('categoryIds').map(Number)
 	const location = (form.get('location') as string) || ''
 	const location2 = (form.get('location2') as string) || ''
-	const [newProject] = await db.insert(project).values({ name: projectName, location, location2 }).returning()
+	const [newProject] = await db.insert(project).values({ name: projectName, url, location, location2 }).returning()
 	await db.insert(projectSubmission).values(categoryIds.map((categoryId) => ({ projectId: newProject.id, categoryId })))
 }, 'create-project-and-submissions')
 
@@ -308,7 +309,7 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 
 		const [{ insertedProjectId }] = await db
 			.insert(project)
-			.values({ name: p.title, location: p.location, location2: '' })
+			.values({ name: p.title, location: p.location, location2: '', url: p.url })
 			.returning({ insertedProjectId: project.id })
 
 		const submittedCategories = p.categoriesCsv.split(',')

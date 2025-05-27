@@ -1,5 +1,5 @@
 import { createAsync } from '@solidjs/router'
-import { For, Suspense } from 'solid-js'
+import { For, Show, Suspense } from 'solid-js'
 import { ProjectWithSubmission } from '~/db/types'
 import IconTablerX from '~icons/tabler/x'
 import { listCategories, updateProject } from './actions'
@@ -12,6 +12,7 @@ interface ProjectEditFormProps {
 export function ProjectEditForm(props: ProjectEditFormProps) {
 	const categories = createAsync(() => listCategories())
 	const submittedCategories = () => props.project.submissions.map((s) => s.categoryId)
+	console.log(props.project)
 	return (
 		<Suspense>
 			<section>
@@ -27,6 +28,17 @@ export function ProjectEditForm(props: ProjectEditFormProps) {
 					</header>
 					<div class="p-4">
 						<input type="hidden" name="projectId" value={props.project.id} />
+						<div class="fieldset">
+							<span class="fieldset-legend text-sm">DevPost URL</span>
+							<Show when={props.project.url} fallback=<p>No Submisison URL</p>>
+								{(url) => (
+									<a class="link link-primary text-sm" href={url()} target="_blank">
+										{url().replace(/^https?:\/\//, '')}
+									</a>
+								)}
+							</Show>
+						</div>
+
 						<label class="fieldset">
 							<span class="fieldset-legend text-sm">Name</span>
 							<input type="text" class="input w-full" name="name" value={props.project.name} required />
