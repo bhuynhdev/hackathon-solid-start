@@ -38,7 +38,7 @@ export default function JudgesPage() {
 							<span aria-hidden>
 								<IconTablerTrashX />
 							</span>
-							Clear judge group
+							Delete all judge group
 						</button>
 					</form>
 				</div>

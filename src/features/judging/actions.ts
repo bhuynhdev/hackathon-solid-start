@@ -1,4 +1,4 @@
-import { action, query } from '@solidjs/router'
+import { action, query, reload } from '@solidjs/router'
 import '@total-typescript/ts-reset/filter-boolean'
 import { parse } from 'csv-parse/sync'
 import { eq, inArray, notInArray } from 'drizzle-orm'
@@ -158,6 +158,18 @@ export const clearJudgeGroups = action(async () => {
 	'use server'
 	const db = getDb()
 	await db.delete(judgeGroup)
+}, 'clear-judge-groups')
+
+export const deleteEmptyJudgeGroup = action(async (form: FormData) => {
+	'use server'
+	const db = getDb()
+	const groupId = Number(form.get('groupId'))
+	const memberCount = await db.$count(judge, eq(judge.judgeGroupId, groupId))
+	if (memberCount > 0) {
+		throw Error('Group must be empty to be manually deleted.')
+	}
+	await db.delete(judgeGroup).where(eq(judgeGroup.id, groupId))
+	return reload({ revalidate: [listJudgeGroups.key, listJudges.key] })
 }, 'clear-judge-groups')
 
 export const resetAndOrganizeJudgeGroups = action(async () => {

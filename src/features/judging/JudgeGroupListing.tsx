@@ -1,9 +1,11 @@
-import { createSignal, For } from 'solid-js'
-import { Judge, JudgeGroup, JudgeGroupWithJudges } from '~/db/types'
+import { createSignal, For, Show } from 'solid-js'
+import { Judge, JudgeGroupWithJudges } from '~/db/types'
 import IconTablerHomeMove from '~icons/tabler/home-move'
+import IconTablerTrash from '~icons/tabler/trash'
 import IconTablerX from '~icons/tabler/x'
-import { MoveJudgeForm } from './MoveJudgeForm'
 import { JudgeGroupCreateForm } from './JudgeGroupCreateForm'
+import { MoveJudgeForm } from './MoveJudgeForm'
+import { deleteEmptyJudgeGroup } from './actions'
 
 type JudgeGroupListingProps = {
 	judgeGroups: JudgeGroupWithJudges[]
@@ -21,16 +23,24 @@ export function JudgeGroupListing(props: JudgeGroupListingProps) {
 		<div class="grid grid-cols-[repeat(auto-fit,minmax(270px,1fr))] gap-6">
 			<For each={props.judgeGroups}>
 				{(group) => (
-					<div class="h-72 rounded-xl border border-gray-400 p-4 shadow">
+					<div class="relative h-72 rounded-xl border border-gray-400 p-4 shadow">
 						<p class="ml-2 text-lg font-bold">Group {group.name}</p>
 						<p class="my-1 ml-2 text-sm text-gray-600 italic">{group.category.name}</p>
+						<Show when={group.judges.length === 0}>
+							<form method="post" action={deleteEmptyJudgeGroup} class="tooltip absolute top-4 right-4" data-tip={`Delete empty group ${group.name}`}>
+								<input type="hidden" name="groupId" value={group.id} />
+								<button type="submit" class="cursor-pointer" aria-label={`Delete empty group ${group.name}`}>
+									<IconTablerTrash width={24} height={24} />
+								</button>
+							</form>
+						</Show>
 						<div class="mt-2 flex flex-col">
 							<For each={group.judges}>
 								{(j) => (
-									<div class="group flex items-center justify-between px-2 py-1 hover:bg-slate-100">
+									<div class="group/judge flex items-center justify-between px-2 py-1 hover:bg-slate-100">
 										<p>{j.name}</p>
 										<button
-											class="cursor-pointer opacity-0 group-hover:opacity-100"
+											class="cursor-pointer opacity-0 group-hover/judge:opacity-100"
 											aria-label={`Move judge ${j.name} to another group`}
 											onClick={() => {
 												setJudgeToMove(j)
