@@ -147,6 +147,11 @@ export const assignment = sqliteTable('assignment', {
   (table) => [ primaryKey({columns: [table.judgeGroupId, table.submissionId]}) ]
 )
 
+export const assignmentRelations = relations(assignment, ({ one }) => ({
+  submission: one(submission, { fields: [assignment.submissionId], references: [submission.id] }),
+  judgeGroup: one(judgeGroup, { fields: [assignment.judgeGroupId], references: [judgeGroup.id] }),
+}))
+
 export const mailCampaign = sqliteTable('mail_campaign', {
 	id: integer('id').primaryKey(),
 	template: text('template').notNull(),

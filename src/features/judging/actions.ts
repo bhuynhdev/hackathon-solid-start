@@ -391,11 +391,24 @@ export const deleteProject = action(async (form: FormData) => {
 }, 'delete-project')
 
 /** PROJECT ASSIGNMENTS **/
+export const listAssignments = query(async () => {
+  'use server'
+  const db = getDb()
+  return await db.query.assignment.findMany(
+    {
+      with: {
+        submission: { with: { project: true } },
+        judgeGroup: true
+      }
+    })
+}, 'list-assignments')
+
+
 export const assignSubmissionsToJudgeGroups = action(async () => {
   'use server'
   const db = getDb()
   const allSubmissions = await db.query.submission.findMany({ with: { category: true }})
-  const allGroups = await  db.select({
+  const allGroups = await db.select({
     id: judgeGroup.id,
     categoryId: judgeGroup.categoryId,
     judgeCount: sql<number>`count(${judge.id})`.mapWith(Number)
@@ -438,7 +451,8 @@ export const assignSubmissionsToJudgeGroups = action(async () => {
       }
     })
 )
-  await db.insert(assignment).values(assignmentsToInsert)
+  const a = db.insert(assignment).values(assignmentsToInsert).toSQL()
+  console.log(a)
 
 }, 'assign-submissions-to-judge-groups')
 
