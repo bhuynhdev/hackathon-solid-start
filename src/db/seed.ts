@@ -2,7 +2,7 @@ import assert from 'assert'
 import { drizzle } from 'drizzle-orm/libsql'
 import { reset, seed } from 'drizzle-seed'
 import { getLocalD1Path } from '../../drizzle.config'
-import { participant, category, judge, judgeGroup, project, projectSubmission } from './schema'
+import { participant, category, judge, judgeGroup, project, submission } from './schema'
 import { NewCategory } from './types'
 
 async function developmentSeed() {
@@ -13,7 +13,7 @@ async function developmentSeed() {
 
 	const SEED = 1234
 
-	await reset(db, { participant, category, judge, judgeGroup, project, projectSubmission })
+	await reset(db, { participant, category, judge, judgeGroup, project, submission })
 
 	const categorySeeds: NewCategory[] = [
 		{ type: 'general', name: 'General' },

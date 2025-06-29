@@ -1,5 +1,5 @@
 import { relations, sql, type SQL } from 'drizzle-orm'
-import { check, integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
+import { check, integer, primaryKey, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
 
 export const event = sqliteTable(
 	'event',
@@ -118,10 +118,10 @@ export const project = sqliteTable('project', {
 })
 
 export const projectRelations = relations(project, ({ many }) => ({
-	submissions: many(projectSubmission)
+	submissions: many(submission)
 }))
 
-export const projectSubmission = sqliteTable(
+export const submission = sqliteTable(
 	'project_submission',
 	{
 		id: integer('id').primaryKey(),
@@ -135,9 +135,17 @@ export const projectSubmission = sqliteTable(
 	(table) => [unique('project_and_category').on(table.projectId, table.categoryId)]
 )
 
-export const projectSubmissionsRelations = relations(projectSubmission, ({ one }) => ({
-	project: one(project, { fields: [projectSubmission.projectId], references: [project.id] })
+export const submissionsRelations = relations(submission, ({ one }) => ({
+	project: one(project, { fields: [submission.projectId], references: [project.id] }),
+	category: one(category, { fields: [submission.categoryId], references: [category.id] })
 }))
+
+export const assignment = sqliteTable('assignment', {
+  submissionId: integer('submission_id').notNull().references(() => submission.id, {onDelete: 'cascade'}),
+  judgeGroupId: integer('judge_group_id').notNull().references(() => judgeGroup.id, {onDelete: 'cascade'})
+},
+  (table) => [ primaryKey({columns: [table.judgeGroupId, table.submissionId]}) ]
+)
 
 export const mailCampaign = sqliteTable('mail_campaign', {
 	id: integer('id').primaryKey(),
