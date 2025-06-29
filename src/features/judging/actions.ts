@@ -1,10 +1,10 @@
 import { action, query, reload } from '@solidjs/router'
 import '@total-typescript/ts-reset/filter-boolean'
 import { parse } from 'csv-parse/sync'
-import { eq, inArray, notInArray } from 'drizzle-orm'
-import { category, categoryTypes, judge, judgeGroup, project, projectSubmission } from '~/db/schema'
-import { CategoryType, Judge } from '~/db/types'
-import { getDb } from '~/utils'
+import { eq, getTableColumns, inArray, notInArray, sql } from 'drizzle-orm'
+import { assignment, category, categoryTypes, judge, judgeGroup, project, submission } from '~/db/schema'
+import { Category, CategoryType, Judge, JudgeGroup, NewAssignment } from '~/db/types'
+import { getDb, RotatingQueue } from '~/utils'
 
 const devPostCsvColsMapping = {
 	'Project Title': 'title',
@@ -280,7 +280,7 @@ export const createProjectAndSubmissions = action(async (form: FormData) => {
 	const location = (form.get('location') as string) || ''
 	const location2 = (form.get('location2') as string) || ''
 	const [newProject] = await db.insert(project).values({ name: projectName, url, location, location2 }).returning()
-	await db.insert(projectSubmission).values(categoryIds.map((categoryId) => ({ projectId: newProject.id, categoryId })))
+	await db.insert(submission).values(categoryIds.map((categoryId) => ({ projectId: newProject.id, categoryId })))
 }, 'create-project-and-submissions')
 
 export const importProjectsFromDevpost = action(async (form: FormData) => {
@@ -313,7 +313,7 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 	})
 
 	// Delete all current projects and submissions, and insert new ones obtained from the CSV
-	await db.delete(projectSubmission)
+	await db.delete(submission)
 	await db.delete(project)
 
 	for (const p of projectsInput) {
@@ -341,7 +341,7 @@ export const importProjectsFromDevpost = action(async (form: FormData) => {
 			})
 			.filter(Boolean)
 
-		await db.insert(projectSubmission).values(submittedCategoryIds.map((c) => ({ categoryId: c, projectId: insertedProjectId })))
+		await db.insert(submission).values(submittedCategoryIds.map((c) => ({ categoryId: c, projectId: insertedProjectId })))
 	}
 }, 'import-devpost-projects')
 
@@ -356,12 +356,12 @@ export const updateProjectInfo = action(async (form: FormData) => {
 	await db.update(project).set({ name: projectName, location, location2 }).where(eq(project.id, projectId))
 
 	// Remove submissions not in the given category Ids
-	await db.delete(projectSubmission).where(notInArray(projectSubmission.categoryId, categoryIds))
+	await db.delete(submission).where(notInArray(submission.categoryId, categoryIds))
 	// Add new submissions, ignoring already existed
 	await db
-		.insert(projectSubmission)
+		.insert(submission)
 		.values(categoryIds.map((categoryId) => ({ projectId: projectId, categoryId })))
-		.onConflictDoNothing({ target: [projectSubmission.categoryId, projectSubmission.projectId] })
+		.onConflictDoNothing({ target: [submission.categoryId, submission.projectId] })
 }, 'update-project-info')
 
 /**
@@ -389,3 +389,56 @@ export const deleteProject = action(async (form: FormData) => {
 	const projectId = form.get('projectId') as string
 	await db.delete(project).where(eq(project.id, Number(projectId)))
 }, 'delete-project')
+
+/** PROJECT ASSIGNMENTS **/
+export const assignSubmissionsToJudgeGroups = action(async () => {
+  'use server'
+  const db = getDb()
+  const allSubmissions = await db.query.submission.findMany({ with: { category: true }})
+  const allGroups = await  db.select({
+    id: judgeGroup.id,
+    categoryId: judgeGroup.categoryId,
+    judgeCount: sql<number>`count(${judge.id})`.mapWith(Number)
+  })
+  .from(judgeGroup)
+  .innerJoin(judge, eq(judge.id, judgeGroup.id))
+  .groupBy(judgeGroup.id)
+
+  const groupsByCategory = allGroups.reduce((acc, curr) => {
+    if (!acc.has(curr.categoryId)) {
+      acc.set(curr.categoryId, new RotatingQueue([curr]));
+    } else {
+      acc.get(curr.categoryId)!.enqueue(curr); // custom method we'll define
+    }
+    return acc;
+  }, new Map<Category['id'], RotatingQueue<typeof allGroups[number]>>());
+
+  const PHASE_1_JUDGE_GROUPS_PER_PROJECT: Record<Category['type'], number> = {
+    'inhouse': 2,
+    'general': 1,
+    'sponsor': 1,
+    'mlh': 0
+  }
+
+  // Project assignment algorithm:
+  // Phase 1: Assign submissions to judge groups of corresponding category, ensuring JUDGE_GROUPS_PER_PROJECT groups per project, while recording how many judges per project
+  // Phase 2: Make additional General assignments if any projects have less than MINIMUM_JUDGE_PER_PROJECT judges
+  const judgeCountPerProject = new Map()
+  const assignmentsToInsert = allSubmissions.flatMap(s =>
+    Array.from({ length: PHASE_1_JUDGE_GROUPS_PER_PROJECT[s.category.type] }).map(() => {
+      const groupToAssign = groupsByCategory.get(s.categoryId)!.getNext()
+
+      // Update judge count of this project
+      const currentJudgeCount = judgeCountPerProject.get(s.projectId) || 0
+      judgeCountPerProject.set(s.projectId, groupToAssign.judgeCount + currentJudgeCount)
+
+      return {
+        submissionId: s.id,
+        judgeGroupId: groupToAssign.id,
+      }
+    })
+)
+  await db.insert(assignment).values(assignmentsToInsert)
+
+}, 'assign-submissions-to-judge-groups')
+
