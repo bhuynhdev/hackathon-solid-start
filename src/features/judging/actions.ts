@@ -398,8 +398,8 @@ export const listAssignments = query(async () => {
     {
       with: {
         submission: { with: { project: true } },
-        judgeGroup: true
-      }
+        judgeGroup: { with: { category: true } }
+      },
     })
 }, 'list-assignments')
 
