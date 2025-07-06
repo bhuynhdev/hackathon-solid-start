@@ -437,8 +437,9 @@ export const assignSubmissionsToJudgeGroups = action(async () => {
   // Phase 1: Assign submissions to judge groups of corresponding category, ensuring JUDGE_GROUPS_PER_PROJECT groups per project, while recording how many judges per project
   // Phase 2: Make additional General assignments if any projects have less than MINIMUM_JUDGE_PER_PROJECT judges
   const judgeCountPerProject = new Map()
-  const assignmentsToInsert = allSubmissions.flatMap(s =>
-    Array.from({ length: PHASE_1_JUDGE_GROUPS_PER_PROJECT[s.category.type] }).map(() => {
+  const assignmentsToInsert = allSubmissions.flatMap(s => {
+    const judgeGroupsPerSubmission = Math.min(groupsByCategory.get(s.categoryId)?.length || 0, PHASE_1_JUDGE_GROUPS_PER_PROJECT[s.category.type])
+    return Array.from({ length: judgeGroupsPerSubmission }).map(() => {
       const groupToAssign = groupsByCategory.get(s.categoryId)!.getNext()
 
       // Update judge count of this project
