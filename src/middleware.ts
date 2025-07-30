@@ -1,3 +1,5 @@
+import { sha512_256 } from '@oslojs/crypto/sha2'
+import { constantTimeEqual } from '@oslojs/crypto/subtle'
 import { redirect } from '@solidjs/router'
 import { createMiddleware } from '@solidjs/start/middleware'
 import { and, eq, lte } from 'drizzle-orm'
@@ -5,9 +7,7 @@ import { drizzle as drizzleD1 } from 'drizzle-orm/d1'
 import { getCookie } from 'vinxi/http'
 import * as schema from './db/schema'
 import { session, user } from './db/schema'
-import { sha512_256 } from '@oslojs/crypto/sha2'
-import { constantTimeEqual } from '@oslojs/crypto/subtle'
-import { removeSessionCookie } from './features/auth/auth'
+import { removeSessionCookie, SESSION_TOKEN_COOKIE_NAME } from './features/auth/auth'
 
 export default createMiddleware({
 	onRequest: async (event) => {
@@ -15,7 +15,7 @@ export default createMiddleware({
 			if (import.meta.env.DEV) {
 				const { getPlatformProxy } = await import('wrangler')
 				const proxy = await getPlatformProxy()
-				const db = drizzleD1(proxy.env.DB as D1Database, { schema: schema })
+				const db = drizzleD1(proxy.env.DB as D1Database, { schema: schema, logger: true })
 				event.locals.db = db
 			} else {
 				const db = drizzleD1(event.nativeEvent.context.cloudflare.env.DB, { schema: schema })
@@ -23,9 +23,9 @@ export default createMiddleware({
 			}
 		}
 
-    if (!event.locals.user) {
-      const sessionToken = getCookie("session_token")
-      // Validate session token
+    const pathname = new URL(event.request.url).pathname
+    if (pathname !== "/admin" && pathname !== "/admin/" && !event.locals.user) { // Ignore the public login page
+      const sessionToken = getCookie(SESSION_TOKEN_COOKIE_NAME)
       if (!sessionToken) {
         return redirect("/admin", 302)
       }
