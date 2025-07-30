@@ -50,9 +50,10 @@ export async function GET(event: APIEvent): Promise<Response> {
 	if (existingUser) {
 		const { id, secretHash, token } = generateSessionIdSecretAndToken();
     const now = new Date()
-    const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // Expires in 7 days
-    // Insert new session to database
-    await db.insert(session).values({ id: id, secretHash: Buffer.from(secretHash), userId: existingUser.id, createdAt: now, expiresAt: oneWeekFromNow })
+    const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    // Must cast "as Buffer" and can't use Buffer.from() since Miniflare doesn't work with Buffer: https://github.com/cloudflare/workers-sdk/issues/5771
+    await db.insert(session).values({ id: id, secretHash: secretHash as Buffer, userId: existingUser.id, createdAt: now, expiresAt: oneWeekFromNow })
+
     setCookie(SESSION_TOKEN_COOKIE_NAME, token, {
       httpOnly: true,
       path: "/",
@@ -65,6 +66,6 @@ export async function GET(event: APIEvent): Promise<Response> {
 	}
 
 	// TODO:If user not exists yet, then create a new Pending user
-	const newUser = await db.insert(user).values({ email: githubUser.email, role: "pending", name: githubUser.name })
+	const newUser = await db.insert(user).values({ email: githubUser.email, role: "pending", name: githubUser.name }).onConflictDoNothing()
   return redirect("/admin?denied", 302);
 }
