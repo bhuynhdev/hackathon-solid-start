@@ -1,4 +1,8 @@
+/// <reference types="@solidjs/start/env" />
 import type { Request as CfRequest, D1Database, ExecutionContext, KVNamespace, R2Bucket } from '@cloudflare/workers-types'
+import { type DrizzleD1Database } from 'drizzle-orm/d1'
+import * as schema from './db/schema'
+import { User } from './db/types'
 
 /**
  * Reference: https://developers.cloudflare.com/workers/runtime-apis/fetch-event/#parameters
@@ -26,4 +30,22 @@ declare module 'vinxi/http' {
 			context: ExecutionContext
 		}
 	}
+}
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      GITHUB_CLIENT_ID: string;
+      GITHUB_CLIENT_SECRET: string;
+      NODE_ENV: 'development' | 'production';
+      PORT?: string;
+      PWD: string;
+    }
+  }
+  namespace App {
+    interface RequestEventLocals {
+      db: DrizzleD1Database<typeof schema>
+      user: User
+    }
+  }
 }
