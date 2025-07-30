@@ -78,6 +78,13 @@
       "when": 1751216571532,
       "tag": "0010_premium_bruce_banner",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1753845553213,
+      "tag": "0011_nappy_thunderbolt",
+      "breakpoints": true
     }
   ]
 }

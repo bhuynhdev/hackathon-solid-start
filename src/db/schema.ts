@@ -1,5 +1,5 @@
 import { relations, sql, type SQL } from 'drizzle-orm'
-import { check, integer, primaryKey, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
+import { blob, check, integer, primaryKey, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
 
 export const event = sqliteTable(
 	'event',
@@ -63,12 +63,10 @@ export const participant = sqliteTable('participant', {
 
 export const user = sqliteTable('user', {
 	id: integer('id').primaryKey(),
-	email: text('email').notNull(),
-	password: text('password'),
+	email: text('email').notNull().unique(),
 	name: text('name').notNull(),
+  role: text('role', { enum: ['admin', 'judge', 'pending']} ).notNull(),
 	isDiabled: integer('is_disabled', { mode: 'boolean' }).default(false).notNull(),
-	isAdmin: integer('is_admin', { mode: 'boolean' }).default(false).notNull(),
-	isJudge: integer('is_judge', { mode: 'boolean' }).default(false).notNull()
 })
 
 export const category = sqliteTable('category', {
@@ -175,8 +173,8 @@ export const mailLog = sqliteTable('mail_log', {
 
 export const session = sqliteTable('session', {
 	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => participant.id),
-	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+	userId: integer('user_id').notNull().references(() => user.id),
+  secretHash: blob('secret_hash', { mode: 'buffer' }).notNull(),
+	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 })
