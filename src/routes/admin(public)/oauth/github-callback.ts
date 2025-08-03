@@ -4,7 +4,7 @@ import { GitHub, type OAuth2Tokens } from "arctic";
 import { and, eq } from "drizzle-orm";
 import { getCookie, setCookie } from "vinxi/http";
 import { session, user } from "~/db/schema";
-import { generateSessionIdSecretAndToken, SESSION_TOKEN_COOKIE_NAME } from "~/features/auth/auth";
+import { generateSessionIdSecretAndToken, SESSION_TOKEN_COOKIE_NAME } from "~/features/auth/authUtil";
 import { getDb } from "~/utils";
 
 // Based on: https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user

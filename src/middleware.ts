@@ -1,13 +1,12 @@
 import { sha512_256 } from '@oslojs/crypto/sha2'
 import { constantTimeEqual } from '@oslojs/crypto/subtle'
-import { redirect } from '@solidjs/router'
 import { createMiddleware } from '@solidjs/start/middleware'
 import { and, eq, lte } from 'drizzle-orm'
 import { drizzle as drizzleD1 } from 'drizzle-orm/d1'
 import { getCookie } from 'vinxi/http'
 import * as schema from './db/schema'
 import { session, user } from './db/schema'
-import { removeSessionCookie, SESSION_TOKEN_COOKIE_NAME } from './features/auth/auth'
+import { removeSessionCookie, SESSION_TOKEN_COOKIE_NAME } from './features/auth/authUtil'
 
 export default createMiddleware({
 	onRequest: async (event) => {
@@ -23,34 +22,38 @@ export default createMiddleware({
 			}
 		}
 
-    const pathname = new URL(event.request.url).pathname
-    if (pathname !== "/admin" && pathname !== "/admin/" && !event.locals.user) { // Ignore the public login page
+    // Authentication middleware:
+    // Works by assigning user to event.locals.user if they can be authenticated - i.e. session token is valid and exists
+    // If not, pass through: No authorization should be done here
+    // -> The server functions will have extra check and thus deny access if event.locals.user not set
+    // -> Keeping authorization close to source instead of inside middleware
+    if (!event.locals.user) { // Ignore the public login page
       const sessionToken = getCookie(SESSION_TOKEN_COOKIE_NAME)
       if (!sessionToken) {
-        return redirect("/admin", 302)
+        return
       }
       const tokenParts = sessionToken.split(".");
       if (tokenParts.length !== 2) {
         removeSessionCookie()
-        return redirect("/admin", 403);
+        return
       }
       const [sessionId, sessionSecret] = tokenParts;
       const [existingSession] = await event.locals.db.select().from(session).where(and(eq(session.id, sessionId), lte(session.expiresAt, new Date()))).limit(1)
       if (!existingSession) {
         removeSessionCookie()
-        return redirect("/admin", 403)
+        return
       }
       const tokenSecretHash = sha512_256(new TextEncoder().encode(sessionSecret));
       const isValidSecret = constantTimeEqual(tokenSecretHash, existingSession.secretHash)
       if (!isValidSecret) {
         removeSessionCookie()
-        return redirect("/admin", 403)
+        return
       }
 
       const [authenticatedUser] = await event.locals.db.select().from(user).where(eq(user.id, existingSession.userId))
       if (!authenticatedUser) {
         removeSessionCookie()
-        return redirect("/admin", 403)
+        return
       }
       event.locals.user = authenticatedUser
     }
