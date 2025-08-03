@@ -1,6 +1,7 @@
 import emails from '@emailtemplates/emails.json'
-import { A, RouteSectionProps } from '@solidjs/router'
+import { A, createAsync, RouteSectionProps } from '@solidjs/router'
 import { For, JSX, Show } from 'solid-js'
+import { getAuthenticatedUser } from '~/features/auth/action'
 import IconTablerChalkboard from '~icons/tabler/chalkboard'
 import IconTablerMailFast from '~icons/tabler/mail-fast'
 
@@ -42,6 +43,7 @@ const links = [
 ] satisfies Array<NavLinkData>
 
 export default function AdminLayout(props: RouteSectionProps) {
+  const user = createAsync(() => getAuthenticatedUser())
 	return (
 		<div class="grid min-h-screen grid-rows-[auto_1fr_auto]">
 			<header class="bg-diagonal-pattern border-b p-4">
