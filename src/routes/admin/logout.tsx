@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { eq } from "drizzle-orm";
 import { getCookie } from "vinxi/http";
 import { session } from "~/db/schema";
-import { removeSessionCookie, SESSION_TOKEN_COOKIE_NAME } from "~/features/auth/auth";
+import { removeSessionCookie, SESSION_TOKEN_COOKIE_NAME } from "~/features/auth/authUtil";
 import { getDb } from "~/utils";
 
 export async function GET(event: APIEvent) {
