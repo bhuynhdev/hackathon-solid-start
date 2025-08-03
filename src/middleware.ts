@@ -1,7 +1,7 @@
 import { sha512_256 } from '@oslojs/crypto/sha2'
 import { constantTimeEqual } from '@oslojs/crypto/subtle'
 import { createMiddleware } from '@solidjs/start/middleware'
-import { and, eq, lte } from 'drizzle-orm'
+import { and, eq, gt } from 'drizzle-orm'
 import { drizzle as drizzleD1 } from 'drizzle-orm/d1'
 import { getCookie } from 'vinxi/http'
 import * as schema from './db/schema'
@@ -38,13 +38,13 @@ export default createMiddleware({
         return
       }
       const [sessionId, sessionSecret] = tokenParts;
-      const [existingSession] = await event.locals.db.select().from(session).where(and(eq(session.id, sessionId), lte(session.expiresAt, new Date()))).limit(1)
+      const [existingSession] = await event.locals.db.select().from(session).where(and(eq(session.id, sessionId), gt(session.expiresAt, new Date()))).limit(1)
       if (!existingSession) {
         removeSessionCookie()
         return
       }
       const tokenSecretHash = sha512_256(new TextEncoder().encode(sessionSecret));
-      const isValidSecret = constantTimeEqual(tokenSecretHash, existingSession.secretHash)
+      const isValidSecret = constantTimeEqual(tokenSecretHash, new Uint8Array(existingSession.secretHash))
       if (!isValidSecret) {
         removeSessionCookie()
         return
