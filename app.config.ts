@@ -89,7 +89,7 @@ export default defineConfig({
 		plugins: [tailwindcss(), emailTemplatesPlugin(), Icons({ compiler: 'solid' }), tsconfigPaths()]
 	},
 	server: {
-		preset: 'cloudflare-pages',
+		preset: 'cloudflare-module',
 		rollupConfig: {
 			external: ['node:async_hooks']
 		}

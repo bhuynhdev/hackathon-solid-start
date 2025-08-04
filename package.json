@@ -6,7 +6,7 @@
 		"decrypt": "dotenvx decrypt -f .env*.local",
 		"dev": "dotenvx run -f .env.development.local -- vinxi dev",
 		"build": "dotenvx run -f .env.production.local -- vinxi build",
-		"preview": "dotenvx run -f .env.production.local -- pnpm run build && wrangler pages dev",
+		"preview": "dotenvx run -f .env.production.local -- pnpm run build && wrangler dev",
 		"db:gen": "drizzle-kit generate",
 		"db:seed": "dotenvx run -f .env.development.local -- tsx ./src/db/seed.ts",
 		"db:migrate": "dotenvx run -f .env.development.local -- drizzle-kit migrate",
@@ -34,11 +34,11 @@
 		"vite-tsconfig-paths": "^5.1.4"
 	},
 	"engines": {
-		"node": ">=22.17.0"
+		"node": ">=22.16.0"
 	},
 	"packageManager": "pnpm@10.13.1",
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20250724.0",
+		"@cloudflare/workers-types": "^4.20250803.0",
 		"@dotenvx/dotenvx": "^1.48.3",
 		"@fsouza/prettierd": "^0.25.4",
 		"@libsql/client": "^0.15.10",
@@ -49,6 +49,6 @@
 		"esbuild-plugin-solid": "^0.6.0",
 		"prettier-plugin-tailwindcss": "^0.6.14",
 		"tsx": "^4.20.3",
-		"wrangler": "^3.114.11"
+		"wrangler": "^4.27.0"
 	}
 }
