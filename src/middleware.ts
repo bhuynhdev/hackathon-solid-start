@@ -27,35 +27,35 @@ export default createMiddleware({
     // If not, pass through: No authorization should be done here
     // -> The server functions will have extra check and thus deny access if event.locals.user not set
     // -> Keeping authorization close to source instead of inside middleware
-    if (!event.locals.user) { // Ignore the public login page
-      const sessionToken = getCookie(SESSION_TOKEN_COOKIE_NAME)
-      if (!sessionToken) {
-        return
-      }
-      const tokenParts = sessionToken.split(".");
-      if (tokenParts.length !== 2) {
-        removeSessionCookie()
-        return
-      }
-      const [sessionId, sessionSecret] = tokenParts;
-      const [existingSession] = await event.locals.db.select().from(session).where(and(eq(session.id, sessionId), gt(session.expiresAt, new Date()))).limit(1)
-      if (!existingSession) {
-        removeSessionCookie()
-        return
-      }
-      const tokenSecretHash = sha512_256(new TextEncoder().encode(sessionSecret));
-      const isValidSecret = constantTimeEqual(tokenSecretHash, new Uint8Array(existingSession.secretHash))
-      if (!isValidSecret) {
-        removeSessionCookie()
-        return
-      }
-
-      const [authenticatedUser] = await event.locals.db.select().from(user).where(eq(user.id, existingSession.userId))
-      if (!authenticatedUser) {
-        removeSessionCookie()
-        return
-      }
-      event.locals.user = authenticatedUser
-    }
+	//    if (!event.locals.user) { // Ignore the public login page
+	//      const sessionToken = getCookie(SESSION_TOKEN_COOKIE_NAME)
+	//      if (!sessionToken) {
+	//        return
+	//      }
+	//      const tokenParts = sessionToken.split(".");
+	//      if (tokenParts.length !== 2) {
+	//        removeSessionCookie()
+	//        return
+	//      }
+	//      const [sessionId, sessionSecret] = tokenParts;
+	//      const [existingSession] = await event.locals.db.select().from(session).where(and(eq(session.id, sessionId), gt(session.expiresAt, new Date()))).limit(1)
+	//      if (!existingSession) {
+	//        removeSessionCookie()
+	//        return
+	//      }
+	//      const tokenSecretHash = sha512_256(new TextEncoder().encode(sessionSecret));
+	//      const isValidSecret = constantTimeEqual(tokenSecretHash, new Uint8Array(existingSession.secretHash))
+	//      if (!isValidSecret) {
+	//        removeSessionCookie()
+	//        return
+	//      }
+	//
+	//      const [authenticatedUser] = await event.locals.db.select().from(user).where(eq(user.id, existingSession.userId))
+	//      if (!authenticatedUser) {
+	//        removeSessionCookie()
+	//        return
+	//      }
+	//      event.locals.user = authenticatedUser
+	//    }
 	}
 })

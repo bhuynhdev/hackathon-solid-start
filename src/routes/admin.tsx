@@ -43,7 +43,7 @@ const links = [
 ] satisfies Array<NavLinkData>
 
 export default function AdminLayout(props: RouteSectionProps) {
-  const user = createAsync(() => getAuthenticatedUser())
+  // const user = createAsync(() => getAuthenticatedUser())
 	return (
 		<div class="grid min-h-screen grid-rows-[auto_1fr_auto]">
 			<header class="bg-diagonal-pattern border-b p-4">

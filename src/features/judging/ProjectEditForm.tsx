@@ -12,7 +12,6 @@ interface ProjectEditFormProps {
 export function ProjectEditForm(props: ProjectEditFormProps) {
 	const categories = createAsync(() => listCategories())
 	const submittedCategories = () => props.project.submissions.map((s) => s.categoryId)
-	console.log(props.project)
 	return (
 		<Suspense>
 			<section>
